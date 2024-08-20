@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.flask
+    volumes:
+      - "./YOLO:/user/app"
+    ports:
+      - "5000:5000"
+    command: flask run --host=0.0.0.0 --reload
+ 
+  
+volumes:
+  exclude:
