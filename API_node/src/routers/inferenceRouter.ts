@@ -14,19 +14,13 @@ const router = Router();
 // Adding middleware to the router
 //router.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
-//route to retrieve of the list of the dataset associated to the user 
-router.get('/datasets', controller.predictImage);
+//route to make inference on a dataset 
+router.post('/', controller.makeInference);
 
-//route that consents the creation of a new dataset
-router.post('/datasets', controller.predictVideo);
+//route to check the state of a job
+router.get('/:process_id/state', controller.checkState);
 
-//route for logical deletion of a dataset
-router.delete('/datasets', controller.predictVideo);
-
-//route that allows the update of an existings dataset
-router.patch('/datasets', controller.predictVideo);
-
-//route to insert a new content in a specified dataset
-router.post('/contents', controller.predictVideo);
+//route to retrieve the result of an inference
+router.get('/:process_id/result', controller.getResult);
 
 export default router;

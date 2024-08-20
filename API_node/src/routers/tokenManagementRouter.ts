@@ -15,9 +15,9 @@ const router = Router();
 //router.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
 //route to retrieve the user's token balance
-router.get('/balance', controller.predictImage);
+router.get('/balance', controller.getBalance);
 
 //route that allows the admin to update a user's token balance
-router.patch('/balance', controller.predictVideo);
+router.patch('/balance', controller.updateBalance);
 
 export default router;
