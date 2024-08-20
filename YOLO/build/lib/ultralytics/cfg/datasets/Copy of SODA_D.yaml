@@ -1,0 +1,23 @@
+
+# Definizione del percorso dei dataset
+path: .
+train: images/train  # Il file che contiene i percorsi delle immagini di training
+val: images/val    # Il file che contiene i percorsi delle immagini di validazione
+test:     # Opzionale: Percorsi delle immagini di test
+
+# Nomi delle classi
+names:
+  0: ignore
+  1: people
+  2: rider
+  3: bicycle 
+  4: motor
+  5: vehicle
+  6: traffic-sign
+  7: traffic-light
+  8: traffic-camera
+  9: warning-cone
+
+
+
+

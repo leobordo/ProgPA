@@ -1,0 +1,16 @@
+FROM python:3.12.3-bullseye
+WORKDIR /user/app
+RUN pwd 
+RUN apt-get update && \
+    apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY YOLO /user/app
+
+ENV FLASK_APP=app.py
+CMD ["flask", "run", "--debug", "--host=0.0.0.0"]
