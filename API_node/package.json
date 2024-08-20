@@ -1,0 +1,19 @@
+{
+  "name": "api_node",
+  "version": "1.0.0",
+  "description": "An API in Node.js (developed using Express) that consent a client to interface with a CV model",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leobordo/ProgPA.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leobordo/ProgPA/issues"
+  },
+  "homepage": "https://github.com/leobordo/ProgPA#readme"
+}
