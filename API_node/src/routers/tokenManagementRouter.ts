@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
-import * as controller from '../controllers/inferenceController';
+import * as controller from '../controllers/tokenManagementController';
 //import { AuthenticationMiddleware, AuthorizationMiddleware, ValidationMiddleware } from '../middleware/middleware';
 
 const router = Router();
@@ -14,19 +14,10 @@ const router = Router();
 // Adding middleware to the router
 //router.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
-//route to retrieve of the list of the dataset associated to the user 
-router.get('/datasets', controller.predictImage);
+//route to retrieve the user's token balance
+router.get('/balance', controller.predictImage);
 
-//route that consents the creation of a new dataset
-router.post('/datasets', controller.predictVideo);
-
-//route for logical deletion of a dataset
-router.delete('/datasets', controller.predictVideo);
-
-//route that allows the update of an existings dataset
-router.patch('/datasets', controller.predictVideo);
-
-//route to insert a new content in a specified dataset
-router.post('/contents', controller.predictVideo);
+//route that allows the admin to update a user's token balance
+router.patch('/balance', controller.predictVideo);
 
 export default router;
