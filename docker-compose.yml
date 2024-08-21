@@ -11,11 +11,22 @@ services:
       context: .
       dockerfile: Dockerfile.flask
     volumes:
-      - "./YOLO:/user/app"
+      - "./YOLO:/user/app"       # per poter aggiornare file YOLO in fase di sviluppo
     ports:
       - "5000:5000"
-    command: flask run --host=0.0.0.0 --reload
+    command: flask run --host=0.0.0.0 --reload   # modifiche attive senza riavviare
  
-  
+  express:
+    build:
+      context: ./API_node
+      dockerfile: Dockerfile.api
+    ports:
+      - 3000:3000
+    env_file:
+      - ./API_node/.env           
+    volumes:
+      - ./API_node:/user/app
+      - exclude:/user/app/node_modules/
+
 volumes:
   exclude:
