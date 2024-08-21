@@ -1,65 +1,56 @@
-import { Pool } from 'pg';
-
-// Crea un pool di connessioni utilizzando la configurazione standard
-const pool = new Pool();
+import { Dataset } from '../models/Dataset';
+import { Content } from '../models/Content';
 
 const DatasetDAO = {
     async getDsByName(datasetName: string, userEmail: string) {
-        const query = 'SELECT * FROM Datasets WHERE name = $1 AND email = $2';
-        const { rows } = await pool.query(query, [datasetName, userEmail]);
-        return rows[0];
+        return await Dataset.findOne({
+            where: {
+                datasetName: datasetName,
+                email: userEmail,
+                isDeleted: false
+            }
+        });
     },
 
-    async create(datasetName: string, userEmail: string) {
-        const client = await pool.connect();
-        try {
-            await client.query('BEGIN');
-    
-            // Inserisci il record nel database dei dataset
-            const insertDataset = 'INSERT INTO Datasets (name, email) VALUES ($1, $2) RETURNING *';
-            const dataset = await client.query(insertDataset, [datasetName, userEmail]);
-    
-            await client.query('COMMIT');
-            return dataset.rows[0]; // Restituisce l'oggetto dataset appena creato
-        } catch (err) {
-            await client.query('ROLLBACK');
-            throw err; // Rilancia l'errore per una gestione ulteriore se necessario
-        } finally {
-            client.release(); // Rilascia sempre la connessione alla fine del tentativo
-        }
+    async create(datasetName: string, userEmail: string, filePath: string) {
+        return await Dataset.create({
+            datasetName: datasetName,
+            email: userEmail,
+            filePath: filePath
+        });
     },
-    
 
     async getAllByUserEmail(userEmail: string) {
-        const query = 'SELECT * FROM Datasets WHERE email = $1';
-        const { rows } = await pool.query(query, [userEmail]);
-        return rows;
+        return await Dataset.findAll({
+            where: { email: userEmail, isDeleted: false }
+        });
     },
 
-    async getById(datasetId: number, userEmail : string) {
-        const query = 'SELECT * FROM Datasets WHERE dataset_id = $1 AND email=$2';
-        const { rows } = await pool.query(query, [datasetId]);
-        return rows[0];
+    async updateByName(datasetName: string, email: string, updates: { name?: string }) {
+        const [affectedRows, updatedDatasets] = await Dataset.update(
+            { datasetName: updates.name }, 
+            {
+                where: { datasetName: datasetName, email: email, isDeleted: false },
+                returning: true
+            }
+        );
+        return updatedDatasets[0];
     },
 
-    async updateById(datasetId: number, updates: { name?: string }) {
-        const query = 'UPDATE Datasets SET name = $1 WHERE dataset_id = $2 RETURNING *';
-        const { rows } = await pool.query(query, [updates.name, datasetId]);
-        return rows[0];
+    async softDeleteByName(datasetName: string, email: string) {
+        await Dataset.update(
+            { isDeleted: true },
+            { where: { datasetName: datasetName, email: email } }
+        );
     },
 
-    async deleteById(datasetId: number) {
-        const query = 'DELETE FROM Datasets WHERE dataset_id = $1';
-        await pool.query(query, [datasetId]);
-    },
-
-    async insertContent(datasetId: number, filePath: string) {
-        const query = 'INSERT INTO Contents (dataset_id, file_path) VALUES ($1, $2)';
-        await pool.query(query, [datasetId, filePath]);
+    async insertContent(datasetName: string, datasetId: string, filePath: string) {
+        await Content.create({
+            datasetName: datasetName,
+            datasetId: datasetId,
+            filePath: filePath
+        });
     }
 };
 
 export default DatasetDAO;
-
-
-//

@@ -6,6 +6,19 @@ services:
     ports:
       - "6379:6379"
 
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./API_node/src/uploads:/user/uploads
+      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+
   flask:
     build:
       context: .
@@ -15,6 +28,14 @@ services:
     ports:
       - "5000:5000"
     command: flask run --host=0.0.0.0 --reload   # modifiche attive senza riavviare
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=${POSTGRES_HOST}  # Hostname del servizio del database
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    depends_on:
+      - db
  
   express:
     build:
@@ -27,6 +48,13 @@ services:
     volumes:
       - ./API_node:/user/app
       - exclude:/user/app/node_modules/
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}   # Hostname del servizio del database
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    depends_on:
+      - db
 
 volumes:
+  db_data:
   exclude:
+

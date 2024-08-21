@@ -1,5 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
-import sequelize from '../config/sequelize'; // Assicurati che il percorso sia corretto
+
 
 export class Utente extends Model {
     public email!: string; // `email` è obbligatorio

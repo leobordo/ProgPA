@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import { initializeUtente as initializeUtente } from './models/Utente';
 import { initializeContent as initializeContent } from './models/Content';
 import { initializeDataset as initializeDataset } from './models/Dataset';
+import { initializeResults } from './models/Result';
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
@@ -24,12 +25,13 @@ app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
 
 initializeUtente(sequelize);
-initializeContent(sequelize);
 initializeDataset(sequelize);
+initializeContent(sequelize);
+initializeResults(sequelize);
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
   console.log("Database synchronized");
-  const PORT = process.env.PORT || 3000;  //TODO: Porta sbagliata
+  const PORT = process.env.POSTGRES_PORT || 5432;  
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
