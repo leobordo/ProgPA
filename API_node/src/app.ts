@@ -1,6 +1,7 @@
 import dataRouter from './routers/dataRouter';
 import tokenManagementRouter from './routers/tokenManagementRouter';
 import inferenceRouter from './routers/inferenceRouter';
+import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 require('dotenv').config();         // Loading environment variables from .env file
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -13,6 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/datasets', dataRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
+
+app.use(AuthenticationMiddleware);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
