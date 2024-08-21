@@ -7,6 +7,7 @@ import { initializeUtente as initializeUtente } from './models/Utente';
 import { initializeContent as initializeContent } from './models/Content';
 import { initializeDataset as initializeDataset } from './models/Dataset';
 import { initializeResults } from './models/Result';
+import { createServer, Server } from 'http';
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
@@ -16,6 +17,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const app = express();
+const server: Server = createServer(app);
 
 // Middleware per l'analisi dei body delle richieste
 app.use(bodyParser.json());
@@ -46,7 +48,7 @@ sequelize.sync({ force: false }).then(() => {
 // Gestione della chiusura del server e della connessione al database
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
-  app.close(() => {
+  server.close(() => {
     console.log('HTTP server closed');
 
     sequelize.close().then(() => {

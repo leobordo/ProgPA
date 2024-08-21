@@ -5,7 +5,6 @@ export class Dataset extends Model {
     public email!: string;
     public datasetName!: string;
     public filePath!: string;
-    public isDeleted!: boolean; //allow logic removal
 }
 
 export function initializeDataset(sequelize: Sequelize): void {
@@ -19,7 +18,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.STRING(255),
             allowNull: false,
             references: {
-                model: 'Utenti',
+                model: 'Utenti', // Nome della tabella a cui si fa riferimento
                 key: 'email'
             }
         },
@@ -30,16 +29,11 @@ export function initializeDataset(sequelize: Sequelize): void {
         filePath: {
             type: DataTypes.TEXT,
             allowNull: false
-        },
-        isDeleted: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
         }
     }, {
         sequelize,
         tableName: 'Datasets',
-        timestamps: false,
+        timestamps: false, // Imposta a `true` se la tabella ha colonne `createdAt` e `updatedAt`
         indexes: [
             {
                 unique: true,
@@ -48,6 +42,10 @@ export function initializeDataset(sequelize: Sequelize): void {
             {
                 unique: true,
                 fields: ['filePath', 'email']
+            },
+            {
+                unique: true,
+                fields: ['datasetId', 'datasetName']
             }
         ]
     });

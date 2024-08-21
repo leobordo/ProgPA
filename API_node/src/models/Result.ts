@@ -34,7 +34,7 @@ export function initializeResults(sequelize: Sequelize): void {
             allowNull: false,
             references: {
                 model: 'Datasets',
-                key: 'dataset_id'
+                key: 'datasetId'
             },
             primaryKey: true
         },

@@ -8,16 +8,16 @@ CREATE TABLE Datasets (
     file_path TEXT NOT NULL,
     dataset_id SERIAL PRIMARY KEY,
     dataset_name TEXT NOT NULL,
-    FOREIGN KEY (email) REFERENCES Utenti(email)
-    UNIQUE (email, dataset_name)
-    UNIQUE (file_path, email)
+    FOREIGN KEY (email) REFERENCES Utenti(email),
+    UNIQUE (email, dataset_name),
+    UNIQUE (file_path, email),
+    UNIQUE (dataset_id, dataset_name) 
 );
 CREATE TABLE Contents (
     file_id SERIAL PRIMARY KEY,
     dataset_id INTEGER NOT NULL,
     dataset_name TEXT NOT NULL,
-    FOREIGN KEY (dataset_id) REFERENCES Datasets(dataset_id),
-    FOREIGN KEY (dataset_name) REFERENCES Datasets(dataset_name)
+    FOREIGN KEY (dataset_id) REFERENCES Datasets(dataset_id)
 );
 
 

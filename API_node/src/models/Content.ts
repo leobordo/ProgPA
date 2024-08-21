@@ -1,8 +1,7 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
-import { Dataset } from './Dataset'; 
 
 export class Content extends Model {
-    public fileId!: number; 
+    public fileId!: number;
     public datasetId!: number;
     public datasetName!: string;
 }
@@ -19,26 +18,17 @@ export function initializeContent(sequelize: Sequelize): void {
             allowNull: false,
             references: {
                 model: 'Datasets',
-                key: 'dataset_id'
+                key: 'datasetId'
             }
         },
         datasetName: {
             type: DataTypes.TEXT,
-            allowNull: false,
-            references: {
-                model: 'Datasets',
-                key: 'dataset_name'
-            }
+            allowNull: false
+            
         }
     }, {
         sequelize,
         tableName: 'Contents',
         timestamps: false,
-        indexes: [
-            {
-                unique: true,
-                fields: ['datasetId', 'datasetName'] // Indice unico su datasetId e datasetName
-            }
-        ]
     });
 }

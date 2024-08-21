@@ -22,7 +22,7 @@ const upload = multer({
         if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype === 'application/zip') {
             cb(null, true);
         } else {
-            cb(new Error('Unsupported file type'), false);
+            cb(new Error('Unsupported file type'));
         }
     }
 });
