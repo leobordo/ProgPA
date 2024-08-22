@@ -4,6 +4,9 @@
   "description": "An API in Node.js (developed using Express) that consent a client to interface with a CV model",
   "main": "app.js",
   "scripts": {
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts", 
+    "start:watch": "nodemon src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -21,6 +24,7 @@
     "@types/multer": "^1.4.4",
     "@types/node": "^16.11.7",
     "@types/sequelize": "^4.28.10",
+    "@types/unzipper": "0.10.10",
     "dotenv": "^16.0.0",
     "nodemon": "^3.1.4",
     "ts-node": "^10.4.0",

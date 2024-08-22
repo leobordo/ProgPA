@@ -11,8 +11,8 @@ interface AuthPayload {
 }
 
 interface AuthenticatedRequest extends Request {
-    auth: {
-        payload: AuthPayload;
+    auth?: {
+        payload?: AuthPayload;
     };
 }
 

@@ -44,7 +44,7 @@ const DatasetDAO = {
         );
     },
 
-    async insertContent(datasetName: string, datasetId: string, filePath: string) {
+    async insertContent(datasetName: string, datasetId: number, filePath: string) {
         await Content.create({
             datasetName: datasetName,
             datasetId: datasetId,

@@ -41,7 +41,7 @@ class AuthorizationMiddleware extends Middleware {
 
     //Checks if the role specified in the token is among those required to access the route
     handle(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
-        if (this.requiredRoles.includes(req.auth.payload.role as Role)) {
+        if (this.requiredRoles.includes(req.auth?.payload?.role as Role)) {
             super.handle(req, res, next);
         } else {
             res.status(401).send({ error: 'Unauthorized' });
