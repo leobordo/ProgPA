@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as dataServices from '../services/dataServices'; // Importa il servizio
 import { AuthenticatedRequest } from '../models/request';
 

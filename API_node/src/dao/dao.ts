@@ -1,13 +1,20 @@
-import { Dataset } from '../models/Dataset';
-import { Content } from '../models/Content';
+import { Dataset } from '../models/sequelize_model/Dataset';
+
 
 const DatasetDAO = {
+    async getMaxDatasetId() {
+        const maxDatasetId = await Dataset.max('datasetId');
+        return maxDatasetId;
+    },
+    
     async getDsByName(datasetName: string, userEmail: string) {
         return await Dataset.findOne({
             where: {
                 datasetName: datasetName,
                 email: userEmail,
                 isDeleted: false
+                
+
             }
         });
     },
@@ -16,7 +23,9 @@ const DatasetDAO = {
         return await Dataset.create({
             datasetName: datasetName,
             email: userEmail,
-            filePath: filePath
+            filePath: filePath,
+            isDeleted: false,
+            tokenCost: 0
         });
     },
 
@@ -44,13 +53,13 @@ const DatasetDAO = {
         );
     },
 
-    async insertContent(datasetName: string, datasetId: number, filePath: string) {
+    /*async insertContent(datasetName: string, datasetId: number, filePath: string) {
         await Content.create({
             datasetName: datasetName,
             datasetId: datasetId,
             filePath: filePath
         });
-    }
+    }*/
 };
 
 export default DatasetDAO;
