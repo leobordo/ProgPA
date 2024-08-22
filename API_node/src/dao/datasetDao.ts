@@ -1,6 +1,5 @@
 import { Dataset } from '../models/sequelize_model/Dataset';
 
-
 const DatasetDAO = {
     async getMaxDatasetId() {
         const maxDatasetId = await Dataset.max('datasetId');
@@ -13,8 +12,6 @@ const DatasetDAO = {
                 datasetName: datasetName,
                 email: userEmail,
                 isDeleted: false
-                
-
             }
         });
     },
@@ -35,22 +32,49 @@ const DatasetDAO = {
         });
     },
 
-    async updateByName(datasetName: string, email: string, updates: { name?: string }) {
+    async updateByName(datasetName: string, userEmail: string, updates: { name?: string }) {
         const [affectedRows, updatedDatasets] = await Dataset.update(
             { datasetName: updates.name }, 
             {
-                where: { datasetName: datasetName, email: email, isDeleted: false },
+                where: { datasetName: datasetName, email: userEmail, isDeleted: false },
                 returning: true
             }
         );
         return updatedDatasets[0];
     },
 
-    async softDeleteByName(datasetName: string, email: string) {
+    async softDeleteByName(datasetName: string, userEmail: string) {
         await Dataset.update(
             { isDeleted: true },
-            { where: { datasetName: datasetName, email: email } }
+            { where: { datasetName: datasetName, email: userEmail } }
         );
+    },
+
+    async getDatasetByName(datasetName: string, userEmail: string) {
+        await Dataset.findOne(
+            { where: { datasetName: datasetName, email: userEmail, isDeleted: false } }
+        );
+    },
+
+    async updateTokenCostByName(datasetName: string, userEmail: string, additionalCost: number) {
+        const dataset = await Dataset.findOne({
+            attributes: ['tokenCost'], 
+            where: {
+                datasetName: datasetName,
+                email: userEmail,
+                isDeleted: false
+            }
+        });
+        if (dataset) {
+            const newTokenCost = dataset.tokenCost + additionalCost;
+            await Dataset.update(
+                { tokenCost: newTokenCost },
+                { where: { datasetName: datasetName, email: userEmail } }
+            );
+        } else {
+            throw Error("Dataset not found");
+        }
+        
     },
 
     /*async insertContent(datasetName: string, datasetId: number, filePath: string) {

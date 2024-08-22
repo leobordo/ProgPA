@@ -1,4 +1,4 @@
-import * as DatasetDAO from '../dao/dao';
+import * as DatasetDAO from '../dao/datasetDao';
 import fs from 'fs';
 import unzipper from 'unzipper';
 import path from 'path';

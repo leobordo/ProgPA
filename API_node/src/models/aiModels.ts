@@ -1,8 +1,11 @@
-enum modelId {
+enum ModelId {
     YoloV8 = "yolov8"
 }
 
-const yoloV8Versions = ['small', 'medium'];
+enum Yolov8Version {
+    Small = "small",
+    Medium = "medium"
+}
 
-export {modelId, yoloV8Versions};
+export {ModelId, Yolov8Version};
 

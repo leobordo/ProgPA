@@ -1,10 +1,12 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { JobStatus } from '../job';
+import { ModelId } from '../aiModels';
 
 export class Result extends Model {
     public jobId!: string;
     public result?: string; // Il campo result è opzionale
-    public state!: string;
-    public modelId!: string;
+    public state!: JobStatus;
+    public modelId!: ModelId;
     public datasetId!: number;
     public modelVersion!: string;
 }
