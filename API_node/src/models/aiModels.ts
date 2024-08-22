@@ -4,3 +4,5 @@ enum modelId {
 
 const yoloV8Versions = ['small', 'medium'];
 
+export {modelId, yoloV8Versions};
+
