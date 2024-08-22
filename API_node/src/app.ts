@@ -3,10 +3,9 @@ import tokenManagementRouter from './routers/tokenManagementRouter';
 import inferenceRouter from './routers/inferenceRouter';
 import sequelize from './config/sequelize'; // Importa l'istanza di Sequelize configurata
 import dotenv from 'dotenv';
-import { initializeUtente as initializeUtente } from './models/Utente';
-import { initializeContent as initializeContent } from './models/Content';
-import { initializeDataset as initializeDataset } from './models/Dataset';
-import { initializeResults } from './models/Result';
+import { initializeUtente as initializeUtente } from './models/sequelize_model/Utente';
+import { initializeDataset as initializeDataset } from './models/sequelize_model/Dataset';
+import { initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
 
 // Carica le variabili di ambiente dal file .env
@@ -32,8 +31,7 @@ app.use(AuthenticationMiddleware);
 
 initializeUtente(sequelize);
 initializeDataset(sequelize);
-initializeContent(sequelize);
-initializeResults(sequelize);
+initializeResult(sequelize);
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
   console.log("Database synchronized");
