@@ -24,6 +24,10 @@ export function initializeDataset(sequelize: Sequelize): void {
                 key: 'email'
             }
         },
+        tags: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
         filePath: {
             type: DataTypes.TEXT,
             allowNull: true

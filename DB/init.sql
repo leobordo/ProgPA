@@ -5,6 +5,7 @@ CREATE TABLE Utenti (
 
 CREATE TABLE Datasets (
     email VARCHAR(255),
+    tags TEXT,
     file_path TEXT,
     token_cost NUMERIC,
     dataset_id SERIAL PRIMARY KEY,

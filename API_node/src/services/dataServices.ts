@@ -10,7 +10,7 @@ const createDataset = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
     
-    const { datasetName } = req.body;
+    const { datasetName, tags } = req.body;
     const email = req.auth?.payload?.email;
 
     const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
@@ -27,7 +27,7 @@ const createDataset = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation);
     }
 
-    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir);
+    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir, tags);
     return { message: 'Dataset created successfully', dataset: newDataset };
 };
 

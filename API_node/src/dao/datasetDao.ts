@@ -16,11 +16,12 @@ const DatasetDAO = {
         });
     },
 
-    async create(datasetName: string, userEmail: string, filePath: string) {
+    async create(datasetName: string, userEmail: string, filePath: string, tags: string) {
         return await Dataset.create({
             datasetName: datasetName,
             email: userEmail,
             filePath: filePath,
+            tags: tags,
             isDeleted: false,
             tokenCost: 0
         });
@@ -32,14 +33,35 @@ const DatasetDAO = {
         });
     },
 
-    async updateByName(datasetName: string, userEmail: string, updates: { name?: string }) {
-        const [affectedRows, updatedDatasets] = await Dataset.update(
+    async updateByName(datasetName: string, userEmail: string, updates: { name?: string, tags?: string }) {
+        if(updates.tags == undefined)
+        {const [affectedRows, updatedDatasets] = await Dataset.update(
             { datasetName: updates.name }, 
             {
                 where: { datasetName: datasetName, email: userEmail, isDeleted: false },
                 returning: true
             }
         );
+        return updatedDatasets[0];}
+        if(updates.name==undefined)
+            {const [affectedRows, updatedDatasets] = await Dataset.update(
+            { tags: updates.tags }, 
+            {
+                where: { datasetName: datasetName, email: userEmail, isDeleted: false },
+                returning: true
+            }
+        );
+
+        return updatedDatasets[0];}
+        const [affectedRows, updatedDatasets] = await Dataset.update(
+            {   datasetName: updates.name,
+                tags: updates.tags }, 
+            {
+                where: { datasetName: datasetName, email: userEmail, isDeleted: false },
+                returning: true
+            }
+        );
+        
         return updatedDatasets[0];
     },
 
