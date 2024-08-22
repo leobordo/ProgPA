@@ -34,5 +34,20 @@ const processContents:Function = async (job: Job) => {
 // Worker creation to process jobs in the inferenceQueue
 new Worker('inferenceQueue', processContents, { connection: redisConnection });
 
+// Listener for the 'active' event
+inferenceQueueEvents.on('active', async (event:any) => {
+  //aggiornamento dello stato del job nel db
+});
+
+// Listener for the 'completed' event
+inferenceQueueEvents.on('completed', async (event:any) => {
+  //aggiornamento dello stato del job nel db
+});
+
+// Listener for the 'failed' event
+inferenceQueueEvents.on('failed', async (event:any) => {
+  //aggiornamento dello stato del job nel db
+});
+
 module.exports = {inferenceQueue, inferenceQueueEvents};
 

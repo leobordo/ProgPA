@@ -1,0 +1,6 @@
+export const TOKEN_COSTS = {
+    IMAGE_UPLOADING: 0.75,                
+    FRAME_VIDEO_UPLOADING: 0.5,
+    IMAGE_INFERENCE: 1.5,
+    FRAME_VIDEO_INFERENCE: 1.0,
+};
