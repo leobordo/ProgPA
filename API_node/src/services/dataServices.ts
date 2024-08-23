@@ -42,6 +42,7 @@ const getAllDatasets = async (req: AuthenticatedRequest) => {
 const updateDatasetByName = async (req: AuthenticatedRequest) => {
     const datasetName = req.body.datasetName;
     const newName = req.body.newDatasetName;
+    const tags = req.body.newTags;
     const email = req.auth?.payload?.email;
 
     if (!email) {
@@ -61,7 +62,7 @@ const updateDatasetByName = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
 
-    return await DatasetDAO.default.updateByName(datasetName, email, { name: newName });
+    return await DatasetDAO.default.updateByName(datasetName, email, { name: newName, tags: tags });
 };
 
 const deleteDatasetByName = async (req: AuthenticatedRequest) => {
