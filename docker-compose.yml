@@ -15,7 +15,8 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./API_node/src/uploads:/user/uploads
-      - ./DB/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./DB/entrypoint:/docker-entrypoint-initdb.d
+
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
 
@@ -24,7 +25,7 @@ services:
       context: .
       dockerfile: ./FLASK/Dockerfile.flask
     volumes:
-      - "./FLASK/YOLO:/user/app"       # per poter aggiornare file YOLO in fase di sviluppo
+      - "./FLASK:/user/app"       # per poter aggiornare file YOLO in fase di sviluppo
     ports:
       - "5000:5000"
     command: flask run --host=0.0.0.0 --reload   # modifiche attive senza riavviare

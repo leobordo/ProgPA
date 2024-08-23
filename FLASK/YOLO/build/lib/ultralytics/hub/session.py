@@ -30,7 +30,7 @@ class HUBTrainingSession:
         rate_limits (dict): Rate limits for different API calls (in seconds).
         timers (dict): Timers for rate limiting.
         metrics_queue (dict): Queue for the model's metrics.
-        model (dict): Model data fetched from Ultralytics HUB.
+        model (dict): Model data fetched from ultralytics HUB.
         alive (bool): Indicates if the heartbeat loop is active.
     """
 
@@ -101,7 +101,7 @@ class HUBTrainingSession:
         smart_request('post', self.api_url, json=payload, headers=self.auth_header, code=2)
 
     def _get_model(self):
-        """Fetch and return model data from Ultralytics HUB."""
+        """Fetch and return model data from ultralytics HUB."""
         api_url = f'{HUB_API_ROOT}/v1/models/{self.model_id}'
 
         try:

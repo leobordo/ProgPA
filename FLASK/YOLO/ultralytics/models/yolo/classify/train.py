@@ -63,7 +63,7 @@ class ClassificationTrainer(BaseTrainer):
             return
 
         model, ckpt = str(self.model), None
-        # Load a YOLO model locally, from torchvision, or from Ultralytics assets
+        # Load a YOLO model locally, from torchvision, or from ultralytics assets
         if model.endswith('.pt'):
             self.model, ckpt = attempt_load_one_weight(model, device='cpu')
             for p in self.model.parameters():

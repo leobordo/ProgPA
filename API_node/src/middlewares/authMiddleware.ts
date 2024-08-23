@@ -14,7 +14,7 @@ class AuthenticationMiddleware extends Middleware {
             audience: process.env.AUDIENCE,
             issuerBaseURL: process.env.ISSUER_BASE_URL,
             algorithms: [process.env.SIGNING_ALGORITHM],                        //Signign algorithm
-            jwksUri: `https://${process.env.TENANT_NAME}/.well-known/jwks.json` //Public key recovery
+            secret: process.env.PUBLIC_KEY //Public key recovery
         });
     }
 

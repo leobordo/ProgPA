@@ -12,7 +12,7 @@ import cv2
 import requests
 from PIL import Image
 
-from ultralytics.models.yolo.model import YOLO
+#from ultralytics.models.yolo.model import YOLO
 from ultralytics.engine.results import Results
 from config import Config
 from models import db, Utente, Dataset, Result

@@ -35,7 +35,7 @@ initializeResult(sequelize);
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
   console.log("Database synchronized");
-  const PORT = process.env.POSTGRES_PORT || 5432;  
+  const PORT = process.env.EXPRESS_PORT || 3000;  
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

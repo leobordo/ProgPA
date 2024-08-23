@@ -252,7 +252,7 @@ def handle_yolo_hub(args: List[str]) -> None:
         # Log in to Ultralytics HUB using the provided API key
         hub.login(key)
     elif args[0] == 'logout':
-        # Log out from Ultralytics HUB
+        # Log out from ultralytics HUB
         hub.logout()
 
 
