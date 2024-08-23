@@ -51,9 +51,14 @@ const DatasetDAO = {
     },
 
     async getDatasetByName(datasetName: string, userEmail: string) {
-        await Dataset.findOne(
+        const dataset = await Dataset.findOne(
             { where: { datasetName: datasetName, email: userEmail, isDeleted: false } }
         );
+        if (dataset) {
+            return dataset;
+        } else {
+            throw Error("Dataset not found");
+        }
     },
 
     async updateTokenCostByName(datasetName: string, userEmail: string, additionalCost: number) {

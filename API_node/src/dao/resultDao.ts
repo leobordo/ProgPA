@@ -24,14 +24,17 @@ const ResultDAO = {
     },
 
     //Gets the status of the job with the specified Id
-    async getJobStatus(jobId: string) {
-        return await Result.findOne({
+    async getJob(jobId: string) {
+        const result = await Result.findOne({
             where: {
                 jobId: jobId,
             }
         });
+        if (result) {
+            return result;
+        }
+        throw Error("Job not found");
     }
-
 }
 
 export default ResultDAO;

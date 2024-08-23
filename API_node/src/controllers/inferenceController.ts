@@ -11,7 +11,7 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
 
     //Request parameter extraction
     const modelId = req.body.modelId;
-    const modelVersion = req.body.modelId;
+    const modelVersion = req.body.modelVersion;
     const datasetName = req.body.datasetName;
     const user = req.body.auth.payload.email;
     
@@ -44,7 +44,7 @@ const checkState = async (req: Request, res: Response): Promise<void> => {
       res.send({jobState: jobStatus});
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error: 'An error occurred while processing the image' });
+      res.status(500).send({ error: 'Internal error' });
     }
   };
 
@@ -66,7 +66,7 @@ const getResult = async (req: Request, res: Response): Promise<void> => {
       throw Error("The job is not completed")
     } catch (error) {
       console.error(error);
-      res.status(500).send({ error: 'An error occurred while processing the image' });
+      res.status(500).send({ error: "Internal error" });
     }
   };
 
