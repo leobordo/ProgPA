@@ -22,9 +22,9 @@ services:
   flask:
     build:
       context: .
-      dockerfile: Dockerfile.flask
+      dockerfile: ./FLASK/Dockerfile.flask
     volumes:
-      - "./YOLO:/user/app"       # per poter aggiornare file YOLO in fase di sviluppo
+      - "./FLASK/YOLO:/user/app"       # per poter aggiornare file YOLO in fase di sviluppo
     ports:
       - "5000:5000"
     command: flask run --host=0.0.0.0 --reload   # modifiche attive senza riavviare

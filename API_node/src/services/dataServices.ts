@@ -10,7 +10,7 @@ const createDataset = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
     
-    const { datasetName } = req.body;
+    const { datasetName, tags } = req.body;
     const email = req.auth?.payload?.email;
 
     const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
@@ -27,7 +27,7 @@ const createDataset = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation);
     }
 
-    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir);
+    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir, tags);
     return { message: 'Dataset created successfully', dataset: newDataset };
 };
 
@@ -42,6 +42,7 @@ const getAllDatasets = async (req: AuthenticatedRequest) => {
 const updateDatasetByName = async (req: AuthenticatedRequest) => {
     const datasetName = req.body.datasetName;
     const newName = req.body.newDatasetName;
+    const tags = req.body.newTags;
     const email = req.auth?.payload?.email;
 
     if (!email) {
@@ -61,7 +62,7 @@ const updateDatasetByName = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
 
-    return await DatasetDAO.default.updateByName(datasetName, email, { name: newName });
+    return await DatasetDAO.default.updateByName(datasetName, email, { name: newName, tags: tags });
 };
 
 const deleteDatasetByName = async (req: AuthenticatedRequest) => {
