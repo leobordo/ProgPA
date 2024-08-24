@@ -1,19 +1,14 @@
-import { Request } from 'express';
-
 enum Role {
     User = "user",
     Admin = "admin",
 }
 
-interface AuthPayload {
+interface UserPayload {
     email: string;
     role: string;
+    iat: number;
+    exp:number;
+    aud: string;
 }
 
-interface AuthenticatedRequest extends Request {
-    auth?: {
-        payload?: AuthPayload;
-    };
-}
-
-export {Role, AuthenticatedRequest};
+export {Role, UserPayload};

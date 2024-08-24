@@ -3,7 +3,7 @@ import * as tokenManagementService from '../services/tokenManagementService';
 
 // Returns the token balance of the user that sends the request
 const getBalance = async (req: Request, res: Response): Promise<void> => {
-    const userEmail = req.body.auth.payload.email;
+    const userEmail = req.body.userEmail;
 
     try {
       //Retrieves the user's balance by his email

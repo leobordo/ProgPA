@@ -1,8 +1,7 @@
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import * as dataServices from '../services/dataServices'; // Importa il servizio
-import { AuthenticatedRequest } from '../models/request';
 
-const createDataset = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const createDataset = async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await dataServices.createDataset(req);
     res.status(201).json(result);
@@ -12,7 +11,7 @@ const createDataset = async (req: AuthenticatedRequest, res: Response): Promise<
   }
 };
 
-const getAllDatasets = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getAllDatasets = async (req: Request, res: Response): Promise<void> => {
   try {
     const datasets = await dataServices.getAllDatasets(req);
     res.status(200).json(datasets);
@@ -22,7 +21,7 @@ const getAllDatasets = async (req: AuthenticatedRequest, res: Response): Promise
   }
 };
 
-const updateDatasetByName = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const updateDatasetByName = async (req: Request, res: Response): Promise<void> => {
   try {
     const updatedDataset = await dataServices.updateDatasetByName(req);
     res.status(200).json({ message: 'Dataset updated successfully', dataset: updatedDataset });
@@ -32,7 +31,7 @@ const updateDatasetByName = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
-const deleteDatasetByName = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const deleteDatasetByName = async (req: Request, res: Response): Promise<void> => {
   try {
     await dataServices.deleteDatasetByName(req);
     res.status(200).json({ message: 'Dataset deleted successfully' });
@@ -42,7 +41,7 @@ const deleteDatasetByName = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
-const insertContents = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const insertContents = async (req: Request, res: Response): Promise<void> => {
   try {
     const message = await dataServices.insertContents(req);
     res.status(201).json({ message });

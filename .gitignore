@@ -135,4 +135,7 @@ dist
 *.pyc
 
 
-
+API_node/tokenGeneration/tokenGenerator.js
+API_node/tokenGeneration/public_key.pem
+API_node/tokenGeneration/private_key.pem
+API_node/tokenGeneration/keyGenerator.js

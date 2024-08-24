@@ -13,7 +13,7 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
     const modelId = req.body.modelId;
     const modelVersion = req.body.modelVersion;
     const datasetName = req.body.datasetName;
-    const user = req.body.auth.payload.email;
+    const user = req.body.userEmail;
     
     try {
       //Adds the job to the queue and receives the Id 

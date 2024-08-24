@@ -7,10 +7,10 @@ import { initializeUtente as initializeUtente } from './models/sequelize_model/U
 import { initializeDataset as initializeDataset } from './models/sequelize_model/Dataset';
 import { initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
+import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
-import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 require('dotenv').config();         // Loading environment variables from .env file
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -27,7 +27,7 @@ app.use('/datasets', dataRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
 
-app.use(AuthenticationMiddleware);
+app.use(new AuthenticationMiddleware);
 
 initializeUtente(sequelize);
 initializeDataset(sequelize);

@@ -2,16 +2,16 @@ import * as DatasetDAO from '../dao/datasetDao';
 import fs from 'fs';
 import unzipper from 'unzipper';
 import path from 'path';
-import { Role, AuthenticatedRequest } from '../models/request';
 import { ErrorType, ErrorFactory } from './errorFactory';
+import { Request } from 'express';
 
-const createDataset = async (req: AuthenticatedRequest) => {
-    if (!req.auth?.payload?.email) {
+const createDataset = async (req: Request) => {
+    if (!req.body.userEmail) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
     
     const { datasetName, tags } = req.body;
-    const email = req.auth?.payload?.email;
+    const email = req.body.userEmail;
 
     const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
     if (existingDataset) {
@@ -31,19 +31,19 @@ const createDataset = async (req: AuthenticatedRequest) => {
     return { message: 'Dataset created successfully', dataset: newDataset };
 };
 
-const getAllDatasets = async (req: AuthenticatedRequest) => {
-    if (!req.auth?.payload?.email) {
+const getAllDatasets = async (req: Request) => {
+    if (!req.body.userEmail) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
 
-    return await DatasetDAO.default.getAllByUserEmail(req.auth?.payload?.email);
+    return await DatasetDAO.default.getAllByUserEmail(req.body.userEmail);
 };
 
-const updateDatasetByName = async (req: AuthenticatedRequest) => {
+const updateDatasetByName = async (req: Request) => {
     const datasetName = req.body.datasetName;
     const newName = req.body.newDatasetName;
     const tags = req.body.newTags;
-    const email = req.auth?.payload?.email;
+    const email = req.body.userEmail;
 
     if (!email) {
         throw ErrorFactory.createError(ErrorType.Authentication);
@@ -65,9 +65,9 @@ const updateDatasetByName = async (req: AuthenticatedRequest) => {
     return await DatasetDAO.default.updateByName(datasetName, email, { name: newName, tags: tags });
 };
 
-const deleteDatasetByName = async (req: AuthenticatedRequest) => {
+const deleteDatasetByName = async (req: Request) => {
     const datasetName = req.body.datasetName;
-    const email = req.auth?.payload?.email;
+    const email = req.body.userEmail;
 
     if (!email) {
         throw ErrorFactory.createError(ErrorType.Authentication);
@@ -76,15 +76,15 @@ const deleteDatasetByName = async (req: AuthenticatedRequest) => {
     return await DatasetDAO.default.softDeleteByName(datasetName, email);
 };
 
-const insertContents = async (req: AuthenticatedRequest) => {
+const insertContents = async (req: Request) => {
     const datasetName = req.body.datasetName;
     const file = req.file;
 
-    if (req.auth?.payload?.email == undefined) {
+    if (req.body.userEmail == undefined) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
 
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, req.auth.payload.email);
+    const dataset = await DatasetDAO.default.getDsByName(datasetName, req.body.userEmail);
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
