@@ -5,12 +5,12 @@ import { Result } from "../models/sequelize_model/Result";
 const ResultDAO = {
     
     //Stores a new job 
-    async createJob(jobId: string, jobStatus: JobStatus, modelId: ModelId, modelVersion: string, datasetId:number) {
+    async createJob(jobId: string, jobStatus: JobStatus, modelId: ModelId, modelVersion: string, dataset_id:number) {
         return await Result.create({
             jobId: jobId,
             state: jobStatus,
             modelId: modelId,
-            datasetId: datasetId,
+            dataset_id: dataset_id,
             modelVersion: modelVersion
         });
     },

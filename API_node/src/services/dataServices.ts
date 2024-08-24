@@ -10,10 +10,10 @@ const createDataset = async (req: Request) => {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
     
-    const { datasetName, tags } = req.body;
+    const { dataset_name, tags } = req.body;
     const email = req.body.userEmail;
 
-    const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
+    const existingDataset = await DatasetDAO.default.getDsByName(dataset_name, email);
     if (existingDataset) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
@@ -27,7 +27,7 @@ const createDataset = async (req: Request) => {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation);
     }
 
-    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir, tags);
+    const newDataset = await DatasetDAO.default.create(dataset_name, email, datasetDir, tags);
     return { message: 'Dataset created successfully', dataset: newDataset };
 };
 
@@ -39,8 +39,9 @@ const getAllDatasets = async (req: Request) => {
     return await DatasetDAO.default.getAllByUserEmail(req.body.userEmail);
 };
 
+
 const updateDatasetByName = async (req: Request) => {
-    const datasetName = req.body.datasetName;
+    const datasetName = req.body.dataset_name;
     const newName = req.body.newDatasetName;
     const tags = req.body.newTags;
     const email = req.body.userEmail;
@@ -58,15 +59,16 @@ const updateDatasetByName = async (req: Request) => {
         throw ErrorFactory.createError(ErrorType.Authorization);
     }
 
-    if (dataset.datasetName === newName) {
+    if (dataset.dataset_name === newName) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
 
     return await DatasetDAO.default.updateByName(datasetName, email, { name: newName, tags: tags });
 };
 
+
 const deleteDatasetByName = async (req: Request) => {
-    const datasetName = req.body.datasetName;
+    const datasetName = req.body.dataset_name;
     const email = req.body.userEmail;
 
     if (!email) {
@@ -76,20 +78,20 @@ const deleteDatasetByName = async (req: Request) => {
     return await DatasetDAO.default.softDeleteByName(datasetName, email);
 };
 
+
 const insertContents = async (req: Request) => {
-    const datasetName = req.body.datasetName;
+    const datasetName = req.body.dataset_name;
     const file = req.file;
 
     if (req.body.userEmail == undefined) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
-
     const dataset = await DatasetDAO.default.getDsByName(datasetName, req.body.userEmail);
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
 
-    const datasetFilePath = dataset.filePath;
+    const datasetFilePath = dataset.file_path;
 
     if (!file) {
         throw ErrorFactory.createError(ErrorType.FileUpload);

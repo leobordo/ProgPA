@@ -22,7 +22,7 @@ export function initializeUtente(sequelize: Sequelize): void {
         }
     }, {
         sequelize,
-        tableName: 'Utenti',
+        tableName: 'utenti',
         timestamps: true, 
         modelName: 'Utente'
     });

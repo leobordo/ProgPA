@@ -23,7 +23,7 @@ const FLASK_PREDICTION_URL = process.env.FLASK_PREDICTION_URL || 'http://localho
 const processContents:Function = async (job: Job) => {
   
   //Retrieve the dataset informations
-  const dataset:Dataset = await DatasetDAO.getDatasetByName(job.data.datasetName, job.data.user);
+  const dataset:Dataset = await DatasetDAO.getDatasetByName(job.data.dataset_name, job.data.user);
 
   //Checks if the user has enough tokens to perform the inference on the dataset
   if (await checkTokenAvailability(job.data.user, -dataset.tokenCost)) {
@@ -38,7 +38,7 @@ const processContents:Function = async (job: Job) => {
         'Content-Type': 'application/json', 
       },
       body: JSON.stringify({ 
-          datasetName: job.data.datasetName, 
+          dataset_name: job.data.dataset_name, 
           user: job.data.user, 
           model_id: job.data.modelId, 
           model_version: job.data.modelVersion  

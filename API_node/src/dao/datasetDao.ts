@@ -2,25 +2,25 @@ import { Dataset } from '../models/sequelize_model/Dataset';
 
 const DatasetDAO = {
     async getMaxDatasetId() {
-        const maxDatasetId = await Dataset.max('datasetId');
+        const maxDatasetId = await Dataset.max('dataset_id');
         return maxDatasetId;
     },
     
-    async getDsByName(datasetName: string, userEmail: string) {
+    async getDsByName(dataset_name: string, userEmail: string) {
         return await Dataset.findOne({
             where: {
-                datasetName: datasetName,
+                dataset_name: dataset_name,
                 email: userEmail,
                 isDeleted: false
             }
         });
     },
 
-    async create(datasetName: string, userEmail: string, filePath: string, tags: string) {
+    async create(dataset_name: string, userEmail: string, file_path: string, tags: string) {
         return await Dataset.create({
-            datasetName: datasetName,
+            dataset_name: dataset_name,
             email: userEmail,
-            filePath: filePath,
+            file_path: file_path,
             tags: tags,
             isDeleted: false,
             tokenCost: 0
@@ -33,12 +33,12 @@ const DatasetDAO = {
         });
     },
 
-    async updateByName(datasetName: string, userEmail: string, updates: { name?: string, tags?: string }) {
+    async updateByName(dataset_name: string, userEmail: string, updates: { name?: string, tags?: string }) {
         if(updates.tags == undefined)
         {const [affectedRows, updatedDatasets] = await Dataset.update(
-            { datasetName: updates.name }, 
+            { dataset_name: updates.name }, 
             {
-                where: { datasetName: datasetName, email: userEmail, isDeleted: false },
+                where: { dataset_name: dataset_name, email: userEmail, isDeleted: false },
                 returning: true
             }
         );
@@ -47,17 +47,17 @@ const DatasetDAO = {
             {const [affectedRows, updatedDatasets] = await Dataset.update(
             { tags: updates.tags }, 
             {
-                where: { datasetName: datasetName, email: userEmail, isDeleted: false },
+                where: { dataset_name: dataset_name, email: userEmail, isDeleted: false },
                 returning: true
             }
         );
 
         return updatedDatasets[0];}
         const [affectedRows, updatedDatasets] = await Dataset.update(
-            {   datasetName: updates.name,
+            {   dataset_name: updates.name,
                 tags: updates.tags }, 
             {
-                where: { datasetName: datasetName, email: userEmail, isDeleted: false },
+                where: { dataset_name: dataset_name, email: userEmail, isDeleted: false },
                 returning: true
             }
         );
@@ -65,16 +65,16 @@ const DatasetDAO = {
         return updatedDatasets[0];
     },
 
-    async softDeleteByName(datasetName: string, userEmail: string) {
+    async softDeleteByName(dataset_name: string, userEmail: string) {
         await Dataset.update(
             { isDeleted: true },
-            { where: { datasetName: datasetName, email: userEmail } }
+            { where: { dataset_name: dataset_name, email: userEmail } }
         );
     },
 
-    async getDatasetByName(datasetName: string, userEmail: string) {
+    async getDatasetByName(dataset_name: string, userEmail: string) {
         const dataset = await Dataset.findOne(
-            { where: { datasetName: datasetName, email: userEmail, isDeleted: false } }
+            { where: { dataset_name: dataset_name, email: userEmail, isDeleted: false } }
         );
         if (dataset) {
             return dataset;
@@ -83,11 +83,11 @@ const DatasetDAO = {
         }
     },
 
-    async updateTokenCostByName(datasetName: string, userEmail: string, additionalCost: number) {
+    async updateTokenCostByName(dataset_name: string, userEmail: string, additionalCost: number) {
         const dataset = await Dataset.findOne({
             attributes: ['tokenCost'], 
             where: {
-                datasetName: datasetName,
+                dataset_name: dataset_name,
                 email: userEmail,
                 isDeleted: false
             }
@@ -96,7 +96,7 @@ const DatasetDAO = {
             const newTokenCost = dataset.tokenCost + additionalCost;
             await Dataset.update(
                 { tokenCost: newTokenCost },
-                { where: { datasetName: datasetName, email: userEmail } }
+                { where: { dataset_name: dataset_name, email: userEmail } }
             );
         } else {
             throw Error("Dataset not found");
@@ -104,11 +104,11 @@ const DatasetDAO = {
         
     },
 
-    /*async insertContent(datasetName: string, datasetId: number, filePath: string) {
+    /*async insertContent(dataset_name: string, dataset_id: number, file_path: string) {
         await Content.create({
-            datasetName: datasetName,
-            datasetId: datasetId,
-            filePath: filePath
+            dataset_name: dataset_name,
+            dataset_id: dataset_id,
+            file_path: file_path
         });
     }*/
 };

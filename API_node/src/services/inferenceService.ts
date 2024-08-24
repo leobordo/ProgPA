@@ -9,18 +9,18 @@ import { Result } from "../models/sequelize_model/Result";
 const {inferenceQueue} = require('./queue');
 
 // Adds the job to the queue and returns its ID which can be used later to check the job status and/or retrieve its result
-const requestDatasetInference = async (datasetName: string, userEmail:string, modelId:ModelId, modelVersion:string): Promise<string|undefined> => {
+const requestDatasetInference = async (dataset_name: string, userEmail:string, modelId:ModelId, modelVersion:string): Promise<string|undefined> => {
 
     //Retrieve the dataset informations
-    const dataset:Dataset = await DatasetDAO.getDatasetByName(datasetName, userEmail);
+    const dataset:Dataset = await DatasetDAO.getDatasetByName(dataset_name, userEmail);
 
     //Checks if the user has enough tokens to perform the inference on the dataset
     //if (await checkTokenAvailability(userEmail, dataset.tokenCost)) {
 
     // Adds the job to the queue, store its information into the dataset and return its ID
-    const job:Job = await inferenceQueue.add('processRequest', { datasetName, userEmail, modelId, modelVersion});
+    const job:Job = await inferenceQueue.add('processRequest', { dataset_name, userEmail, modelId, modelVersion});
     if (job.id) { 
-        ResultDAO.createJob(job.id, JobStatus.Pending, modelId, modelVersion, dataset.datasetId);
+        ResultDAO.createJob(job.id, JobStatus.Pending, modelId, modelVersion, dataset.dataset_id);
         return job.id;
     } else {
         throw Error("job id is undefined");
@@ -44,8 +44,8 @@ const getProcessStatus = async (jobId: string): Promise<JobStatus> => {
 // Returns an object which includes the result (content URI and JSON) of the specified job (by ID)
 const getProcessResult = async (jobId: string): Promise<IResult> => {
     const job:Result = await ResultDAO.getJob(jobId);
-    const uri = `user/uploads/${job.datasetId}/annotated_files/${job.jobId}`;
-    job.datasetId
+    const uri = `user/uploads/${job.dataset_id}/annotated_files/${job.jobId}`;
+    job.dataset_id
     if (job.result) {
         const jsonResult = JSON.parse(job.result);
         // chiamata ad una funzione del dao per prendere il risultato del job dal db

@@ -12,7 +12,7 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
     //Request parameter extraction
     const modelId = req.body.modelId;
     const modelVersion = req.body.modelVersion;
-    const datasetName = req.body.datasetName;
+    const datasetName = req.body.dataset_name;
     const user = req.body.userEmail;
     
     try {
