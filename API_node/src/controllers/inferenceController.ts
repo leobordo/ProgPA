@@ -12,12 +12,12 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
     //Request parameter extraction
     const modelId = req.body.modelId;
     const modelVersion = req.body.modelVersion;
-    const datasetName = req.body.datasetName;
+    const dataset_name = req.body.dataset_name;
     const user = req.body.auth.payload.email;
     
     try {
       //Adds the job to the queue and receives the Id 
-      const jobId = await service.requestDatasetInference(datasetName, user, modelId, modelVersion);
+      const jobId = await service.requestDatasetInference(dataset_name, user, modelId, modelVersion);
       res.send({ message: "Process added succesfully", jobId: jobId});
     } catch (error) {
       console.error(error);

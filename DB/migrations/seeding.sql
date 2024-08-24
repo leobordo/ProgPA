@@ -1,3 +1,3 @@
-INSERT INTO Utenti (email)
+INSERT INTO utenti (email)
 VALUES
 ('prova@gmail.com')

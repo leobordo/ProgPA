@@ -1,17 +1,17 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
 export class Dataset extends Model {
-    public datasetId!: number; 
+    public dataset_id!: number; 
     public email!: string;
-    public filePath!: string;
+    public file_path!: string;
     public tokenCost!: number;
-    public datasetName!: string;
+    public dataset_name!: string;
     public isDeleted!: boolean; // Campo per l'eliminazione logica
 }
 
 export function initializeDataset(sequelize: Sequelize): void {
     Dataset.init({
-        datasetId: {
+        dataset_id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
@@ -20,7 +20,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.STRING(255),
             allowNull: false,
             references: {
-                model: 'Utenti', // Nome della tabella a cui si fa riferimento
+                model: 'utenti', // Nome della tabella a cui si fa riferimento
                 key: 'email'
             }
         },
@@ -28,7 +28,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        filePath: {
+        file_path: {
             type: DataTypes.TEXT,
             allowNull: true
         },
@@ -36,7 +36,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.FLOAT, // Usa FLOAT o DECIMAL in Sequelize per numeri con virgola mobile
             allowNull: true
         },
-        datasetName: {
+        dataset_name: {
             type: DataTypes.TEXT,
             allowNull: false
         },
@@ -47,20 +47,20 @@ export function initializeDataset(sequelize: Sequelize): void {
         }
     }, {
         sequelize,
-        tableName: 'Datasets',
+        tableName: 'datasets',
         timestamps: false,
         indexes: [
             {
                 unique: true,
-                fields: ['email', 'datasetName']
+                fields: ['email', 'dataset_name']
             },
             {
                 unique: true,
-                fields: ['filePath', 'email']
+                fields: ['file_path', 'email']
             },
             {
                 unique: true,
-                fields: ['datasetId', 'datasetName']
+                fields: ['dataset_id', 'dataset_name']
             }
         ]
     });

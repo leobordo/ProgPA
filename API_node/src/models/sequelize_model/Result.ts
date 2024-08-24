@@ -7,7 +7,7 @@ export class Result extends Model {
     public result?: string; // Il campo result è opzionale
     public state!: JobStatus;
     public modelId!: ModelId;
-    public datasetId!: number;
+    public dataset_id!: number;
     public modelVersion!: string;
 }
 
@@ -29,12 +29,12 @@ export function initializeResult(sequelize: Sequelize): void {
             type: DataTypes.STRING,
             allowNull: false
         },
-        datasetId: {
+        dataset_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'Datasets',
-                key: 'datasetId'
+                model: 'datasets',
+                key: 'dataset_id'
             }
         },
         modelVersion: {
@@ -43,7 +43,7 @@ export function initializeResult(sequelize: Sequelize): void {
         }
     }, {
         sequelize,
-        tableName: 'Results',
+        tableName: 'results',
         timestamps: false
     });
 }

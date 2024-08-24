@@ -10,10 +10,10 @@ const createDataset = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
     
-    const { datasetName, tags } = req.body;
+    const { dataset_name, tags } = req.body;
     const email = req.auth?.payload?.email;
 
-    const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
+    const existingDataset = await DatasetDAO.default.getDsByName(dataset_name, email);
     if (existingDataset) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
@@ -27,7 +27,7 @@ const createDataset = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation);
     }
 
-    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir, tags);
+    const newDataset = await DatasetDAO.default.create(dataset_name, email, datasetDir, tags);
     return { message: 'Dataset created successfully', dataset: newDataset };
 };
 
@@ -40,7 +40,7 @@ const getAllDatasets = async (req: AuthenticatedRequest) => {
 };
 
 const updateDatasetByName = async (req: AuthenticatedRequest) => {
-    const datasetName = req.body.datasetName;
+    const dataset_name = req.body.dataset_name;
     const newName = req.body.newDatasetName;
     const tags = req.body.newTags;
     const email = req.auth?.payload?.email;
@@ -49,7 +49,7 @@ const updateDatasetByName = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
 
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
+    const dataset = await DatasetDAO.default.getDsByName(dataset_name, email);
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
@@ -58,38 +58,38 @@ const updateDatasetByName = async (req: AuthenticatedRequest) => {
         throw ErrorFactory.createError(ErrorType.Authorization);
     }
 
-    if (dataset.datasetName === newName) {
+    if (dataset.dataset_name === newName) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
 
-    return await DatasetDAO.default.updateByName(datasetName, email, { name: newName, tags: tags });
+    return await DatasetDAO.default.updateByName(dataset_name, email, { name: newName, tags: tags });
 };
 
 const deleteDatasetByName = async (req: AuthenticatedRequest) => {
-    const datasetName = req.body.datasetName;
+    const dataset_name = req.body.dataset_name;
     const email = req.auth?.payload?.email;
 
     if (!email) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
 
-    return await DatasetDAO.default.softDeleteByName(datasetName, email);
+    return await DatasetDAO.default.softDeleteByName(dataset_name, email);
 };
 
 const insertContents = async (req: AuthenticatedRequest) => {
-    const datasetName = req.body.datasetName;
+    const dataset_name = req.body.dataset_name;
     const file = req.file;
 
     if (req.auth?.payload?.email == undefined) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
 
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, req.auth.payload.email);
+    const dataset = await DatasetDAO.default.getDsByName(dataset_name, req.auth.payload.email);
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
 
-    const datasetFilePath = dataset.filePath;
+    const datasetFilePath = dataset.file_path;
 
     if (!file) {
         throw ErrorFactory.createError(ErrorType.FileUpload);
