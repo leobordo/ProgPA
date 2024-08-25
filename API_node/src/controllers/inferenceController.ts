@@ -12,8 +12,8 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
     //Request parameter extraction
     const modelId = req.body.modelId;
     const modelVersion = req.body.modelVersion;
-    const datasetName = req.body.dataset_name;
-    const user = req.body.userEmail;
+    const datasetName = req.body.datasetName;
+    const user = req.user!.userEmail;
     
     try {
       //Adds the job to the queue and receives the Id 
@@ -30,11 +30,13 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
   If the status is COMPLETED, also returns the job result in JSON format
 */
 const checkState = async (req: Request, res: Response): Promise<void> => {
-    const jobId = req.body.jobId;
-    
+  console.log(req.body)  
+  const jobId = req.body.job_id;
+  console.log(jobId)
     try {
       //Retrieves the job status by its ID
       const jobStatus:JobStatus = await service.getProcessStatus(jobId);
+      
       if (jobStatus === JobStatus.Completed) {
         //Retrieves the job result by its ID
         const result:IResult = await service.getProcessResult(jobId);

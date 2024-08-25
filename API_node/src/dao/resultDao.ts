@@ -7,11 +7,11 @@ const ResultDAO = {
     //Stores a new job 
     async createJob(jobId: string, jobStatus: JobStatus, modelId: ModelId, modelVersion: string, dataset_id:number) {
         return await Result.create({
-            jobId: jobId,
+            job_id: jobId,
             state: jobStatus,
-            modelId: modelId,
+            model_id: modelId,
             dataset_id: dataset_id,
-            modelVersion: modelVersion
+            model_version: modelVersion
         });
     },
     
@@ -19,7 +19,7 @@ const ResultDAO = {
     async updateJobStatus(jobId: string, newJobStatus: JobStatus) {
         await Result.update(
             { state: newJobStatus }, 
-            { where: { jobId: jobId}}
+            { where: { job_id: jobId}}
         );
     },
 
@@ -27,7 +27,7 @@ const ResultDAO = {
     async getJob(jobId: string) {
         const result = await Result.findOne({
             where: {
-                jobId: jobId,
+                job_id: jobId,
             }
         });
         if (result) {
