@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/dataController';
-import upload from '../middlewares/multerConfig';
+import uploadCustom from '../middlewares/multerConfig';
 //import { AuthenticationMiddleware, AuthorizationMiddleware, ValidationMiddleware } from '../middleware/middleware';
 
 const router = Router();
- 
+const multer  = require('multer')
+const upload = multer()
 // Adding middleware to the router
 //const authenticationMiddleware = new AuthenticationMiddleware();
 //const authorizationMiddleware = new AuthorizationMiddleware(Role.Standard);
@@ -19,15 +20,15 @@ const router = Router();
 router.get('/', controller.getAllDatasets);
 
 //route that consents the creation of a new dataset
-router.post('/', controller.createDataset);
+router.post('/', upload.none(), controller.createDataset);
 
 //route for logical deletion of a dataset given its id
-router.delete('/:id', controller.deleteDatasetByName);
+router.delete('/:id',upload.none(), controller.deleteDatasetByName);
 
 //route that allows the update of an existings dataset given its id
-router.patch('/:id', controller.updateDatasetByName);
+router.patch('/:id',upload.none(), controller.updateDatasetByName);
 
 //route to insert a new content in a specified dataset (through the dataset id)
-router.post('/:id/contents', upload.single('file'), controller.insertContents);
+router.post('/:id/contents', uploadCustom.single('file'), controller.insertContents);
 
 export default router;

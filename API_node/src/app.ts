@@ -8,6 +8,8 @@ import { initializeDataset as initializeDataset } from './models/sequelize_model
 import { initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
 import {AuthenticationMiddleware} from './middlewares/authMiddleware';
+import { Request, Response, NextFunction } from 'express';
+ 
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
@@ -15,19 +17,22 @@ require('dotenv').config();         // Loading environment variables from .env f
 const express = require('express');
 const bodyParser = require('body-parser');
 
+
 const app = express();
 const server: Server = createServer(app);
 
 // Middleware per l'analisi dei body delle richieste
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const authenticationMiddleware = new AuthenticationMiddleware();
+app.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
 // Definizione delle rotte
 app.use('/datasets', dataRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
 
-app.use(new AuthenticationMiddleware);
+
 
 initializeUtente(sequelize);
 initializeDataset(sequelize);

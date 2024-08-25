@@ -7,11 +7,12 @@ const DatasetDAO = {
     },
     
     async getDsByName(dataset_name: string, userEmail: string) {
+        console.log("ggg")
         return await Dataset.findOne({
             where: {
                 dataset_name: dataset_name,
                 email: userEmail,
-                isDeleted: false
+                is_deleted: false
             }
         });
     },
@@ -22,42 +23,42 @@ const DatasetDAO = {
             email: userEmail,
             file_path: file_path,
             tags: tags,
-            isDeleted: false,
-            tokenCost: 0
+            is_deleted: false,
+            token_cost: 0
         });
     },
 
     async getAllByUserEmail(userEmail: string) {
         return await Dataset.findAll({
-            where: { email: userEmail, isDeleted: false }
+            where: { email: userEmail, is_deleted: false }
         });
     },
 
-    async updateByName(dataset_name: string, userEmail: string, updates: { name?: string, tags?: string }) {
-        if(updates.tags == undefined)
+    async updateByName(dataset_name: string, userEmail: string, newName?: string, tags?: string ) {
+        if(tags == undefined || tags == null)
         {const [affectedRows, updatedDatasets] = await Dataset.update(
-            { dataset_name: updates.name }, 
+            { dataset_name: newName }, 
             {
-                where: { dataset_name: dataset_name, email: userEmail, isDeleted: false },
+                where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },
                 returning: true
             }
         );
         return updatedDatasets[0];}
-        if(updates.name==undefined)
+        if(newName==undefined || newName == null)
             {const [affectedRows, updatedDatasets] = await Dataset.update(
-            { tags: updates.tags }, 
+            { tags: tags }, 
             {
-                where: { dataset_name: dataset_name, email: userEmail, isDeleted: false },
+                where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },
                 returning: true
             }
         );
 
         return updatedDatasets[0];}
         const [affectedRows, updatedDatasets] = await Dataset.update(
-            {   dataset_name: updates.name,
-                tags: updates.tags }, 
+            {   dataset_name: newName,
+                tags: tags }, 
             {
-                where: { dataset_name: dataset_name, email: userEmail, isDeleted: false },
+                where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },
                 returning: true
             }
         );
@@ -67,14 +68,14 @@ const DatasetDAO = {
 
     async softDeleteByName(dataset_name: string, userEmail: string) {
         await Dataset.update(
-            { isDeleted: true },
+            { is_deleted: true },
             { where: { dataset_name: dataset_name, email: userEmail } }
         );
     },
 
     async getDatasetByName(dataset_name: string, userEmail: string) {
         const dataset = await Dataset.findOne(
-            { where: { dataset_name: dataset_name, email: userEmail, isDeleted: false } }
+            { where: { dataset_name: dataset_name, email: userEmail, is_deleted: false } }
         );
         if (dataset) {
             return dataset;
@@ -85,17 +86,17 @@ const DatasetDAO = {
 
     async updateTokenCostByName(dataset_name: string, userEmail: string, additionalCost: number) {
         const dataset = await Dataset.findOne({
-            attributes: ['tokenCost'], 
+            attributes: ['token_cost'], 
             where: {
                 dataset_name: dataset_name,
                 email: userEmail,
-                isDeleted: false
+                is_deleted: false
             }
         });
         if (dataset) {
-            const newTokenCost = dataset.tokenCost + additionalCost;
+            const newTokenCost = dataset.token_cost + additionalCost;
             await Dataset.update(
-                { tokenCost: newTokenCost },
+                { token_cost: newTokenCost },
                 { where: { dataset_name: dataset_name, email: userEmail } }
             );
         } else {

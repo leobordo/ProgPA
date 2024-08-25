@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "start:watch": "nodemon src/app.ts",
+    "start:watch": "nodemon -r dotenv/config --watch src --legacy-watch --exec ts-node src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

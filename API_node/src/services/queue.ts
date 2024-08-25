@@ -26,10 +26,10 @@ const processContents:Function = async (job: Job) => {
   const dataset:Dataset = await DatasetDAO.getDatasetByName(job.data.dataset_name, job.data.user);
 
   //Checks if the user has enough tokens to perform the inference on the dataset
-  if (await checkTokenAvailability(job.data.user, -dataset.tokenCost)) {
+  if (await checkTokenAvailability(job.data.user, -dataset.token_cost)) {
 
     //Update token balance
-    UserDAO.updateTokenBalance(job.data.user, dataset.tokenCost)
+    UserDAO.updateTokenBalance(job.data.user, dataset.token_cost)
 
     //Sends the inference request to the flask API
     const response = await fetch(FLASK_PREDICTION_URL, {

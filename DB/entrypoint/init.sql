@@ -10,8 +10,8 @@ CREATE TABLE datasets (
     token_cost NUMERIC,
     dataset_id SERIAL PRIMARY KEY,
     dataset_name TEXT NOT NULL,
+    is_deleted BOOLEAN,
     FOREIGN KEY (email) REFERENCES utenti(email),
-    UNIQUE (email, dataset_name),
     UNIQUE (file_path, email),
     UNIQUE (dataset_id, dataset_name) 
 );

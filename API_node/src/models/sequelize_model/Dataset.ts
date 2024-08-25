@@ -4,9 +4,9 @@ export class Dataset extends Model {
     public dataset_id!: number; 
     public email!: string;
     public file_path!: string;
-    public tokenCost!: number;
+    public token_cost!: number;
     public dataset_name!: string;
-    public isDeleted!: boolean; // Campo per l'eliminazione logica
+    public is_deleted!: boolean; // Campo per l'eliminazione logica
 }
 
 export function initializeDataset(sequelize: Sequelize): void {
@@ -32,7 +32,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        tokenCost: {
+        token_cost: {
             type: DataTypes.FLOAT, // Usa FLOAT o DECIMAL in Sequelize per numeri con virgola mobile
             allowNull: true
         },
@@ -40,7 +40,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.TEXT,
             allowNull: false
         },
-        isDeleted: {
+        is_deleted: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false // Imposta il valore predefinito su false
@@ -50,10 +50,7 @@ export function initializeDataset(sequelize: Sequelize): void {
         tableName: 'datasets',
         timestamps: false,
         indexes: [
-            {
-                unique: true,
-                fields: ['email', 'dataset_name']
-            },
+            
             {
                 unique: true,
                 fields: ['file_path', 'email']

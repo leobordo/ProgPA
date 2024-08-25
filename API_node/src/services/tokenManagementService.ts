@@ -2,9 +2,9 @@ import userDao from '../dao/userDao';
 import { Utente } from '../models/sequelize_model/Utente';
 
 // Check if the tokens owned by the specified user (by email) are sufficient to perform the requested operation
-const checkTokenAvailability = async (userEmail: string, tokenCost: number): Promise<boolean> => {
+const checkTokenAvailability = async (userEmail: string, token_cost: number): Promise<boolean> => {
     const user:Utente = await userDao.getUserByEmail(userEmail);
-    if (user.tokens >= tokenCost) {
+    if (user.tokens >= token_cost) {
         return true;
     }
     return false;
