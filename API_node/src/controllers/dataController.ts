@@ -3,9 +3,11 @@ import * as dataServices from '../services/dataServices'; // Importa il servizio
 
 const createDataset = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log(req.user)
     const result = await dataServices.createDataset(req);
     res.status(201).json(result);
   } catch (error) {
+    console.log("OK")
     const err = error as Error;
     res.status(500).json({ message: err.message });
   }
@@ -33,7 +35,9 @@ const updateDatasetByName = async (req: Request, res: Response): Promise<void> =
 
 const deleteDatasetByName = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log("QUIi")
     await dataServices.deleteDatasetByName(req);
+    console.log("QUI2")
     res.status(200).json({ message: 'Dataset deleted successfully' });
   } catch (error) {
     const err = error as Error;

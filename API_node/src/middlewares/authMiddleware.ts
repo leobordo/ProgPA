@@ -2,10 +2,22 @@ import { Request, Response, NextFunction } from 'express';
 import { Middleware } from "./middleware";
 import { Role, UserPayload } from '../models/request';
 import * as jwt from 'jsonwebtoken';
-//const fs = require('fs');
+
+
+// Estendi l'interfaccia Request di Express
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      userEmail: string;
+      userRole: Role;
+    };
+  }
+}
+
+const fs = require('fs');
 //const { auth } = require('express-oauth2-jwt-bearer');
 
-//const publicKey = fs.readFileSync('../../public_key.pem', 'utf8');    //Public key recovery
+const publicKey = fs.readFileSync('././public_key.pem', 'utf8');    //Public key recovery
 
 /*
 //Middleware for authentication that check the correctness of jwt token
@@ -38,6 +50,7 @@ class AuthenticationMiddleware extends Middleware {
         });
     }
 }*/
+//const publicKey = process.env.PUBLIC_KEY!.replace(/\\n/g, '\n');
 
 class AuthenticationMiddleware extends Middleware {
 
@@ -56,20 +69,24 @@ class AuthenticationMiddleware extends Middleware {
             }
 
             // Checks the token
-            jwt.verify(token, process.env.PUBLIC_KEY!, { algorithms: ['RS256'] }, (err: any, decoded: any) => {
+            jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err: any, decoded: any) => {
+                console.log(token)
                 if (err) {
                     return res.status(403).send({ error: 'Token is invalid' });
                 }
 
                 // Cast the decoded object
                 const decodedPayload = decoded as UserPayload;
-
+                
                 // Arricchisce la richiesta con i dati dell'utente contenuti nel token
-                req.body.userEmail = decodedPayload.email;                
-                req.body.userRole = decodedPayload.role;
+                req.user = {
+                    userEmail: decodedPayload.email,
+                    userRole: decodedPayload.role as Role
+                };
                 super.handle(req, res, next);
             });
         } else {
+
             res.status(401).send({ error: 'Authorization header is missing' });
         }
     }

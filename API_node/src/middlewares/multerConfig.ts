@@ -16,7 +16,7 @@ const storage: StorageEngine = multer.diskStorage({
 });
 
 // Configurazione di Multer per il file upload, incluso il filtro del file
-const upload = multer({
+const uploadCustom = multer({
     storage: storage,
     fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
         if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype === 'application/zip') {
@@ -27,5 +27,5 @@ const upload = multer({
     }
 });
 
-export default upload;
+export default uploadCustom;
 

@@ -6,20 +6,27 @@ import { ErrorType, ErrorFactory } from './errorFactory';
 import { Request } from 'express';
 
 const createDataset = async (req: Request) => {
-    if (!req.body.userEmail) {
-        throw ErrorFactory.createError(ErrorType.Authentication);
+    
+    if (!req.user!.userEmail) {
+        //throw ErrorFactory.createError(ErrorType.Authentication);
+        
     }
     
-    const { dataset_name, tags } = req.body;
-    const email = req.body.userEmail;
+    const dataset_name= req.body.datasetName;
+    const tags = req.body.tags
+    const email = req.user!.userEmail;
 
+    //TROVA CON is_deleted=false
     const existingDataset = await DatasetDAO.default.getDsByName(dataset_name, email);
+    
     if (existingDataset) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
 
-    const maxDatasetId = await DatasetDAO.default.getMaxDatasetId();
-    const datasetDir = path.join('./uploads', String(maxDatasetId));
+    var maxDatasetId = await DatasetDAO.default.getMaxDatasetId();
+    console.log(maxDatasetId)
+    if(maxDatasetId==null){maxDatasetId="0"}
+    const datasetDir = path.join('./uploads', (parseInt(maxDatasetId as string,10)+1).toString());
 
     try {
         fs.mkdirSync(datasetDir, { recursive: true });
@@ -32,25 +39,26 @@ const createDataset = async (req: Request) => {
 };
 
 const getAllDatasets = async (req: Request) => {
-    if (!req.body.userEmail) {
+    if (!req.user!.userEmail) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
 
-    return await DatasetDAO.default.getAllByUserEmail(req.body.userEmail);
+    return await DatasetDAO.default.getAllByUserEmail(req.user!.userEmail);
 };
 
 
 const updateDatasetByName = async (req: Request) => {
-    const datasetName = req.body.dataset_name;
+    const datasetName = req.body.datasetName;
     const newName = req.body.newDatasetName;
     const tags = req.body.newTags;
-    const email = req.body.userEmail;
+    const email = req.user!.userEmail;
 
     if (!email) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
-
+    
     const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
+    
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
@@ -62,14 +70,17 @@ const updateDatasetByName = async (req: Request) => {
     if (dataset.dataset_name === newName) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
-
-    return await DatasetDAO.default.updateByName(datasetName, email, { name: newName, tags: tags });
+    if (newName==null && tags==null){
+        throw new Error("non stai modificando nulla")
+    }
+    console.log("OK")
+    return await DatasetDAO.default.updateByName(datasetName, email, newName, tags);
 };
 
 
 const deleteDatasetByName = async (req: Request) => {
-    const datasetName = req.body.dataset_name;
-    const email = req.body.userEmail;
+    const datasetName = req.body.datasetName;
+    const email = req.user!.userEmail;
 
     if (!email) {
         throw ErrorFactory.createError(ErrorType.Authentication);
@@ -80,13 +91,15 @@ const deleteDatasetByName = async (req: Request) => {
 
 
 const insertContents = async (req: Request) => {
-    const datasetName = req.body.dataset_name;
+    
+    const datasetName = req.body.datasetName;
     const file = req.file;
-
-    if (req.body.userEmail == undefined) {
+    console.log(req.body.datasetName)
+    if (req.user!.userEmail == undefined) {
         throw ErrorFactory.createError(ErrorType.Authentication);
     }
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, req.body.userEmail);
+    const dataset = await DatasetDAO.default.getDsByName(datasetName, req.user!.userEmail);
+    console.log("gg")
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
@@ -125,8 +138,9 @@ const insertContents = async (req: Request) => {
                 const finalFilePath = path.join(originalFilesPath, fileName);
                 fs.renameSync(extractedFilePath, finalFilePath);
             }
-
+            
             fs.rmSync(extractedPath, { recursive: true, force: true });
+            fs.rmSync(file.path, {recursive: true, force: true});
         } catch (err) {
             throw ErrorFactory.createError(ErrorType.FileUpload);
         }

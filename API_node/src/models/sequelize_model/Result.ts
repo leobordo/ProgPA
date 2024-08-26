@@ -3,17 +3,17 @@ import { JobStatus } from '../job';
 import { ModelId } from '../aiModels';
 
 export class Result extends Model {
-    public jobId!: string;
+    public job_id!: string;
     public result?: string; // Il campo result è opzionale
     public state!: JobStatus;
-    public modelId!: ModelId;
+    public model_id!: ModelId;
     public dataset_id!: number;
-    public modelVersion!: string;
+    public model_version!: string;
 }
 
 export function initializeResult(sequelize: Sequelize): void {
     Result.init({
-        jobId: {
+        job_id: {
             type: DataTypes.STRING,
             primaryKey: true
         },
@@ -25,7 +25,7 @@ export function initializeResult(sequelize: Sequelize): void {
             type: DataTypes.STRING,
             allowNull: false
         },
-        modelId: {
+        model_id: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -37,7 +37,7 @@ export function initializeResult(sequelize: Sequelize): void {
                 key: 'dataset_id'
             }
         },
-        modelVersion: {
+        model_version: {
             type: DataTypes.STRING,
             allowNull: false
         }

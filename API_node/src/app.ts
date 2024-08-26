@@ -16,20 +16,22 @@ require('dotenv').config();         // Loading environment variables from .env f
 const express = require('express');
 const bodyParser = require('body-parser');
 
+
 const app = express();
 const server: Server = createServer(app);
 
 // Middleware per l'analisi dei body delle richieste
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const authenticationMiddleware = new AuthenticationMiddleware();
+app.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
 // Definizione delle rotte
 app.use('/datasets', dataRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
 
-const authenticationMiddleware = new AuthenticationMiddleware();
-app.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
+
 
 initializeUtente(sequelize);
 initializeDataset(sequelize);
