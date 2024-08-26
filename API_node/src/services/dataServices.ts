@@ -3,30 +3,24 @@ import fs from 'fs';
 import unzipper from 'unzipper';
 import path from 'path';
 import { ErrorType, ErrorFactory } from './errorFactory';
-import { Request } from 'express';
 
-const createDataset = async (req: Request) => {
-    
-    if (!req.user!.userEmail) {
-        //throw ErrorFactory.createError(ErrorType.Authentication);
-        
-    }
-    
-    const dataset_name= req.body.datasetName;
-    const tags = req.body.tags
-    const email = req.user!.userEmail;
+/**
+ * Create a new dataset
+ * @param datasetName - Name of the dataset
+ * @param tags - Tags associated with the dataset
+ * @param email - User's email
+ * @returns The result of the dataset creation
+ */
+const createDataset = async (datasetName: string, tags: string, email: string) => {
+    const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
 
-    //TROVA CON is_deleted=false
-    const existingDataset = await DatasetDAO.default.getDsByName(dataset_name, email);
-    
     if (existingDataset) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
 
-    var maxDatasetId = await DatasetDAO.default.getMaxDatasetId();
-    console.log(maxDatasetId)
-    if(maxDatasetId==null){maxDatasetId="0"}
-    const datasetDir = path.join('./uploads', (parseInt(maxDatasetId as string,10)+1).toString());
+    let maxDatasetId = await DatasetDAO.default.getMaxDatasetId();
+    if (maxDatasetId === null) { maxDatasetId = "0"; }
+    const datasetDir = path.join('./uploads', (parseInt(maxDatasetId as string, 10) + 1).toString());
 
     try {
         fs.mkdirSync(datasetDir, { recursive: true });
@@ -34,31 +28,30 @@ const createDataset = async (req: Request) => {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation);
     }
 
-    const newDataset = await DatasetDAO.default.create(dataset_name, email, datasetDir, tags);
+    const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir, tags);
     return { message: 'Dataset created successfully', dataset: newDataset };
 };
 
-const getAllDatasets = async (req: Request) => {
-    if (!req.user!.userEmail) {
-        throw ErrorFactory.createError(ErrorType.Authentication);
-    }
-
-    return await DatasetDAO.default.getAllByUserEmail(req.user!.userEmail);
+/**
+ * Get all datasets by user email
+ * @param email - User's email
+ * @returns All datasets associated with the email
+ */
+const getAllDatasets = async (email: string) => {
+    return await DatasetDAO.default.getAllByUserEmail(email);
 };
 
-
-const updateDatasetByName = async (req: Request) => {
-    const datasetName = req.body.datasetName;
-    const newName = req.body.newDatasetName;
-    const tags = req.body.newTags;
-    const email = req.user!.userEmail;
-
-    if (!email) {
-        throw ErrorFactory.createError(ErrorType.Authentication);
-    }
-    
+/**
+ * Update dataset by name
+ * @param datasetName - Current name of the dataset
+ * @param newName - New name for the dataset
+ * @param tags - New tags for the dataset
+ * @param email - User's email
+ * @returns The updated dataset
+ */
+const updateDatasetByName = async (datasetName: string, newName: string , tags: string, email: string) => {
     const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
-    
+
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
@@ -67,51 +60,48 @@ const updateDatasetByName = async (req: Request) => {
         throw ErrorFactory.createError(ErrorType.Authorization);
     }
 
-    if (dataset.dataset_name === newName) {
+    if (newName && dataset.dataset_name === newName) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset);
     }
-    if (newName==null && tags==null){
-        throw new Error("non stai modificando nulla")
+
+    if (!newName && !tags) {
+        throw ErrorFactory.createError(ErrorType.UndefinedRequest)
     }
-    console.log("OK")
+
     return await DatasetDAO.default.updateByName(datasetName, email, newName, tags);
 };
 
+/**
+ * Delete dataset by name
+ * @param datasetName - Name of the dataset to delete
+ * @param email - User's email
+ */
+const deleteDatasetByName = async (datasetName: string, email: string) => {
+    const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
 
-const deleteDatasetByName = async (req: Request) => {
-    const datasetName = req.body.datasetName;
-    const email = req.user!.userEmail;
-
-    if (!email) {
-        throw ErrorFactory.createError(ErrorType.Authentication);
+    if (!dataset) {
+        throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
-
     return await DatasetDAO.default.softDeleteByName(datasetName, email);
 };
 
+/**
+ * Insert contents into a dataset
+ * @param datasetName - Name of the dataset
+ * @param file - File to insert
+ * @param email - User's email
+ * @returns Success message
+ */
+const insertContents = async (datasetName: string, file: Express.Multer.File, email: string) => {
+    const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
 
-const insertContents = async (req: Request) => {
-    
-    const datasetName = req.body.datasetName;
-    const file = req.file;
-    console.log(req.body.datasetName)
-    if (req.user!.userEmail == undefined) {
-        throw ErrorFactory.createError(ErrorType.Authentication);
-    }
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, req.user!.userEmail);
-    console.log("gg")
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
 
     const datasetFilePath = dataset.file_path;
-
-    if (!file) {
-        throw ErrorFactory.createError(ErrorType.FileUpload);
-    }
-
     const originalFilesPath = path.join(datasetFilePath, 'original_files');
-    
+
     if (!fs.existsSync(originalFilesPath)) {
         try {
             fs.mkdirSync(originalFilesPath, { recursive: true });
@@ -138,9 +128,9 @@ const insertContents = async (req: Request) => {
                 const finalFilePath = path.join(originalFilesPath, fileName);
                 fs.renameSync(extractedFilePath, finalFilePath);
             }
-            
+
             fs.rmSync(extractedPath, { recursive: true, force: true });
-            fs.rmSync(file.path, {recursive: true, force: true});
+            fs.rmSync(file.path, { recursive: true, force: true });
         } catch (err) {
             throw ErrorFactory.createError(ErrorType.FileUpload);
         }
@@ -153,4 +143,20 @@ const insertContents = async (req: Request) => {
     }
 };
 
-export { createDataset, getAllDatasets, insertContents, deleteDatasetByName, updateDatasetByName };
+// dataServices.ts
+
+/**
+ * Validates required parameters and throws an error if any are missing.
+ * @param params An object containing key-value pairs of parameters to check.
+ * @param requiredParams Array of strings specifying keys to check in the params object.
+ */
+const validateRequiredParams = (params: { [key: string]: any }, requiredParams: string[]): void => {
+    let missingParams = requiredParams.filter(param => !params[param]);
+
+    if (missingParams.length > 0) {
+        throw ErrorFactory.createError(ErrorType.MissingParameters,"", missingParams );
+    }
+}
+
+
+export { createDataset, getAllDatasets, insertContents, deleteDatasetByName, updateDatasetByName, validateRequiredParams };
