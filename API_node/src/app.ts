@@ -8,6 +8,7 @@ import { initializeDataset as initializeDataset } from './models/sequelize_model
 import { initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
 import {AuthenticationMiddleware} from './middlewares/authMiddleware';
+import { Request, Response, NextFunction } from 'express';
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
@@ -27,11 +28,13 @@ app.use('/datasets', dataRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
 
-app.use(new AuthenticationMiddleware);
+const authenticationMiddleware = new AuthenticationMiddleware();
+app.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
 initializeUtente(sequelize);
 initializeDataset(sequelize);
 initializeResult(sequelize);
+
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
   console.log("Database synchronized");
