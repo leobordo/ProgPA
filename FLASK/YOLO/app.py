@@ -1,23 +1,22 @@
 import os
-import tempfile
-import io
-import mimetypes
 import logging
 
-from flask import Flask, request, jsonify, send_file
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, request, jsonify  #, send_file
 from dotenv import load_dotenv
-import yt_dlp
-import torch
-import cv2
-import requests
-from PIL import Image
+
+#from flask_sqlalchemy import SQLAlchemy
+# import yt_dlp
+# import torch
+# import cv2
+# import requests
+# from PIL import Image
 
 #from ultralytics.models.yolo.model import YOLO
-from ultralytics.engine.results import Results
+#from ultralytics.engine.results import Results
 from config import Config
-from models import db, Utente, Dataset, Result
+from models import db, Dataset, Result #, Utente
 from utils import model_dict, get_file_category
+from processing import process_image, process_video
 
 load_dotenv()
 
@@ -26,7 +25,8 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-app.config.from_object(Config)  # Carica la configurazione da config.py
+# load configuration from config.py
+app.config.from_object(Config)
 
 db.init_app(app)
 
@@ -67,10 +67,12 @@ def predict():
     # dataset from database 
     dataset_id = request.form.get('dataset_id')
     logger.debug(f"Dataset ID ricevuto: {dataset_id}")
+    
     if not dataset_id:
         return jsonify({'error': 'dataset_id is required'}), 400
 
     dataset = Dataset.query.get(dataset_id)
+    
     if not dataset:
         return jsonify({'error': 'Dataset not found'}), 404
     
@@ -78,83 +80,28 @@ def predict():
     directory_path = os.path.join('/user/uploads', str(dataset_id), 'original_files')
     logger.debug(f"Percorso directory: {directory_path}")
 
-    results_list = []
-
     if not os.path.exists(directory_path):
         return jsonify({'error': f'Directory not found: {directory_path}'}), 404
     else: logger.debug(f"os.path.exists(directory_path) ESISTE")
 
-    
-    for file_name in os.listdir(directory_path):
-        local_file_path = os.path.join(directory_path, file_name)
-        logger.debug(f"Elaborazione file: {local_file_path}")
+    results_list = []
 
-        if os.path.isfile(local_file_path):  # Assicurarsi che sia un file
-            logger.debug(f"File trovato: {local_file_path}")
-            category = get_file_category(local_file_path)  
+    for file in os.listdir(directory_path):
+        file_path = os.path.join(directory_path, file)
+        logger.debug(f"Elaborazione file: {file_path}")
+
+        if os.path.isfile(file_path):  # Assicurarsi che sia un file
+            logger.debug(f"File trovato: {file_path}")
+            
+            category = get_file_category(file_path)  
             logger.debug(f"Categoria del file: {category}")
 
             if category == 'image':
-                try:
-                    image = Image.open(local_file_path)
-                    logger.debug(f"Immagine aperta correttamente: {local_file_path}")
-
-                    results: Results = model.predict(image)
-                    logger.debug(f"Risultati predizione immagine: {results}")
-
-                    if results[0].boxes is None or len(results[0].boxes) == 0:
-                        results_list.append({
-                            'type': 'image',
-                            'filename': local_file_path,
-                            'results': ["none"]
-                        })
-                    else:
-                        res = [r.tojson() for r in results]
-                        results_list.append({'type': 'image', 'filename': local_file_path, 'results': res})
-                except Exception as e:
-                    results_list.append({'type': 'image', 'filename': local_file_path, 'error': f'Failed to process image: {str(e)}'})
-
+                results_list.extend(process_image(file_path, model, logger))
+            
             elif category == 'video':
-                try:
-                    video = cv2.VideoCapture(local_file_path)
-
-                    if not video.isOpened():
-                        return jsonify({'error': f'Failed to open video file {local_file_path}'}), 500
-
-                    fps = video.get(cv2.CAP_PROP_FPS)
-                    frame_number = 0
-                    while True:
-                        ret, frame = video.read()
-                        if not ret:
-                            break
-
-                        time_in_seconds = frame_number / fps
-                        results: Results = model.predict(frame)
-                    
-                        if results[0].boxes is None or len(results[0].boxes) == 0:
-                            results_list.append({
-                                'type': 'video_frame', 
-                                'filename': local_file_path, 
-                                'frame': frame_number,
-                                'time': time_in_seconds,
-                                'results': ["none"]
-                            })
-                        else:
-                            res = [r.tojson() for r in results]
-                            results_list.append({
-                                'type': 'video_frame', 
-                                'filename': local_file_path, 
-                                'frame': frame_number, 
-                                'results': res
-                            })
-                        frame_number += 1
-
-                except Exception as e:
-                    return jsonify({'error': f'Failed to process video {local_file_path}: {str(e)}'}), 500
-
-                finally:
-                    video.release()
-
+                results_list.extend(process_video(file_path, model, logger))
+        
     # Convert to json 
     results_json = jsonify(results_list) 
 
@@ -180,7 +127,6 @@ def predict():
         existing_result.dataset_id = dataset_id
         existing_result.model_version = model_version
 
-
     try:
         db.session.commit()
     except Exception as e:
@@ -195,7 +141,6 @@ def predict():
         logger.debug(f"Nessun risultato trovato per job_id {job_id}")
 
     return results_json, 200
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

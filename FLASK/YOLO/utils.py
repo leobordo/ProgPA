@@ -1,4 +1,3 @@
-import os
 import mimetypes
 from ultralytics.models.yolo.model import YOLO
 
