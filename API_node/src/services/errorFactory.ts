@@ -86,7 +86,7 @@ class MissingParametersError extends ApplicationError {
 }
 class UndefinedRequestError extends ApplicationError {
     constructor(message: string = 'Undefined request, try again') {
-        super('UndefinedRequestError', message, 500);
+        super('UndefinedRequestError', message, 501);
     }
 }
 

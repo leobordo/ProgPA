@@ -2,6 +2,7 @@ import os
 import tempfile
 import io
 import mimetypes
+import logging
 
 from flask import Flask, request, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
@@ -22,6 +23,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 app.config.from_object(Config)  # Carica la configurazione da config.py
 
 db.init_app(app)
@@ -29,14 +33,19 @@ db.init_app(app)
 @app.route('/predict', methods=['POST'])
 def predict():
     
+    logger.debug("Ricevuta richiesta POST a /predict")
+
     # job id from the request 
     job_id = request.form.get('job_id')
+    logger.debug(f"Job ID ricevuto: {job_id}")
     if not job_id:
         return jsonify({'error': 'job_id is required'}), 400
 
     # model ID and model version from the request
     model_id = request.form.get('model_id')
     model_version = request.form.get('model_version')
+
+    logger.debug(f"Model ID: {model_id}, Model Version: {model_version}")
     
     if not model_id:
         return jsonify({'error': 'model_id is required'}), 400
@@ -46,15 +55,18 @@ def predict():
     
     # corresponding model and version from the dictionary
     model_category = model_dict.get(model_id)
+    logger.debug(f"Model category per ID {model_id}: {model_category}")
     if model_category is None:
         return jsonify({'error': 'Invalid model_id'}), 400
 
     model = model_category.get(model_version)
+    logger.debug(f"Modello caricato: {model}")
     if model is None:
         return jsonify({'error': 'Invalid model_version'}), 400
 
     # dataset from database 
     dataset_id = request.form.get('dataset_id')
+    logger.debug(f"Dataset ID ricevuto: {dataset_id}")
     if not dataset_id:
         return jsonify({'error': 'dataset_id is required'}), 400
 
@@ -63,25 +75,32 @@ def predict():
         return jsonify({'error': 'Dataset not found'}), 404
     
     # Costruire il percorso alla directory delle immagini utilizzando la variabile globale
-    directory_path = os.path.join(app.config['UPLOADS_BASE_DIR'], str(dataset_id), 'original_files')
+    directory_path = os.path.join('/user/uploads', str(dataset_id), 'original_files')
+    logger.debug(f"Percorso directory: {directory_path}")
 
     results_list = []
 
     if not os.path.exists(directory_path):
         return jsonify({'error': f'Directory not found: {directory_path}'}), 404
-
+    else: logger.debug(f"os.path.exists(directory_path) ESISTE")
 
     
     for file_name in os.listdir(directory_path):
         local_file_path = os.path.join(directory_path, file_name)
-        
+        logger.debug(f"Elaborazione file: {local_file_path}")
+
         if os.path.isfile(local_file_path):  # Assicurarsi che sia un file
+            logger.debug(f"File trovato: {local_file_path}")
             category = get_file_category(local_file_path)  
+            logger.debug(f"Categoria del file: {category}")
 
             if category == 'image':
                 try:
                     image = Image.open(local_file_path)
+                    logger.debug(f"Immagine aperta correttamente: {local_file_path}")
+
                     results: Results = model.predict(image)
+                    logger.debug(f"Risultati predizione immagine: {results}")
 
                     if results[0].boxes is None or len(results[0].boxes) == 0:
                         results_list.append({
@@ -142,12 +161,25 @@ def predict():
     # Gestire i risultati in base al job_id, cercando di aggiornare un risultato esistente
     existing_result = Result.query.filter_by(job_id=job_id).first()
 
-    # Aggiornare i campi del risultato esistente
-    existing_result.result = results_json.get_data(as_text=True)
-    existing_result.state = 'Completed'
-    existing_result.model_id = model_version
-    existing_result.dataset_id = dataset_id
-    existing_result.model_version = model_version
+    if existing_result is None:
+        new_result = Result(
+            job_id=job_id,
+            result=results_json.get_data(as_text=True),
+            state='Completed',
+            model_id=model_id,
+            dataset_id=dataset_id,
+            model_version=model_version
+        )
+        db.session.add(new_result)
+
+    else:
+        # Aggiornare i campi del risultato esistente
+        existing_result.result = results_json.get_data(as_text=True)
+        existing_result.state = 'Completed'
+        existing_result.model_id = model_version
+        existing_result.dataset_id = dataset_id
+        existing_result.model_version = model_version
+
 
     try:
         db.session.commit()
@@ -155,7 +187,15 @@ def predict():
         db.session.rollback()
         return jsonify({'error': f'Failed to save results: {str(e)}'}), 500
 
+       # Query per verificare il risultato e stamparlo per il debug
+    result = Result.query.filter_by(job_id=job_id).first()
+    if result:
+        logger.debug(f"Risultato aggiornato per job_id {job_id}: {result.result}")
+    else:
+        logger.debug(f"Nessun risultato trovato per job_id {job_id}")
+
     return results_json, 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

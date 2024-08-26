@@ -26,6 +26,7 @@ services:
       dockerfile: ./FLASK/Dockerfile.flask
     volumes:
       - "./FLASK:/user/app"       # per poter aggiornare file YOLO in fase di sviluppo
+      - ./API_node/uploads:/user/uploads
     ports:
       - "5000:5000"
     command: flask run --host=0.0.0.0 --reload   # modifiche attive senza riavviare
