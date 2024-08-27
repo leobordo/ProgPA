@@ -1,6 +1,7 @@
-import dataRouter from './routers/dataRouter';
+import datasetRouter from './routers/datasetRouter';
 import tokenManagementRouter from './routers/tokenManagementRouter';
 import inferenceRouter from './routers/inferenceRouter';
+import uploadRouter from './routers/uploadRouter';
 import sequelize from './config/sequelize'; // Importa l'istanza di Sequelize configurata
 import dotenv from 'dotenv';
 import { initializeUtente as initializeUtente } from './models/sequelize_model/Utente';
@@ -27,9 +28,10 @@ const authenticationMiddleware = new AuthenticationMiddleware();
 app.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
 
 // Definizione delle rotte
-app.use('/datasets', dataRouter);
+app.use('/datasets', datasetRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
+app.use('/upload', uploadRouter);
 
 
 

@@ -20,8 +20,9 @@ export const datasetNameSchema = Joi.object({
     datasetName: Joi.string().min(3).max(40).required()
 });
 
-export const newDatasetNameSchema = Joi.object({
-    newDatasetName: Joi.string().min(3).max(40).required()
+export const newDatasetSchema = Joi.object({
+    newDatasetName: Joi.string().min(3).max(40).required(),
+    newTags: Joi.string().max(80).required()
 });
 
 export const datasetTagsSchema = Joi.object({

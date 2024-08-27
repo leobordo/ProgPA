@@ -1,23 +1,33 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/tokenManagementController';
-//import { AuthenticationMiddleware, AuthorizationMiddleware, ValidationMiddleware } from '../middleware/middleware';
+import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
+import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
+import { Role } from '../models/request';
+import * as schema from '../middlewares/validationSchemas/bodyValidationSchemas';
 
 const router = Router();
- 
-// Adding middleware to the router
-//const authenticationMiddleware = new AuthenticationMiddleware();
-//const authorizationMiddleware = new AuthorizationMiddleware(Role.Standard);
-//const validationMiddleware = new ValidationMiddleware();
-//authenticationMiddleware.setNext(authorizationMiddleware).setNext(validationMiddleware);
 
-// Adding middleware to the router
-//router.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
+// Middleware instantiation and concatenation
+const bodyParser = new BodyParserMiddleware();
 
+const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
+const getBalanceValidation = new ValidationMiddleware([schema.userSchema]);
+userAuthorization.setNext(getBalanceValidation);
+
+const adminAuthorization = new AuthorizationMiddleware([Role.Admin]);
+const updateBalanceValidation = new ValidationMiddleware([schema.userSchema, schema.topUpSchema]);
+adminAuthorization.setNext(updateBalanceValidation);
+
+//All the routes in this router use BodyParserMiddleware
+router.use((req : Request, res : Response, next : NextFunction) => bodyParser.handle(req, res, next))
+
+//Routes
 //route to retrieve the user's token balance
-router.get('/balance', controller.getBalance);
+router.get('/balance', (req: Request, res: Response, next: NextFunction) => userAuthorization.handle(req, res, next), controller.getBalance);
 
 //route that allows the admin to update a user's token balance
-router.patch('/balance', controller.updateBalance);
+router.patch('/balance', (req: Request, res: Response, next: NextFunction) => adminAuthorization.handle(req, res, next), controller.updateBalance);
 
 export default router;
