@@ -15,7 +15,7 @@ const checkTokenAvailability = async (userEmail: string, token_cost: number): Pr
 const updateTokenBalance = async (userEmail: string, tokenFlowAmount: number): Promise<number> => {
     const user:Utente = await userDao.getUserByEmail(userEmail);
     const newBalance = user.tokens + tokenFlowAmount;
-    const updatedUser:Utente = await userDao.updateTokenBalance(userEmail, newBalance);
+    const updatedUser:Utente = await userDao.updateTokenBalanceByEmail(userEmail, newBalance);
     return updatedUser.tokens;
 };
 

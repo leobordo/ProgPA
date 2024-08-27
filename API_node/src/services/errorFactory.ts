@@ -10,7 +10,8 @@ enum ErrorType {
     MissingParameters,
     FileUpload,
     UndefinedRequest,
-    DirectoryCreation
+    DirectoryCreation,
+    InsufficientTokens
 }
 
 interface IAppError {
@@ -89,6 +90,11 @@ class UndefinedRequestError extends ApplicationError {
         super('UndefinedRequestError', message, 501);
     }
 }
+class InsufficientTokensError extends ApplicationError {
+    constructor(message: string = 'Insufficient tokens to complete request') {
+        super('InsufficientTokens', message, 402);
+    }
+}
 
 class ErrorFactory {
     static createError(type: ErrorType, message?: string, options?: any): IAppError {
@@ -105,6 +111,8 @@ class ErrorFactory {
                 return new UndefinedRequestError(message);
             case ErrorType.DatasetNotFound:
                 return new DatasetNotFoundError(message);
+            case ErrorType.InsufficientTokens:
+                return new InsufficientTokensError(message);
             case ErrorType.DuplicateDataset:
                 return new DuplicateDatasetError(message);
             case ErrorType.FileUpload:

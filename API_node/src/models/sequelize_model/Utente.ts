@@ -1,4 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Dataset } from './Dataset';
 
 
 export class Utente extends Model {
@@ -16,14 +17,16 @@ export function initializeUtente(sequelize: Sequelize): void {
             primaryKey: true
         },
         tokens: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.FLOAT,
             allowNull: true,
             defaultValue: 1000
         }
     }, {
         sequelize,
         tableName: 'utenti',
-        timestamps: true, 
+        timestamps: false, 
         modelName: 'Utente'
     });
+
+    
 }

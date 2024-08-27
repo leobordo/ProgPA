@@ -13,11 +13,11 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
     const modelId = req.body.modelId;
     const modelVersion = req.body.modelVersion;
     const datasetName = req.body.datasetName;
-    const user = req.user!.userEmail;
+    const userEmail = req.user!.userEmail;
     
     try {
       //Adds the job to the queue and receives the Id 
-      const jobId = await service.requestDatasetInference(datasetName, user, modelId, modelVersion);
+      const jobId = await service.requestDatasetInference(datasetName, userEmail, modelId, modelVersion);
       res.send({ message: "Process added succesfully", jobId: jobId});
     } catch (error) {
       console.error(error);
@@ -30,16 +30,16 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
   If the status is COMPLETED, also returns the job result in JSON format
 */
 const checkState = async (req: Request, res: Response): Promise<void> => {
-  console.log(req.body)  
-  const jobId = req.body.job_id;
-  console.log(jobId)
+  const jobId = req.body.jobId;
+  const userEmail = req.user!.userEmail;
+
     try {
       //Retrieves the job status by its ID
-      const jobStatus:JobStatus = await service.getProcessStatus(jobId);
+      const jobStatus:JobStatus = await service.getProcessStatus(jobId, userEmail);
       
       if (jobStatus === JobStatus.Completed) {
         //Retrieves the job result by its ID
-        const result:IResult = await service.getProcessResult(jobId);
+        const result:IResult = await service.getProcessResult(jobId, userEmail);
         res.send({jobState: jobStatus, result: result.jsonResult});
       }
       //If the job isn't completed, returns only its status
@@ -55,13 +55,14 @@ const checkState = async (req: Request, res: Response): Promise<void> => {
 */
 const getResult = async (req: Request, res: Response): Promise<void> => {
     const jobId = req.body.jobId;
+    const userEmail = req.user!.userEmail;
       
     try {
       //Retrieves the job status by its ID
-      const jobStatus:JobStatus = await service.getProcessStatus(jobId);
+      const jobStatus:JobStatus = await service.getProcessStatus(jobId, userEmail);
       if (jobStatus === JobStatus.Completed) {
         //Retrieves the job result by its ID
-        const result:IResult = await service.getProcessResult(jobId);
+        const result:IResult = await service.getProcessResult(jobId, userEmail);
         res.send({contentURI: result.contentURI, result: result.jsonResult});
       }
       //If the job isn't completed, returns an error

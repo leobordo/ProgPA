@@ -14,9 +14,7 @@ const createDataset = async (req: Request, res: Response): Promise<void> => {
     const tags = req.body.tags;
     const email = req.user?.userEmail;
     
-    dataServices.validateRequiredParams({ datasetName, tags}, ['datasetName', 'tags']);
-
-    const result = await dataServices.createDataset(datasetName, tags, email!);
+    const result = await dataServices.createDataset(datasetName!, tags, email!);
     res.status(201).json(result);
   } catch (error) {
     const err = error as Error;
@@ -53,9 +51,7 @@ const updateDatasetByName = async (req: Request, res: Response): Promise<void> =
     const tags = req.body.newTags;
     const email = req.user?.userEmail;
 
-    dataServices.validateRequiredParams({ datasetName}, ['datasetName']);
-
-    const updatedDataset = await dataServices.updateDatasetByName(datasetName, newName, tags, email!);
+    const updatedDataset = await dataServices.updateDatasetByName(datasetName!, newName, tags, email!);
     res.status(200).json({ message: 'Dataset updated successfully', dataset: updatedDataset });
   } catch (error) {
     const err = error as Error;
@@ -73,9 +69,7 @@ const deleteDatasetByName = async (req: Request, res: Response): Promise<void> =
     const datasetName = req.body.datasetName;
     const email = req.user?.userEmail;
 
-    dataServices.validateRequiredParams({ datasetName}, ['datasetName']);
-
-    await dataServices.deleteDatasetByName(datasetName, email!);
+    await dataServices.deleteDatasetByName(datasetName!, email!);
     res.status(200).json({ message: 'Dataset deleted successfully' });
   } catch (error) {
     const err = error as Error;
@@ -91,12 +85,11 @@ const deleteDatasetByName = async (req: Request, res: Response): Promise<void> =
 const insertContents = async (req: Request, res: Response): Promise<void> => {
   try {
     const datasetName = req.body.datasetName;
+    console.log(req.body)
     const file = req.file;
     const email = req.user?.userEmail;
-    
-    dataServices.validateRequiredParams({ datasetName, file}, ['datasetName', 'file']);
 
-    const message = await dataServices.insertContents(datasetName, file!, email!);
+    const message = await dataServices.insertContents(datasetName!, file!, email!);
     res.status(201).json({ message });
   } catch (error) {
     const err = error as Error;

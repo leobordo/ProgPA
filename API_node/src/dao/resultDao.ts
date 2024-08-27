@@ -1,5 +1,6 @@
 import { ModelId } from "../models/aiModels";
 import { JobStatus } from "../models/job";
+import { Dataset } from "../models/sequelize_model/Dataset";
 import { Result } from "../models/sequelize_model/Result";
 
 const ResultDAO = {
@@ -23,9 +24,14 @@ const ResultDAO = {
         );
     },
 
-    //Gets the status of the job with the specified Id
-    async getJob(jobId: string) {
+    //Gets the job with the specified Id (only if the job belongs to the requesting user)
+    async getUserJobByID(jobId: string, userEmail: string) {
         const result = await Result.findOne({
+            include: [{
+                model: Dataset,
+                required: true, 
+                where: { email: userEmail }
+            }],
             where: {
                 job_id: jobId,
             }

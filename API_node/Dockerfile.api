@@ -4,6 +4,10 @@ FROM node:18-bullseye
 # Imposta la directory di lavoro nel container
 WORKDIR /user/app
 
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY package.json ./
 RUN npm install
 

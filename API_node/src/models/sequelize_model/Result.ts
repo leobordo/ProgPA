@@ -1,6 +1,8 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 import { JobStatus } from '../job';
 import { ModelId } from '../aiModels';
+import { Dataset } from './Dataset';
+import { Utente } from './Utente';
 
 export class Result extends Model {
     public job_id!: string;
@@ -46,4 +48,14 @@ export function initializeResult(sequelize: Sequelize): void {
         tableName: 'results',
         timestamps: false
     });
+
+    
 }
+export function createAssociation() : void {
+    Dataset.belongsTo(Utente, { foreignKey: 'email'});
+    Dataset.hasMany(Result, { foreignKey: 'dataset_id', as: 'results' });
+    Utente.hasMany(Dataset, { foreignKey: 'email', as: 'datasets' });
+    Result.belongsTo(Dataset, { foreignKey: 'dataset_id'});
+}
+
+

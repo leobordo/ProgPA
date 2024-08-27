@@ -4,7 +4,7 @@ import { Utente } from "../models/sequelize_model/Utente";
 const UserDAO = {
     
     //Updates the token balance of the specified user (by ID) with the value of newTokenBalance
-    async updateTokenBalance(userEmail: string, newTokenBalance: number) {
+    async updateTokenBalanceByEmail(userEmail: string, newTokenBalance: number) {
         const [_, updatedUser]  = await Utente.update(
             { tokens: newTokenBalance}, 
             { 
@@ -28,6 +28,8 @@ const UserDAO = {
         }
         throw error ("User not found");
     }
+
+
 
 }
 

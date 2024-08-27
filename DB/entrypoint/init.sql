@@ -1,6 +1,6 @@
 CREATE TABLE utenti (
     email VARCHAR(255) PRIMARY KEY,
-    tokens INTEGER DEFAULT 1000
+    tokens FLOAT DEFAULT 1000
 );
 
 CREATE TABLE datasets (
