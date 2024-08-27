@@ -1,4 +1,3 @@
-import os
 import mimetypes
 from ultralytics.models.yolo.model import YOLO
 
@@ -12,8 +11,8 @@ model_dict = {
 
 # MIME types accettati
 ACCEPTED_MIME_TYPES = {
-    'images': ['image/jpeg', 'image/png'],
-    'videos': ['video/mp4'],
+    'image': ['image/jpeg', 'image/png'],
+    'video': ['video/mp4'],
 }
 
 def get_file_category(file_path):

@@ -7,7 +7,9 @@ enum ErrorType {
     Generic,
     DatasetNotFound,
     DuplicateDataset,
+    MissingParameters,
     FileUpload,
+    UndefinedRequest,
     DirectoryCreation
 }
 
@@ -76,9 +78,20 @@ class DirectoryCreationError extends ApplicationError {
         super('DirectoryCreationError', message, 500);
     }
 }
+class MissingParametersError extends ApplicationError {
+    constructor(missingParams: string[]) {
+        const message = `Missing required parameters: ${missingParams.join(', ')}.`;
+        super('MissingParametersError', message, 400);
+    }
+}
+class UndefinedRequestError extends ApplicationError {
+    constructor(message: string = 'Undefined request, try again') {
+        super('UndefinedRequestError', message, 501);
+    }
+}
 
 class ErrorFactory {
-    static createError(type: ErrorType, message?: string): IAppError {
+    static createError(type: ErrorType, message?: string, options?: any): IAppError {
         switch (type) {
             case ErrorType.Authentication:
                 return new AuthenticationError(message);
@@ -86,6 +99,10 @@ class ErrorFactory {
                 return new ValidationError(message);
             case ErrorType.Authorization:
                 return new AuthorizationError(message);
+            case ErrorType.MissingParameters:
+                return new MissingParametersError(options);
+            case ErrorType.UndefinedRequest:
+                return new UndefinedRequestError(message);
             case ErrorType.DatasetNotFound:
                 return new DatasetNotFoundError(message);
             case ErrorType.DuplicateDataset:
