@@ -1,4 +1,5 @@
 import { Dataset } from '../models/sequelize_model/Dataset';
+import { Result } from '../models/sequelize_model/Result';
 
 const DatasetDAO = {
     async getMaxDatasetId() {
@@ -7,7 +8,6 @@ const DatasetDAO = {
     },
     
     async getDsByName(dataset_name: string, userEmail: string) {
-        console.log("ggg")
         return await Dataset.findOne({
             where: {
                 dataset_name: dataset_name,
@@ -103,6 +103,20 @@ const DatasetDAO = {
             throw Error("Dataset not found");
         }
         
+    },
+
+    async getDatasetByJobId(jobId: string) {
+        const dataset = await Dataset.findOne({
+            include: [{
+                model: Result,
+                required: true, 
+                where: { job_id: jobId }
+            }]
+        });
+        if (dataset) {
+            return dataset;
+        }
+        throw Error("User not found");
     },
 
     /*async insertContent(dataset_name: string, dataset_id: number, file_path: string) {

@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/dataController';
-import uploadCustom from '../middlewares/multerConfig';
 //import { AuthenticationMiddleware, AuthorizationMiddleware, ValidationMiddleware } from '../middleware/middleware';
 
 const router = Router();
@@ -29,6 +28,6 @@ router.delete('/:id',upload.none(), controller.deleteDatasetByName);
 router.patch('/:id',upload.none(), controller.updateDatasetByName);
 
 //route to insert a new content in a specified dataset (through the dataset id)
-router.post('/:id/contents', uploadCustom.single('file'), controller.insertContents);
+router.post('/:id/contents', controller.insertContents);
 
 export default router;

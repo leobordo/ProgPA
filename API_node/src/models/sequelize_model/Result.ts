@@ -1,6 +1,7 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 import { JobStatus } from '../job';
 import { ModelId } from '../aiModels';
+import { Dataset } from './Dataset';
 
 export class Result extends Model {
     public job_id!: string;
@@ -46,4 +47,8 @@ export function initializeResult(sequelize: Sequelize): void {
         tableName: 'results',
         timestamps: false
     });
+
+    Result.belongsTo(Dataset, { foreignKey: 'dataset_id' });
 }
+
+

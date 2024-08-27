@@ -1,4 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Dataset } from './Dataset';
 
 
 export class Utente extends Model {
@@ -26,4 +27,6 @@ export function initializeUtente(sequelize: Sequelize): void {
         timestamps: true, 
         modelName: 'Utente'
     });
+
+    Utente.hasMany(Dataset, { foreignKey: 'email' });
 }

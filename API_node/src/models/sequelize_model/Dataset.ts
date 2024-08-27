@@ -1,4 +1,6 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
+import { Utente } from './Utente';
+import { Result } from './Result';
 
 export class Dataset extends Model {
     public dataset_id!: number; 
@@ -61,4 +63,8 @@ export function initializeDataset(sequelize: Sequelize): void {
             }
         ]
     });
+
+    Dataset.belongsTo(Utente, { foreignKey: 'email' });
+    Dataset.hasMany(Result, { foreignKey: 'dataset_id' });
 }
+

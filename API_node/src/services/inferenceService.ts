@@ -29,26 +29,23 @@ const requestDatasetInference = async (dataset_name: string, userEmail:string, m
 };
 
 // Returns the status of the specified job (by ID)
-const getProcessStatus = async (jobId: string): Promise<JobStatus> => {
+const getProcessStatus = async (jobId: string, userEmail: string): Promise<JobStatus> => {
 
-    //if the job is in the Queue, retrieves its status from it
+    //If the job is in the Queue, retrieves its status from it
     const job = await inferenceQueue.getJob(jobId);
-    console.log(inferenceQueue)
     if (job) {
-        console.log("OK")
         const jobState = job.getState();
-        const mappedJobState:JobStatus = mapState(jobState); // Utilizza la funzione di mappatura
+        return mapState(jobState); // Utilizza la funzione di mappatura
     }
-    console.log(jobId)
-    //Otherwise search for the job in the db and return its status
-    return (await ResultDAO.getJob(jobId)).state;
+
+    //Otherwise searchs for the job in the db and returns its status
+    return (await ResultDAO.getUserJobByID(jobId, userEmail)).state;
 };
 
 // Returns an object which includes the result (content URI and JSON) of the specified job (by ID)
-const getProcessResult = async (jobId: string): Promise<IResult> => {
-    const job:Result = await ResultDAO.getJob(jobId);
+const getProcessResult = async (jobId: string, userEmail:string): Promise<IResult> => {
+    const job:Result = await ResultDAO.getUserJobByID(jobId, userEmail);
     const uri = `user/uploads/${job.dataset_id}/annotated_files/${job.job_id}`;
-    job.dataset_id
     if (job.result) {
         const jsonResult = JSON.parse(job.result);
         // chiamata ad una funzione del dao per prendere il risultato del job dal db
@@ -57,7 +54,7 @@ const getProcessResult = async (jobId: string): Promise<IResult> => {
     throw Error("The job has no results");
 };
 
-
+//Maps the BullMQ job state to the API job state 
 function mapState(state: string): JobStatus {
     const stateMapping: { [key: string]: JobStatus } = {
       waiting: JobStatus.Pending,
