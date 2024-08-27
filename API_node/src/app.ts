@@ -6,7 +6,7 @@ import sequelize from './config/sequelize'; // Importa l'istanza di Sequelize co
 import dotenv from 'dotenv';
 import { initializeUtente as initializeUtente } from './models/sequelize_model/Utente';
 import { initializeDataset as initializeDataset } from './models/sequelize_model/Dataset';
-import { initializeResult } from './models/sequelize_model/Result';
+import { createAssociation, initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
 import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 import { Request, Response, NextFunction } from 'express';
@@ -38,7 +38,7 @@ app.use('/upload', uploadRouter);
 initializeUtente(sequelize);
 initializeDataset(sequelize);
 initializeResult(sequelize);
-
+createAssociation()
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
   console.log("Database synchronized");

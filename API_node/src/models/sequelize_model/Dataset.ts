@@ -64,7 +64,7 @@ export function initializeDataset(sequelize: Sequelize): void {
         ]
     });
 
-    Dataset.belongsTo(Utente, { foreignKey: 'email' });
-    Dataset.hasMany(Result, { foreignKey: 'dataset_id' });
+    
 }
+
 
