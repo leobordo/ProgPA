@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 
 from flask import Flask, request, jsonify  #, send_file
 from dotenv import load_dotenv
@@ -16,7 +17,7 @@ from dotenv import load_dotenv
 from config import Config
 from models import db, Dataset, Result #, Utente
 from utils import model_dict, get_file_category
-from processing import process_image, process_video
+from processing import get_image_json, get_video_json, get_annotated_image, get_annotated_video
 
 load_dotenv()
 
@@ -86,6 +87,9 @@ def predict():
 
     results_list = []
 
+    annotated_images_dir = os.path.join('/user/uploads', str(dataset_id), 'annotated_files', str(job_id))
+    os.makedirs(annotated_images_dir, exist_ok=True)  # Crea la directory se non esiste
+
     for file in os.listdir(directory_path):
         file_path = os.path.join(directory_path, file)
         logger.debug(f"Elaborazione file: {file_path}")
@@ -97,11 +101,20 @@ def predict():
             logger.debug(f"Categoria del file: {category}")
 
             if category == 'image':
-                results_list.extend(process_image(file_path, model, logger))
-            
+                results_list.extend(get_image_json(file_path, model, logger))
+                
+                annotated_image = get_annotated_image(file_path, model, logger)
+
+                if annotated_image:
+                    # Nome del file annotato
+                    output_filename = f"annotated_{os.path.basename(file_path)}"
+                    save_path = os.path.join(annotated_images_dir, output_filename)
+                    shutil.move(annotated_image, save_path)  # Sposta il file temporaneo nella directory pubblica
+
             elif category == 'video':
-                results_list.extend(process_video(file_path, model, logger))
-        
+                results_list.extend(get_video_json(file_path, model, logger))
+                get_annotated_video(file_path, model, logger, dataset_id, job_id)
+
     # Convert to json 
     results_json = jsonify(results_list) 
 
