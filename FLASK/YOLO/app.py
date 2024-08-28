@@ -31,14 +31,13 @@ app.config.from_object(Config)
 
 db.init_app(app)
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST']) # todo: resolve R0914 (Too many local variables (21/15))
 def predict():
-    
+
     logger.debug("Ricevuta richiesta POST a /predict")
 
-    # job id from the request 
     job_id = request.form.get('job_id')
-    logger.debug(f"Job ID ricevuto: {job_id}")
+    logger.debug("Job ID ricevuto: %s", job_id)
     if not job_id:
         return jsonify({'error': 'job_id is required'}), 400
 
@@ -46,63 +45,60 @@ def predict():
     model_id = request.form.get('model_id')
     model_version = request.form.get('model_version')
 
-    logger.debug(f"Model ID: {model_id}, Model Version: {model_version}")
-    
+    logger.debug("Model ID: %s, Model Version: %s", model_id, model_version)
+
     if not model_id:
         return jsonify({'error': 'model_id is required'}), 400
     
     if not model_version:
         return jsonify({'error': 'model_version is required'}), 400
-    
-    # corresponding model and version from the dictionary
-    model_category = model_dict.get(model_id)
-    logger.debug(f"Model category per ID {model_id}: {model_category}")
+    model_category = model_dict.get(model_id) # corresponding model and version from the dictionary
+    logger.debug("Model category per ID %s: %s", model_id, model_category)
+
     if model_category is None:
         return jsonify({'error': 'Invalid model_id'}), 400
 
     model = model_category.get(model_version)
-    logger.debug(f"Modello caricato: {model}")
+    logger.debug("Modello caricato: %s", model)
+
     if model is None:
         return jsonify({'error': 'Invalid model_version'}), 400
 
-    # dataset from database 
-    dataset_id = request.form.get('dataset_id')
-    logger.debug(f"Dataset ID ricevuto: {dataset_id}")
-    
+    dataset_id = request.form.get('dataset_id') # dataset from database
+    logger.debug("Dataset ID ricevuto: %s", dataset_id)
+
     if not dataset_id:
         return jsonify({'error': 'dataset_id is required'}), 400
-
     dataset = Dataset.query.get(dataset_id)
-    
     if not dataset:
         return jsonify({'error': 'Dataset not found'}), 404
     
-    # Costruire il percorso alla directory delle immagini utilizzando la variabile globale
+    # Costruisce il percorso alla directory delle immagini utilizzando la variabile globale
     directory_path = os.path.join('/user/uploads', str(dataset_id), 'original_files')
-    logger.debug(f"Percorso directory: {directory_path}")
+    logger.debug("Percorso directory: %s", directory_path)
 
     if not os.path.exists(directory_path):
         return jsonify({'error': f'Directory not found: {directory_path}'}), 404
-    else: logger.debug(f"os.path.exists(directory_path) ESISTE")
+    logger.debug("os.path.exists(directory_path) ESISTE")
 
     results_list = []
 
     annotated_images_dir = os.path.join('/user/uploads', str(dataset_id), 'annotated_files', str(job_id))
-    os.makedirs(annotated_images_dir, exist_ok=True)  # Crea la directory se non esiste
+    # Crea la directory se non esiste
+    os.makedirs(annotated_images_dir, exist_ok=True)
 
     for file in os.listdir(directory_path):
         file_path = os.path.join(directory_path, file)
-        logger.debug(f"Elaborazione file: {file_path}")
+        logger.debug("Elaborazione file: %s", file_path)
 
         if os.path.isfile(file_path):  # Assicurarsi che sia un file
-            logger.debug(f"File trovato: {file_path}")
+            logger.debug("File trovato: %s", file_path)
             
-            category = get_file_category(file_path)  
-            logger.debug(f"Categoria del file: {category}")
-
+            category = get_file_category(file_path)
+            logger.debug("Categoria del file: %s", category)
+            
             if category == 'image':
                 results_list.extend(get_image_json(file_path, model, logger))
-                
                 annotated_image = get_annotated_image(file_path, model, logger)
 
                 if annotated_image:
@@ -115,8 +111,8 @@ def predict():
                 results_list.extend(get_video_json(file_path, model, logger))
                 get_annotated_video(file_path, model, logger, dataset_id, job_id)
 
-    # Convert to json 
-    results_json = jsonify(results_list) 
+    # Convert to json
+    results_json = jsonify(results_list)
 
     # Gestire i risultati in base al job_id, cercando di aggiornare un risultato esistente
     existing_result = Result.query.filter_by(job_id=job_id).first()
@@ -125,7 +121,7 @@ def predict():
         new_result = Result(
             job_id=job_id,
             result=results_json.get_data(as_text=True),
-            state='Completed',
+            # state='Completed',
             model_id=model_id,
             dataset_id=dataset_id,
             model_version=model_version
@@ -149,9 +145,9 @@ def predict():
        # Query per verificare il risultato e stamparlo per il debug
     result = Result.query.filter_by(job_id=job_id).first()
     if result:
-        logger.debug(f"Risultato aggiornato per job_id {job_id}: {result.result}")
+        logger.debug("Risultato aggiornato per job_id %s: %s", job_id, result)
     else:
-        logger.debug(f"Nessun risultato trovato per job_id {job_id}")
+        logger.debug("Nessun risultato trovato per job_id %s", job_id)
 
     return results_json, 200
 
