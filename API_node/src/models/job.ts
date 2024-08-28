@@ -40,7 +40,8 @@ interface IBoundingBox {
 }
 
 interface IResult {
-    jsonResult: Array<IJsonResult>;
+    jsonResult: any;
+    //jsonResult: Array<IJsonResult>;
     contentURI: string;
 }
 

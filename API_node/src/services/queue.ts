@@ -7,7 +7,6 @@ import ResultDAO from "../dao/resultDao";
 import { JobStatus } from "../models/job";
 import UserDAO from "../dao/userDao";
 import { Utente } from "../models/sequelize_model/Utente";
-import { Err } from "joi";
 const { Queue, Worker, QueueEvents } = require('bullmq');
 const IORedis = require('ioredis');
 
@@ -34,7 +33,7 @@ const processContents:Function = async (job: Job) => {
     UserDAO.updateTokenBalanceByEmail(job.data.user, dataset.token_cost)
 
     //Sends the inference request to the flask API
-    await fetch(FLASK_PREDICTION_URL, {
+    const response = await fetch(FLASK_PREDICTION_URL, {
       method: "POST",
       headers: { 
         'Content-Type': 'application/json', 
@@ -46,6 +45,12 @@ const processContents:Function = async (job: Job) => {
           model_version: job.data.modelVersion  
       }),
     });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw Error (responseData.message);
+    }
   } 
   // if the user hasn't enough tokens to perform the inference on the dataset, 
   // update the job status to aborted
@@ -56,7 +61,7 @@ const processContents:Function = async (job: Job) => {
 }
 
 // Worker creation to process jobs in the inferenceQueue
-new Worker('inferenceQueue', processContents, { connection: redisConnection });
+const worker = new Worker('inferenceQueue', processContents, { connection: redisConnection });
 
 // Listener for the 'active' event
 inferenceQueueEvents.on('active', async (event:any) => {
@@ -83,6 +88,11 @@ inferenceQueueEvents.on('failed', async (event:any) => {
   } catch (error) {
     throw Error("");
   }
+});
+
+// Error listener
+worker.on('error', (err: any) => {
+  console.error(err);
 });
 
 module.exports = {inferenceQueue, inferenceQueueEvents};

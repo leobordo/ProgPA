@@ -12,10 +12,10 @@ const router = Router();
 // Middleware instantiation and concatenation
 const uploadMiddleware = new UploadMiddleware();
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
-const validation = new ValidationMiddleware([schema.userSchema, schema.datasetNameSchema]);
+const validation = new ValidationMiddleware(schema.uploadContentsSchema);
 uploadMiddleware.setNext(userAuthorization).setNext(validation);
 
 //route to insert a new content in a specified dataset (through the dataset id)
-router.post('/contents', (req : Request, res : Response, next : NextFunction) => uploadMiddleware.handle(req, res, next), controller.insertContents);
+router.post('/', (req : Request, res : Response, next : NextFunction) => uploadMiddleware.handle(req, res, next), controller.insertContents);
 
 export default router;

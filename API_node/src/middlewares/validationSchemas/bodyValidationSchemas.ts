@@ -2,9 +2,42 @@ import * as Joi from 'joi';
 import { ModelId, Yolov8Version } from '../../models/aiModels';
 import { Role } from '../../models/request';
 
-export const detectionModelSchema = Joi.object({
+export const createDatasetSchema = Joi.object({
+    datasetName: Joi.string().min(3).max(40).required(),
+    tags: Joi.string().max(80).required()
+});
+
+export const deleteDatasetSchema = Joi.object({
+    datasetName: Joi.string().min(3).max(40).required()
+});
+
+export const updateDatasetSchema = Joi.object({
+    datasetName: Joi.string().min(3).max(40).required(),
+    newDatasetName: Joi.string().min(3).max(40).required(),
+    newTags: Joi.string().max(80).required()
+});
+
+export const uploadContentsSchema = Joi.object({
+    datasetName: Joi.string().min(3).max(40).required(),
+});
+
+export const tokensTopUpSchema = Joi.object({
+    topUpUserEmail: Joi.string().email().required(),
+    topUpAmount: Joi.number().min(1).max(20000).required()
+});
+
+export const makeInferenceSchema = Joi.object({
     modelId: Joi.string().valid(ModelId.YoloV8).required(),
-    modelVersion: Joi.string().valid(Yolov8Version.Medium, Yolov8Version.Small).required()
+    modelVersion: Joi.string().valid(Yolov8Version.Medium, Yolov8Version.Small).required(),
+    datasetName: Joi.string().min(3).max(40).required()
+});
+
+export const getJobStatusSchema = Joi.object({
+    jobId: Joi.number().integer().required()
+});
+
+export const getJobResultSchema = Joi.object({
+    jobId: Joi.number().integer().required()
 });
 
 export const userSchema = Joi.object({
@@ -12,25 +45,4 @@ export const userSchema = Joi.object({
     userRole: Joi.string().valid(Role.Admin, Role.User).required()
 });
 
-export const jobIdSchema = Joi.object({
-    jobId: Joi.number().integer().required()
-});
-
-export const datasetNameSchema = Joi.object({
-    datasetName: Joi.string().min(3).max(40).required()
-});
-
-export const newDatasetSchema = Joi.object({
-    newDatasetName: Joi.string().min(3).max(40).required(),
-    newTags: Joi.string().max(80).required()
-});
-
-export const datasetTagsSchema = Joi.object({
-    tags: Joi.string().max(80).required()
-});
-
-export const topUpSchema = Joi.object({
-    topupUserEmail: Joi.string().email().required(),
-    topUpAmount: Joi.number().min(1).max(20000).required()
-});
 

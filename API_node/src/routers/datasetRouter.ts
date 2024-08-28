@@ -12,9 +12,9 @@ const router = Router();
 // Middleware instantiation and concatenation
 const bodyParser = new BodyParserMiddleware();
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
-const createDatasetValidation = new ValidationMiddleware([schema.userSchema, schema.datasetNameSchema, schema.datasetTagsSchema]);
-const deleteDatasetValidation = new ValidationMiddleware([schema.userSchema, schema.datasetNameSchema]);
-const updateDatasetValidation = new ValidationMiddleware([schema.userSchema, schema.datasetNameSchema, schema.newDatasetSchema]);
+const createDatasetValidation = new ValidationMiddleware(schema.createDatasetSchema);
+const deleteDatasetValidation = new ValidationMiddleware(schema.deleteDatasetSchema);
+const updateDatasetValidation = new ValidationMiddleware(schema.updateDatasetSchema);
 
 bodyParser.setNext(userAuthorization);
 
@@ -28,9 +28,9 @@ router.get('/', controller.getAllDatasets);
 router.post('/', (req : Request, res : Response, next : NextFunction) => createDatasetValidation.handle(req, res, next), controller.createDataset);
 
 //route for logical deletion of a dataset given its id
-router.delete('/:id', (req : Request, res : Response, next : NextFunction) => deleteDatasetValidation.handle(req, res, next), controller.deleteDatasetByName);
+router.delete('/', (req : Request, res : Response, next : NextFunction) => deleteDatasetValidation.handle(req, res, next), controller.deleteDatasetByName);
 
 //route that allows the update of an existings dataset given its id
-router.patch('/:id', (req : Request, res : Response, next : NextFunction) => updateDatasetValidation.handle(req, res, next), controller.updateDatasetByName);
+router.patch('/', (req : Request, res : Response, next : NextFunction) => updateDatasetValidation.handle(req, res, next), controller.updateDatasetByName);
 
 export default router;

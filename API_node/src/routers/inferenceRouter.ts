@@ -12,8 +12,9 @@ const router = Router();
 // Middleware instantiation and concatenation
 const bodyParser = new BodyParserMiddleware();
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
-const inferenceValidation = new ValidationMiddleware([schema.userSchema, schema.datasetNameSchema, schema.detectionModelSchema]);
-const jobIdValidation = new ValidationMiddleware([schema.userSchema, schema.jobIdSchema]);
+const inferenceValidation = new ValidationMiddleware(schema.makeInferenceSchema);
+const getStatusValidation = new ValidationMiddleware(schema.getJobStatusSchema);
+const getResultValidation = new ValidationMiddleware(schema.getJobResultSchema);
 
 bodyParser.setNext(userAuthorization);
 
@@ -24,9 +25,9 @@ router.use((req : Request, res : Response, next : NextFunction) => bodyParser.ha
 router.post('/', (req : Request, res : Response, next : NextFunction) => inferenceValidation.handle(req, res, next), controller.makeInference);
 
 //route to check the state of a job
-router.get('/state', (req : Request, res : Response, next : NextFunction) => jobIdValidation.handle(req, res, next), controller.checkState);
+router.get('/state', (req : Request, res : Response, next : NextFunction) => getStatusValidation.handle(req, res, next), controller.checkState);
 
 //route to retrieve the result of an inference
-router.get('/result', (req : Request, res : Response, next : NextFunction) => jobIdValidation.handle(req, res, next), controller.getResult);
+router.get('/result', (req : Request, res : Response, next : NextFunction) => getResultValidation.handle(req, res, next), controller.getResult);
 
 export default router;

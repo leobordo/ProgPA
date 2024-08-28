@@ -60,7 +60,7 @@ const updateDatasetByName = async (datasetName: string, newName: string , tags: 
     }
 
     if (dataset.email !== email) {
-        throw ErrorFactory.createError(ErrorType.Authorization);
+        throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
 
     if (newName && dataset.dataset_name === newName) {
@@ -85,6 +85,11 @@ const deleteDatasetByName = async (datasetName: string, email: string) => {
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound);
     }
+
+    if (dataset.email !== email) {
+        throw ErrorFactory.createError(ErrorType.DatasetNotFound);
+    }
+
     return await DatasetDAO.default.softDeleteByName(datasetName, email);
 };
 
@@ -170,7 +175,7 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             fs.rmSync(extractedPath, { recursive: true, force: true });
             fs.rmSync(file.path, { recursive: true, force: true });
         } catch (err : any) {
-            if (err.message == "Insufficient tokens to complete request"){
+            if (err.status == 402){
                 throw err
             }
             throw ErrorFactory.createError(ErrorType.FileUpload);

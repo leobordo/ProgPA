@@ -13,11 +13,9 @@ const router = Router();
 const bodyParser = new BodyParserMiddleware();
 
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
-const getBalanceValidation = new ValidationMiddleware([schema.userSchema]);
-userAuthorization.setNext(getBalanceValidation);
 
 const adminAuthorization = new AuthorizationMiddleware([Role.Admin]);
-const updateBalanceValidation = new ValidationMiddleware([schema.userSchema, schema.topUpSchema]);
+const updateBalanceValidation = new ValidationMiddleware(schema.tokensTopUpSchema);
 adminAuthorization.setNext(updateBalanceValidation);
 
 //All the routes in this router use BodyParserMiddleware
