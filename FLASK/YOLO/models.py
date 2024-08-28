@@ -3,6 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Utente(db.Model):
+    
+    """
+    Represents a user in the system.
+
+    Attributes:
+        email (str): The primary key for the user, stored as a string.
+        tokens (int): The number of tokens associated with the user, default is 1000.
+        datasets (relationship): A relationship to the Dataset model, representing the datasets owned by the user.
+    """
     __tablename__ = 'utenti'
 
     email = db.Column(db.String(255), primary_key=True)
@@ -11,9 +20,25 @@ class Utente(db.Model):
     datasets = db.relationship('Dataset', backref='utente', lazy=True)
 
     def __repr__(self):
+        """
+        Provides a string representation of the Utente instance.
+        """
         return f'<Utente {self.email}>'
 
+
+
 class Dataset(db.Model):
+    """
+    Represents a dataset in the system.
+
+    Attributes:
+        dataset_id (int): The primary key for the dataset.
+        email (str): Foreign key referencing the user's email who owns the dataset.
+        file_path (str): The path to the dataset file.
+        token_cost (Numeric): The cost of tokens for using the dataset.
+        dataset_name (str): The name of the dataset.
+        results (relationship): A relationship to the Result model, representing the results associated with the dataset.
+    """
     __tablename__ = 'datasets'
 
     dataset_id = db.Column(db.Integer, primary_key=True)
@@ -31,9 +56,23 @@ class Dataset(db.Model):
     )
 
     def __repr__(self):
+        """
+        Provides a string representation of the Dataset instance.
+        """
         return f'<Dataset {self.dataset_name} owned by {self.email}>'
 
 class Result(db.Model):
+    """
+    Represents a result for a specific job in the system.
+
+    Attributes:
+        job_id (str): The primary key for the result, representing the job ID.
+        result (str): The result of the job, stored as text.
+        state (str): The state of the job, not nullable.
+        model_id (str): The ID of the model used for the job, not nullable.
+        dataset_id (int): The dataset associated with the result.
+        model_version (str): The version of the model used for the job, not nullable.
+    """
     __tablename__ = 'results'
 
     job_id = db.Column(db.String, primary_key=True)
@@ -44,4 +83,7 @@ class Result(db.Model):
     model_version = db.Column(db.String, nullable=False)
 
     def __repr__(self):
+        """
+        Provides a string representation of the Result instance.
+        """
         return f'<Result {self.job_id} for Dataset {self.dataset_id}>'
