@@ -3,6 +3,7 @@ import { JobStatus } from '../job';
 import { ModelId } from '../aiModels';
 import { Dataset } from './Dataset';
 import { Utente } from './Utente';
+import { Tag } from './Tag';
 
 export class Result extends Model {
     public job_id!: string;
@@ -56,6 +57,8 @@ export function createAssociation() : void {
     Dataset.hasMany(Result, { foreignKey: 'dataset_id', as: 'results' });
     Utente.hasMany(Dataset, { foreignKey: 'email', as: 'datasets' });
     Result.belongsTo(Dataset, { foreignKey: 'dataset_id'});
+    Dataset.hasMany(Tag, { foreignKey: 'dataset_id', as: 'tags' });
+    Tag.belongsTo(Dataset, { foreignKey: 'dataset_id', as: 'dataset' });
 }
 
 

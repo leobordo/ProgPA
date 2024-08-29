@@ -13,7 +13,7 @@ class UploadMiddleware extends Middleware {
         super();
         const storage: StorageEngine = multer.diskStorage({
             destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
-                cb(null, 'uploads/'); 
+                cb(null, path.resolve('../uploads/')); 
             },
             filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
                 const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -60,6 +60,7 @@ class BodyParserMiddleware extends Middleware {
 
     handle(req: Request, res: Response, next: NextFunction): void {
         // Processa solo dati form-data senza file
+
         this.upload.none()(req, res, (err: any) => {
             if (err) {
                 // Gestisci gli errori di Multer

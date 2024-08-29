@@ -5,7 +5,6 @@ CREATE TABLE utenti (
 
 CREATE TABLE datasets (
     email VARCHAR(255),
-    tags TEXT,
     file_path TEXT,
     token_cost NUMERIC,
     dataset_id SERIAL PRIMARY KEY,
@@ -14,6 +13,14 @@ CREATE TABLE datasets (
     FOREIGN KEY (email) REFERENCES utenti(email),
     UNIQUE (file_path, email),
     UNIQUE (dataset_id, dataset_name) 
+);
+
+CREATE TABLE tags (
+    dataset_id INTEGER NOT NULL,
+    tag TEXT,
+    UNIQUE (dataset_id, tag),
+    FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
+
 );
 
 

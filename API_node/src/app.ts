@@ -10,6 +10,7 @@ import { createAssociation, initializeResult } from './models/sequelize_model/Re
 import { createServer, Server } from 'http';
 import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 import { Request, Response, NextFunction } from 'express';
+import { initializeTag } from './models/sequelize_model/Tag';
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/upload', uploadRouter);
 initializeUtente(sequelize);
 initializeDataset(sequelize);
 initializeResult(sequelize);
+initializeTag(sequelize)
 createAssociation()
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {

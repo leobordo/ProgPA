@@ -13,8 +13,8 @@ export const deleteDatasetSchema = Joi.object({
 
 export const updateDatasetSchema = Joi.object({
     datasetName: Joi.string().min(3).max(40).required(),
-    newDatasetName: Joi.string().min(3).max(40).required(),
-    newTags: Joi.string().max(80).required()
+    newDatasetName: Joi.string().min(3).max(40),
+    newTags: Joi.string().max(80)
 });
 
 export const uploadContentsSchema = Joi.object({
