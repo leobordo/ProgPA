@@ -11,7 +11,10 @@ enum ErrorType {
     FileUpload,
     UndefinedRequest,
     DirectoryCreation,
-    InsufficientTokens
+    InsufficientTokens,
+    UserNotFound,
+    PswMatch,
+    DuplicateUser
 }
 
 interface IAppError {
@@ -35,6 +38,22 @@ class ApplicationError extends Error implements IAppError {
 class ValidationError extends ApplicationError {
     constructor(message: string = 'Validation error occurred') {
         super('ValidationError', message, 400);
+    }
+}
+
+class UserNotFoundError extends ApplicationError {
+    constructor(message: string = 'User not found, wrong email or password'){
+        super('UserNotFoundError', message, 401)
+    }
+}
+class PswMatchError extends ApplicationError {
+    constructor(message: string = "Passwords don't match"){
+        super('PswMatchError', message, 401)
+    }
+}
+class DuplicateUserError extends ApplicationError {
+    constructor(message: string = 'An user with this email already exists') {
+        super('DuplicateUserError', message, 401);
     }
 }
 
@@ -119,6 +138,12 @@ class ErrorFactory {
                 return new FileUploadError(message);
             case ErrorType.DirectoryCreation:
                 return new DirectoryCreationError(message);
+            case ErrorType.UserNotFound:
+                return new UserNotFoundError(message);
+            case ErrorType.DuplicateUser:
+                return new DuplicateUserError(message);
+            case ErrorType.PswMatch:
+                return new PswMatchError(message);
             default:
                 return new GenericError(message);
         }

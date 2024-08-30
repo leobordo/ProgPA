@@ -1,12 +1,12 @@
 import { error } from "console";
-import { Utente } from "../models/sequelize_model/Utente";
+import { User } from "../models/sequelize_model/User";
 import { Transaction } from "sequelize";
 
 const UserDAO = {
     
     //Updates the token balance of the specified user (by ID) with the value of newTokenBalance
     async updateTokenBalanceByEmail(userEmail: string, newTokenBalance: number, transaction: Transaction | null = null) {
-        const [updateCount, updatedUsers] = await Utente.update(
+        const [updateCount, updatedUsers] = await User.update(
             { tokens: newTokenBalance },
             { 
                 where: { email: userEmail },
@@ -23,13 +23,29 @@ const UserDAO = {
 
     //Gets the user's informations by his email 
     async getUserByEmail(userEmail: string) {
-        const user = await Utente.findOne({
+        const user = await User.findOne({
             where: {email: userEmail}
         });
-        if (user) {
-            return user;
-        }
-        throw error ("User not found");
+        return user;
+    },
+
+    //Gets the user's informations by his email and password
+    //used when user has not a token 
+    async getUserByEmailAndPsw(userEmail: string, psw: string) {
+        const user  = await User.findOne({
+            where: {email: userEmail,
+                password: psw
+            }
+        });
+        return user;
+    },
+
+    //Create a new user
+    async createUser(email: string, psw:string){
+        return await User.create({
+            email: email,
+            password:psw
+        })
     }
 
 

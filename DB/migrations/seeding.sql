@@ -1,3 +1,3 @@
-INSERT INTO utenti (email)
+INSERT INTO users (email, password, role)
 VALUES
-('prova@gmail.com')
+('prova@gmail.com', 'ciaociao', 0);

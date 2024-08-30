@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/inferenceController';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
-import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { Role } from '../models/request';
 import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
 import * as schema from '../middlewares/validationSchemas/bodyValidationSchemas';
@@ -15,6 +15,7 @@ const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
 const inferenceValidation = new ValidationMiddleware(schema.makeInferenceSchema);
 const getStatusValidation = new ValidationMiddleware(schema.getJobStatusSchema);
 const getResultValidation = new ValidationMiddleware(schema.getJobResultSchema);
+
 
 bodyParser.setNext(userAuthorization);
 

@@ -2,9 +2,10 @@ import datasetRouter from './routers/datasetRouter';
 import tokenManagementRouter from './routers/tokenManagementRouter';
 import inferenceRouter from './routers/inferenceRouter';
 import uploadRouter from './routers/uploadRouter';
+import loginRouter from './routers/loginRouter';
 import sequelize from './config/sequelize'; // Importa l'istanza di Sequelize configurata
 import dotenv from 'dotenv';
-import { initializeUtente as initializeUtente } from './models/sequelize_model/Utente';
+import { initializeUser as initializeUser } from './models/sequelize_model';
 import { initializeDataset as initializeDataset } from './models/sequelize_model/Dataset';
 import { createAssociation, initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
@@ -24,12 +25,21 @@ const app = express();
 const server: Server = createServer(app);
 
 // Middleware per l'analisi dei body delle richieste
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true }));
 const authenticationMiddleware = new AuthenticationMiddleware();
-app.use((req : Request, res : Response, next : NextFunction) => authenticationMiddleware.handle(req, res, next));
+app.use((req: Request, res: Response, next: NextFunction) => {
+ 
+  if (req.path.startsWith('/user')) {
+      return next();
+  }
+
+  authenticationMiddleware.handle(req, res, next);
+
+});
 
 // Definizione delle rotte
+app.use('/user', loginRouter);
 app.use('/datasets', datasetRouter);
 app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
@@ -37,7 +47,8 @@ app.use('/upload', uploadRouter);
 
 
 
-initializeUtente(sequelize);
+
+initializeUser(sequelize);
 initializeDataset(sequelize);
 initializeResult(sequelize);
 initializeTag(sequelize)

@@ -1,5 +1,7 @@
-CREATE TABLE utenti (
+CREATE TABLE users (
     email VARCHAR(255) PRIMARY KEY,
+    password TEXT NOT NULL,
+    role INTEGER DEFAULT 1,
     tokens FLOAT DEFAULT 1000
 );
 
@@ -10,7 +12,7 @@ CREATE TABLE datasets (
     dataset_id SERIAL PRIMARY KEY,
     dataset_name TEXT NOT NULL,
     is_deleted BOOLEAN,
-    FOREIGN KEY (email) REFERENCES utenti(email),
+    FOREIGN KEY (email) REFERENCES users(email),
     UNIQUE (file_path, email),
     UNIQUE (dataset_id, dataset_name) 
 );
@@ -34,8 +36,8 @@ CREATE TABLE results (
     FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
 );
 
-INSERT INTO utenti (email)
+INSERT INTO users (email, password, role)
 VALUES
-('prova@gmail.com');
+('prova@gmail.com', 'ciaociao', 0);
 
 

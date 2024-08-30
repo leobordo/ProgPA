@@ -1,6 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
-import { Utente } from './Utente';
-import { Result } from './Result';
+
 
 export class Dataset extends Model {
     public dataset_id!: number; 
@@ -22,7 +21,7 @@ export function initializeDataset(sequelize: Sequelize): void {
             type: DataTypes.STRING(255),
             allowNull: false,
             references: {
-                model: 'utenti', // Nome della tabella a cui si fa riferimento
+                model: 'users', // Nome della tabella a cui si fa riferimento
                 key: 'email'
             }
         },

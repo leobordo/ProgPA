@@ -67,6 +67,8 @@ class BodyParserMiddleware extends Middleware {
                 return res.status(400).send(`Error processing data: ${err.message}`);
             }
             // Procedi al prossimo middleware se non ci sono errori
+
+
             super.handle(req, res, next);
         });
     }
