@@ -44,19 +44,19 @@ export const registration = async (email: string, password: string, confirmPassw
 
 function generateToken(email: string, role: Role) {
     const privateKey = (process.env.RSA_PRIVATE_KEY)!.replace(/\\n/g, '\n')
-    const tokenDuration = process.env.TOKEN_DURATION  // expires in 1 day
+    const tokenDuration = (process.env.TOKEN_DURATION)!  // expires in 1 day
     // Dati dell'utente e altre informazioni del token
     const payload = {
         email: email,  // identificativo dell'utente
         iat: Math.floor(Date.now() / 1000),  // issued at
         exp: Math.floor(Date.now() / 1000) + tokenDuration,  
-        aud: process.env.TOKEN_AUD,
+        aud: (process.env.TOKEN_AUD)!,
         role: role
     };
 
     // Opzioni del token
     const signOptions = {
-        algorithm: process.env.TOKEN_ALGORITHM,
+        algorithm: (process.env.TOKEN_ALGORITHM)!,
     };
 
     // Genera il token
