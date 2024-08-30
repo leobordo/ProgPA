@@ -1,6 +1,7 @@
-import { Response, Request } from 'express';
-import * as dataServices from '../services/dataServices'; // Import the service
-import { ErrorType, ErrorFactory } from '../services/errorFactory';
+import { Response, Request } from 'express'; // Import Express types
+import * as dataServices from '../services/dataServices'; // Import the data services
+import { ErrorType, ErrorFactory } from '../services/errorFactory'; // Import error handling utilities
+import  HTTPStatus from 'http-status-codes'; // Import HTTPStatus module
 
 /**
  * Create a new dataset
@@ -14,11 +15,19 @@ const createDataset = async (req: Request, res: Response): Promise<void> => {
     const tags = req.body.tags;
     const email = req.user?.userEmail;
     
-    const result = await dataServices.createDataset(datasetName!, tags, email!);
-    res.status(201).json(result);
+    // Split tags into an array and trim whitespace
+    const arrayTag = tags.split(',').map((element: string) => element.trim());
+    
+    // Create dataset using the data service
+    const result = await dataServices.createDataset(datasetName!, arrayTag, email!);
+    
+    // Respond with created dataset
+    res.status(HTTPStatus.CREATED).json(result);
   } catch (error) {
     const err = error as Error;
-    res.status(500).json({ message: err.message });
+    
+    // Respond with internal server error if an error occurs
+    res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -31,11 +40,16 @@ const getAllDatasets = async (req: Request, res: Response): Promise<void> => {
   try {
     const email = req.user?.userEmail;
 
-    const datasets = await dataServices.getAllDatasets(email!);
-    res.status(200).json(datasets);
+    // Get all datasets associated with the user's email
+    const results = await dataServices.getAllDatasets(email!);
+  
+    // Respond with the datasets
+    res.status(HTTPStatus.OK).json(results);
   } catch (error) {
     const err = error as Error;
-    res.status(500).json({ message: err.message });
+    
+    // Respond with internal server error if an error occurs
+    res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -48,14 +62,26 @@ const updateDatasetByName = async (req: Request, res: Response): Promise<void> =
   try {
     const datasetName = req.body.datasetName;
     const newName = req.body.newDatasetName;
-    const tags = req.body.newTags;
+    let tags: string[] | undefined;
+
+    // Check if new tags are provided, split into array and remove duplicates
+    if (req.body.newTags) {
+      tags = req.body.newTags.split(',').map((element: string) => element.trim());
+      tags = [...new Set(tags)];
+    }
+
     const email = req.user?.userEmail;
 
-    const updatedDataset = await dataServices.updateDatasetByName(datasetName!, newName, tags, email!);
-    res.status(200).json({ message: 'Dataset updated successfully', dataset: updatedDataset });
+    // Update dataset using the data service
+    const updatedMessage = await dataServices.updateDatasetByName(datasetName!, email!, newName, tags);
+    
+    // Respond with updated message
+    res.status(HTTPStatus.OK).json(updatedMessage);
   } catch (error) {
     const err = error as Error;
-    res.status(500).json({ message: err.message });
+    
+    // Respond with internal server error if an error occurs
+    res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -69,11 +95,16 @@ const deleteDatasetByName = async (req: Request, res: Response): Promise<void> =
     const datasetName = req.body.datasetName;
     const email = req.user?.userEmail;
 
+    // Delete dataset using the data service
     await dataServices.deleteDatasetByName(datasetName!, email!);
-    res.status(200).json({ message: 'Dataset deleted successfully' });
+    
+    // Respond with success message
+    res.status(HTTPStatus.OK).json({ message: 'Dataset deleted successfully' });
   } catch (error) {
     const err = error as Error;
-    res.status(500).json({ message: err.message });
+    
+    // Respond with internal server error if an error occurs
+    res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
@@ -85,16 +116,21 @@ const deleteDatasetByName = async (req: Request, res: Response): Promise<void> =
 const insertContents = async (req: Request, res: Response): Promise<void> => {
   try {
     const datasetName = req.body.datasetName;
-    console.log(req.body)
     const file = req.file;
     const email = req.user?.userEmail;
 
+    // Insert contents into dataset using the data service
     const message = await dataServices.insertContents(datasetName!, file!, email!);
-    res.status(201).json({ message });
+    
+    // Respond with success message
+    res.status(HTTPStatus.CREATED).json({ message });
   } catch (error) {
     const err = error as Error;
-    res.status(500).json({ message: err.message });
+    
+    // Respond with internal server error if an error occurs
+    res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
   }
 };
 
+// Export controller functions for use in other modules
 export { getAllDatasets, createDataset, deleteDatasetByName, updateDatasetByName, insertContents };
