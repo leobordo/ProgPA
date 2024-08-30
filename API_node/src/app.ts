@@ -11,6 +11,7 @@ import { createServer, Server } from 'http';
 import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 import { Request, Response, NextFunction } from 'express';
 import { initializeTag } from './models/sequelize_model/Tag';
+import startWebSocketServer from './websocket/websocketServer'; // Importa il server WebSocket
 
 // Carica le variabili di ambiente dal file .env
 dotenv.config();
@@ -48,6 +49,8 @@ sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
+  // Avvia il server WebSocket su una porta separata
+  startWebSocketServer();
 }).catch((error: Error) => {
   console.error("Unable to synchronize the database:", error);
 });
