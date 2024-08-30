@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 
 // Carica la chiave pubblica dal file
-const publicKey = fs.readFileSync('././public_key.pem', 'utf8');
+const publicKey = (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n');
 
 // Middleware per autenticare le connessioni WebSocket
 export const authenticateWebSocket = (socket: WebSocket, request: any, next: () => void): void => {

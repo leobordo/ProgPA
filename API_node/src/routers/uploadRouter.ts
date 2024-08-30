@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/dataController';
-import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { UploadMiddleware } from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
 import { Role } from '../models/request';

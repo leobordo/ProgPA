@@ -4,7 +4,7 @@ import { Role, UserPayload } from '../models/request';
 import * as jwt from 'jsonwebtoken';
 const fs = require('fs');
 
-const publicKey = fs.readFileSync('././public_key.pem', 'utf8');    //Public key recovery
+   //Public key recovery
 
 class AuthenticationMiddleware extends Middleware {
 
@@ -22,7 +22,7 @@ class AuthenticationMiddleware extends Middleware {
             }
 
             // Checks the token and puts the user's information into the request if it's valid 
-            jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err: any, decoded: any) => {
+            jwt.verify(token, (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n'), { algorithms: ['RS256'] }, (err: any, decoded: any) => {
                 if (err) {
                     return res.status(403).send({ error: 'Token is invalid' });
                 }

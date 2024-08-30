@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Utente(db.Model):
+class User(db.Model):
     
     """
     Represents a user in the system.
@@ -12,18 +12,18 @@ class Utente(db.Model):
         tokens (int): The number of tokens associated with the user, default is 1000.
         datasets (relationship): A relationship to the Dataset model, representing the datasets owned by the user.
     """
-    __tablename__ = 'utenti'
+    __tablename__ = 'users'
 
     email = db.Column(db.String(255), primary_key=True)
     tokens = db.Column(db.Integer, default=1000)
 
-    datasets = db.relationship('Dataset', backref='utente', lazy=True)
+    datasets = db.relationship('Dataset', backref='user', lazy=True)
 
     def __repr__(self):
         """
-        Provides a string representation of the Utente instance.
+        Provides a string representation of the User instance.
         """
-        return f'<Utente {self.email}>'
+        return f'<User {self.email}>'
 
 
 
@@ -42,7 +42,7 @@ class Dataset(db.Model):
     __tablename__ = 'datasets'
 
     dataset_id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), db.ForeignKey('utenti.email'), nullable=False)
+    email = db.Column(db.String(255), db.ForeignKey('users.email'), nullable=False)
     file_path = db.Column(db.Text, nullable=False)
     token_cost = db.Column(db.Numeric)
     dataset_name = db.Column(db.String, nullable=False)

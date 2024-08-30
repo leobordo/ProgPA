@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/tokenManagementController';
-import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
 import { Role } from '../models/request';
@@ -18,6 +18,7 @@ const bodyParser = new BodyParserMiddleware();
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
 const adminAuthorization = new AuthorizationMiddleware([Role.Admin]);
 const updateBalanceValidation = new ValidationMiddleware(schema.tokensTopUpSchema);
+
 adminAuthorization.setNext(updateBalanceValidation);
 
 /**

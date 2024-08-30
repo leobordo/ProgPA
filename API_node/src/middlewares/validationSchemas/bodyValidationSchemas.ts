@@ -41,6 +41,15 @@ export const tokensTopUpSchema = Joi.object({
     topUpUserEmail: Joi.string().email().required(),
     topUpAmount: Joi.number().min(VP.MIN_TOPUP_AMOUNT).max(VP.MAX_TOPUP_AMOUNT).required()
 });
+export const loginSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required()
+});
+export const registrationSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required(),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+});
 
 // Validation schema for the route that consents to make inference on a dataset
 export const makeInferenceSchema = Joi.object({

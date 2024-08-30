@@ -2,7 +2,7 @@ import { Model, DataTypes, Sequelize } from 'sequelize';
 import { JobStatus } from '../job';
 import { ModelId } from '../aiModels';
 import { Dataset } from './Dataset';
-import { Utente } from './Utente';
+import { User } from './User';
 import { Tag } from './Tag';
 
 export class Result extends Model {
@@ -53,9 +53,9 @@ export function initializeResult(sequelize: Sequelize): void {
     
 }
 export function createAssociation() : void {
-    Dataset.belongsTo(Utente, { foreignKey: 'email'});
+    Dataset.belongsTo(User, { foreignKey: 'email'});
     Dataset.hasMany(Result, { foreignKey: 'dataset_id', as: 'results' });
-    Utente.hasMany(Dataset, { foreignKey: 'email', as: 'datasets' });
+    User.hasMany(Dataset, { foreignKey: 'email', as: 'datasets' });
     Result.belongsTo(Dataset, { foreignKey: 'dataset_id'});
     Dataset.hasMany(Tag, { foreignKey: 'dataset_id', as: 'tags' });
     Tag.belongsTo(Dataset, { foreignKey: 'dataset_id', as: 'dataset' });

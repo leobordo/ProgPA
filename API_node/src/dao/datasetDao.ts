@@ -227,7 +227,7 @@ const DatasetDAO = {
         if (dataset) {
             return dataset;
         }
-        throw Error("User not found"); // Throws error if user not found
+        throw Error("Dataset not found"); // Throws error if user not found
     },
 };
 

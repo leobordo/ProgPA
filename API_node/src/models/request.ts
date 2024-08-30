@@ -1,11 +1,11 @@
 enum Role {
-    User = "user",
-    Admin = "admin",
+    User = 1,
+    Admin = 0,
 }
 
 interface UserPayload {
     email: string;
-    role: string;
+    role: number;
     iat: number;
     exp:number;
     aud: string;

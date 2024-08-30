@@ -176,13 +176,15 @@ def get_annotated_image(file_path, model, dataset_id, job_id):
         os.makedirs(annotated_image_dir, exist_ok=True)
         logger.debug("Desired output directory for annotated image: %s", annotated_image_dir)
 
+        
+
         # Create output filename and path for the annotated image 
-        output_filename = f"annotated_{os.path.basename(file_path)}"
-        output_path = os.path.join(annotated_image_dir, output_filename)
+        annotated_filename = f"annotated_{os.path.basename(file_path)}"
+        output_path = os.path.join(annotated_image_dir, annotated_filename)
         logger.debug("Expected path for the annotated image (output_path): %s", output_path)
         
         # Perform inference using Ultralytics YOLO and specify the save directory
-        model.predict(file_path, save=True, project=annotated_image_dir, name="annotated_image")
+        model.predict(file_path, save=True, project=annotated_image_dir, name=annotated_filename)
 
         # Check if the annotated image file was saved successfully
         if os.path.exists(output_path):

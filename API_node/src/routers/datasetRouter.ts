@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/dataController';
-import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
 import { Role } from '../models/request';
@@ -15,6 +15,7 @@ const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
 const createDatasetValidation = new ValidationMiddleware(schema.createDatasetSchema);
 const deleteDatasetValidation = new ValidationMiddleware(schema.deleteDatasetSchema);
 const updateDatasetValidation = new ValidationMiddleware(schema.updateDatasetSchema);
+
 
 bodyParser.setNext(userAuthorization);
 
