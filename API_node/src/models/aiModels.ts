@@ -7,8 +7,6 @@ enum ModelId {
 enum Yolov8Version {
     Small = "YOLO8s_FSR",
     Medium = "YOLO8m_FSR",
-    //Small = "small",
-    //Medium = "medium"
 }
 
 export {ModelId, Yolov8Version};

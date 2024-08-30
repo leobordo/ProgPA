@@ -1,5 +1,5 @@
 /**
- * @fileOverview This file contains the parent Middleware class, that is exitended by other 
+ * @fileOverview This file contains the parent Middleware class, that is extended by other 
  *               Middleware classes to implement the Chain of Responsibility pattern.  
  */
 import { Request, Response, NextFunction } from 'express';

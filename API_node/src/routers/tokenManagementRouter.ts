@@ -7,9 +7,9 @@ import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/tokenManagementController';
 import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
-import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
+import { ValidationMiddleware } from '../middlewares/validationMiddleware';
 import { Role } from '../models/request';
-import * as schema from '../middlewares/validationSchemas/bodyValidationSchemas';
+import * as schema from '../middlewares/validationSchemas/validationSchemas';
 
 const router = Router();
 

@@ -12,7 +12,6 @@ const roles = Object.values(Role);
 const modelIds = Object.values(ModelId);
 const yolov8Versions = Object.values(Yolov8Version);
 
-
 // Validation schema for the route that consent to create a new dataset
 export const createDatasetSchema = Joi.object({
     datasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH).required(),
@@ -24,7 +23,7 @@ export const deleteDatasetSchema = Joi.object({
     datasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH).required(),
 });
 
-// Validation schema for the route that consents to update an existing dataset (name and tags)
+// Validation schema for the route that consents to update an existing dataset 
 export const updateDatasetSchema = Joi.object({
     datasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH).required(),
     newDatasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH).required(),
@@ -41,15 +40,6 @@ export const tokensTopUpSchema = Joi.object({
     topUpUserEmail: Joi.string().email().required(),
     topUpAmount: Joi.number().min(VP.MIN_TOPUP_AMOUNT).max(VP.MAX_TOPUP_AMOUNT).required()
 });
-export const loginSchema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required()
-});
-export const registrationSchema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required(),
-    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
-});
 
 // Validation schema for the route that consents to make inference on a dataset
 export const makeInferenceSchema = Joi.object({
@@ -63,15 +53,28 @@ export const getJobStatusSchema = Joi.object({
     jobId: Joi.number().integer().required()
 });
 
-//Validation schema for the route that allows to get result of a specified job
+// Validation schema for the route that allows to get result of a specified job
 export const getJobResultSchema = Joi.object({
     jobId: Joi.number().integer().required()
 });
 
-//Validation schema for the other routes (without parameters)
+// Validation scheme that allows a user to register
+export const loginSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required()
+});
+
+// Validation schema for the route that allows a user to log in
+export const registrationSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required(),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+});
+
+//Validation schema to verify the user's informations format
 export const userSchema = Joi.object({
-    userEmail: Joi.string().email().required(),
-    userRole: Joi.string().valid(...roles).required()
+    userEmail: Joi.string().email(),
+    userRole: Joi.string().valid(...roles)
 });
 
 

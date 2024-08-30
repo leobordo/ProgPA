@@ -5,12 +5,13 @@
  */
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
+
 import * as controller from '../controllers/inferenceController';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
-import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { Role } from '../models/request';
-import { ValidationMiddleware } from '../middlewares/bodyValidationMiddleware';
-import * as schema from '../middlewares/validationSchemas/bodyValidationSchemas';
+import { ValidationMiddleware } from '../middlewares/validationMiddleware';
+import * as schema from '../middlewares/validationSchemas/validationSchemas';
 
 const router = Router();
 

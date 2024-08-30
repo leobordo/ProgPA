@@ -7,11 +7,11 @@ import { IResult, JobStatus } from '../models/job';
 
 /** 
  * Adds a new inference job to the queue with the specified dataset and model version.
- * @param {Request} req - The Express request object containing:
- *                            - the name of the dataset to infer from;
- *                            - the id of the model to use;
- *                            - the version of the model to use;
- *                            - the user's email address.
+ * @param {Request} req - The Express request object containing
+ *                            the name of the dataset to infer from
+ *                            the id of the model to use
+ *                            the version of the model to use and
+ *                            the user's email address.
  * @param {Response} res - The Express response object used for sending back the HTTP response.
  * @returns {Promise<void>} A promise that resolves when the response is sent.
  *                          The response contains the job ID which can be used later to check 
@@ -39,9 +39,9 @@ const makeInference = async (req: Request, res: Response): Promise<void> => {
 /** 
  * Gets the status of the specified job (by ID).
  * If the status is COMPLETED, also gets the job result in JSON format
- * @param {Request} req - The Express request object containing:
- *                            - the job whose status is to be retrieved;
- *                            - the user's email address.
+ * @param {Request} req - The Express request object containing
+ *                            the job whose status is to be retrieved and
+ *                            the user's email address.
  * @param {Response} res - The Express response object used for sending back the HTTP response.
  * @returns {Promise<void>} A promise that resolves when the response is sent.
  *                          The response contains the status of the specified job and, if it's completed, 
