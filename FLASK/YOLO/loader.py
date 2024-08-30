@@ -24,7 +24,7 @@ def load_json_results(validation_data, results_json):
         job_id=job_id,
         result=results_json.get_data(as_text=True),
         # Temporary fix to avoid NOT NULL constraint of the "state" parameter
-        state='Completed',                                
+        # state='Completed',                                
         model_id=model_id,
         dataset_id=dataset_id,
         model_version=model_version

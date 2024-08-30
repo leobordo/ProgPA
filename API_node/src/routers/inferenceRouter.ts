@@ -1,3 +1,8 @@
+/**
+ * @fileOverview Routes configuration for inference operations.
+ *               This file sets up all routes related to initiating, monitoring and removing inference jobs within the application.
+ *               It uses various middlewares to parse requests, validate data, and authorize users.
+ */
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/inferenceController';
@@ -9,25 +14,27 @@ import * as schema from '../middlewares/validationSchemas/bodyValidationSchemas'
 
 const router = Router();
 
-// Middleware instantiation and concatenation
+// Instantiation of middlewares for body parsing, authorization and validation.
 const bodyParser = new BodyParserMiddleware();
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
 const inferenceValidation = new ValidationMiddleware(schema.makeInferenceSchema);
 const getStatusValidation = new ValidationMiddleware(schema.getJobStatusSchema);
 const getResultValidation = new ValidationMiddleware(schema.getJobResultSchema);
 
+/**
+ * Default middlewares for all routes in this router. Each request first goes through the
+ * BodyParserMiddleware and then the AuthorizationMiddleware if the body parsing succeeds.
+ */
 bodyParser.setNext(userAuthorization);
-
-//All the routes in this router use BodyParserMiddleware and userAuthorization with the same configuration
 router.use((req : Request, res : Response, next : NextFunction) => bodyParser.handle(req, res, next))
 
-//route to make inference on a dataset 
+//POST route to make inference on a dataset 
 router.post('/', (req : Request, res : Response, next : NextFunction) => inferenceValidation.handle(req, res, next), controller.makeInference);
 
-//route to check the state of a job
+//GET route to check the state of a job
 router.get('/state', (req : Request, res : Response, next : NextFunction) => getStatusValidation.handle(req, res, next), controller.checkState);
 
-//route to retrieve the result of an inference
+//GET route to retrieve the result of an inference job
 router.get('/result', (req : Request, res : Response, next : NextFunction) => getResultValidation.handle(req, res, next), controller.getResult);
 
 export default router;
