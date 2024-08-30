@@ -13,24 +13,27 @@ def validate_request_params(request):
     Returns:
         dict: A dictionary containing either validation error details or validated parameters.
     """
+    
+    # Get a json from the request
+    data = request.get_json()
 
     # Retrieve job_id from the request form and check if it's provided
-    job_id = request.form.get('job_id')
+    job_id = data.get('job_id')
     if not job_id:
         return {'error': jsonify({'error': 'job_id is required'}), 'status_code': 400}
 
     # Retrieve model_id from the request form and check if it's provided
-    model_id = request.form.get('model_id')
+    model_id = data.get('model_id')
     if not model_id:
         return {'error': jsonify({'error': 'model_id is required'}), 'status_code': 400}
 
     # Retrieve model_version from the request form and check if it's provided
-    model_version = request.form.get('model_version')
+    model_version = data.get('model_version')
     if not model_version:
         return {'error': jsonify({'error': 'model_version is required'}), 'status_code': 400}
 
     # Retrieve dataset_id from the request form and check if it's provided
-    dataset_id = request.form.get('dataset_id')
+    dataset_id = data.get('dataset_id')
     if not dataset_id:
         return {'error': jsonify({'error': 'dataset_id is required'}), 'status_code': 400}
 

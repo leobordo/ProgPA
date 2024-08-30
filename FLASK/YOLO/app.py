@@ -38,7 +38,7 @@ def predict():
     validation_response = validate_request_params(request)
 
     if validation_response['error']:
-        return validation_response['error'], validation_response['status']
+        return validation_response['error'], validation_response['status_code']
 
     # Extract validation values
     job_id = validation_response['job_id']
@@ -56,8 +56,8 @@ def predict():
 
     # Check if the original images directory exists
     if not os.path.exists(directory_path):
-        return jsonify({'error': f'Directory not found: {directory_path}'}), 404
-    logger.debug("os.path.exists(directory_path) exist")
+        #return jsonify({'error': f'Directory not found: {directory_path}'}), 404
+        logger.debug("os.path.exists(directory_path) exist")
 
     results_list = []
 
