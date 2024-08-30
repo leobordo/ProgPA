@@ -5,7 +5,7 @@ import uploadRouter from './routers/uploadRouter';
 import loginRouter from './routers/loginRouter';
 import sequelize from './config/sequelize'; // Importa l'istanza di Sequelize configurata
 import dotenv from 'dotenv';
-import { initializeUser as initializeUser } from './models/sequelize_model';
+import { initializeUser as initializeUser } from './models/sequelize_model/User';
 import { initializeDataset as initializeDataset } from './models/sequelize_model/Dataset';
 import { createAssociation, initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
