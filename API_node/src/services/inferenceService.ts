@@ -1,44 +1,26 @@
 import { Job } from "bullmq";
-import { IResult, JobStatus } from "../models/job";
+import { IResult, JobStatus, BullJobStatus} from "../models/job";
 import DatasetDAO from "../dao/datasetDao";
 import { Dataset } from "../models/sequelize_model/Dataset";
 import ResultDAO from "../dao/resultDao";
 import { ModelId } from "../models/aiModels";
 import { Result } from "../models/sequelize_model/Result";
-
-const {inferenceQueue} = require('./queue');
+const {inferenceQueue} = require('./inferenceQueue');
 
 // Adds the job to the queue and returns its ID which can be used later to check the job status and/or retrieve its result
-const requestDatasetInference = async (dataset_name: string, userEmail:string, modelId:ModelId, modelVersion:string): Promise<string|undefined> => {
+const requestDatasetInference = async (datasetName: string, userEmail:string, modelId:ModelId, modelVersion:string): Promise<string|undefined> => {
 
     //Retrieve the dataset informations
-    const dataset:Dataset = await DatasetDAO.getDatasetByName(dataset_name, userEmail);
-
-    //Checks if the user has enough tokens to perform the inference on the dataset
-    //if (await checkTokenAvailability(userEmail, dataset.tokenCost)) {
+    const dataset:Dataset = await DatasetDAO.getDatasetByName(datasetName, userEmail);
 
     // Adds the job to the queue, store its information into the dataset and return its ID
-    const job:Job = await inferenceQueue.add('processRequest', { dataset_name, userEmail, modelId, modelVersion});
-    if (job.id) { 
-        ResultDAO.createJob(job.id, JobStatus.Pending, modelId, modelVersion, dataset.dataset_id);
-        return job.id;
-    } else {
-        throw Error("job id is undefined");
-    }        
-    //} 
+    const job:Job = await inferenceQueue.add('processRequest', { datasetName, userEmail, modelId, modelVersion});
+    ResultDAO.createJob(job.id!, JobStatus.Pending, modelId, modelVersion, dataset.dataset_id);
+    return job.id;    
 };
 
 // Returns the status of the specified job (by ID)
 const getProcessStatus = async (jobId: string, userEmail: string): Promise<JobStatus> => {
-
-    //If the job is in the Queue, retrieves its status from it
-    const job = await inferenceQueue.getJob(jobId);
-    if (job) {
-        const jobState = job.getState();
-        return mapState(jobState); // Utilizza la funzione di mappatura
-    }
-
-    //Otherwise searchs for the job in the db and returns its status
     return (await ResultDAO.getUserJobByID(jobId, userEmail)).state;
 };
 
@@ -53,17 +35,5 @@ const getProcessResult = async (jobId: string, userEmail:string): Promise<IResul
     }
     throw Error("The job has no results");
 };
-
-//Maps the BullMQ job state to the API job state 
-function mapState(state: string): JobStatus {
-    const stateMapping: { [key: string]: JobStatus } = {
-      waiting: JobStatus.Pending,
-      delayed: JobStatus.Pending,
-      active: JobStatus.Running,
-      completed: JobStatus.Completed,
-      failed: JobStatus.Failed
-    };
-    return stateMapping[state] || 'Unknown';
-  }
 
 export {requestDatasetInference, getProcessStatus, getProcessResult};

@@ -1,9 +1,20 @@
 enum JobStatus {
-    Pending = "Pending",
-    Running = "Running",
-    Completed = "Completed",
-    Failed = "Failed",
-    Aborted = "Aborted"
+    Pending = "pending",
+    Running = "running",
+    Completed = "completed",
+    Failed = "failed",
+    Aborted = "aborted"
+}
+
+enum BullJobStatus {
+    Waiting = "waiting",
+    Completed = "completed",
+    Delayed = "delayed",
+    Active = "active",
+    WaitingChildren = "waiting-children",
+    Prioritized = "prioritized",
+    Failed = "failed",
+    Removed = "removed"
 }
 
 /*
@@ -45,4 +56,4 @@ interface IResult {
     contentURI: string;
 }
 
-export {JobStatus, IResult}
+export {JobStatus, IResult, BullJobStatus}

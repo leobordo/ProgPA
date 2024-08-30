@@ -14,7 +14,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./API_node/src/uploads:/user/uploads
+      - ./API_node/uploads:/user/uploads
       - ./DB/entrypoint:/docker-entrypoint-initdb.d
 
     ports:
