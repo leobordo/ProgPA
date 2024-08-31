@@ -236,6 +236,7 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             // Deduct tokens
             await updateTokenBalance(email, -totalTokenCost);
             // Update token cost on dataset
+            
             await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, totalTokenCostInference);
 
             // Clean up extracted files and uploaded zip
@@ -271,14 +272,16 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
                 fs.rmSync(file.path, { recursive: true, force: true });
                 throw ErrorFactory.createError(ErrorType.InsufficientTokens);
             }
-
+            
+            // Deduct tokens
+            await updateTokenBalance(email, -totalTokenCost);
+            await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, totalTokenCostInference);
         } catch (err) {
             console.error(err);
         }
         
 
-        // Deduct tokens
-        await updateTokenBalance(email, -totalTokenCost);
+        
 
         // Move file to final destination
         const finalFilePath = path.join(originalFilesPath, file.filename);
