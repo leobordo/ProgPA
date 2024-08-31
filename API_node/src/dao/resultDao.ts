@@ -24,6 +24,14 @@ const ResultDAO = {
         );
     },
 
+    //Updates the state of the specified job (by Id)
+    async updateJobResult(jobId: string, result: string) {
+        await Result.update(
+            { result: result }, 
+            { where: { job_id: jobId}}
+        );
+    },
+
     //Gets the job with the specified Id (only if the job belongs to the requesting user)
     async getUserJobByID(jobId: string, userEmail: string) {
         const result = await Result.findOne({
@@ -37,6 +45,8 @@ const ResultDAO = {
             }
         });
         if (result) {
+            console.log("Stato: " + result.state);
+            console.log("Risultato: " + result.result);
             return result;
         }
         throw Error("Job not found");

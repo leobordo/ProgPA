@@ -27,29 +27,21 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
         throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if dataset exists
     }
 
-    // Get the maximum dataset ID
-    let maxDatasetId = await DatasetDAO.default.getMaxDatasetId();
-    if (maxDatasetId === null) { maxDatasetId = "0"; }
-    const datasetId = (parseInt(maxDatasetId as string, 10) + 1).toString();
-    const datasetDir = path.join('/user/uploads', datasetId);
-
-    try {
-        // Create directory for the new dataset
-        fs.mkdirSync(datasetDir, { recursive: true });
-    } catch (err) {
-        throw ErrorFactory.createError(ErrorType.DirectoryCreation); // Throw error if directory creation fails
-    }
-
     try {
         // Create the new dataset in the database
-        const newDataset = await DatasetDAO.default.create(datasetName, email, datasetDir);
+        const newDataset = await DatasetDAO.default.create(datasetName, email);
+        if (!newDataset) {
+            throw Error;
+        }
         if (tags){
             // Add tags to the new dataset
             tags.forEach(async (tag) => {
                 await DatasetDAO.default.createTag(newDataset.dataset_id, tag);
             });
         }
-        return { message: 'Dataset created successfully', dataset: newDataset, tags: tags };
+         // Create directory for the new dataset
+         fs.mkdirSync(newDataset.file_path, { recursive: true });
+         return { message: 'Dataset created successfully', dataset: newDataset, tags: tags };
     } catch(err) {
         throw err; // Propagate error if dataset creation fails
     }
@@ -272,12 +264,18 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             totalTokenCostInference = TOKEN_COSTS.IMAGE_UPLOADING;
         }
 
-        // Check if user has enough tokens
-        const hasEnoughTokens = await checkTokenAvailability(email, totalTokenCost);
-        if (!hasEnoughTokens) {
-            fs.rmSync(file.path, { recursive: true, force: true });
-            throw ErrorFactory.createError(ErrorType.InsufficientTokens);
+        try {
+            // Check if user has enough tokens
+            const hasEnoughTokens = await checkTokenAvailability(email, totalTokenCost);
+            if (!hasEnoughTokens) {
+                fs.rmSync(file.path, { recursive: true, force: true });
+                throw ErrorFactory.createError(ErrorType.InsufficientTokens);
+            }
+
+        } catch (err) {
+            console.error(err);
         }
+        
 
         // Deduct tokens
         await updateTokenBalance(email, -totalTokenCost);

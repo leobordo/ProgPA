@@ -5,9 +5,10 @@ import { User } from '../models/sequelize_model/User';
 const checkTokenAvailability = async (userEmail: string, token_cost: number): Promise<boolean> => {
     const user = await userDao.getUserByEmail(userEmail);
     if (!user){
-        throw Error
+        throw Error("User not found")
     }
     if (user.tokens >= token_cost) {
+        console.log("tokens: " + user.tokens)
         return true;
     }
     return false;

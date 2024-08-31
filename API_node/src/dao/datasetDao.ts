@@ -1,3 +1,4 @@
+import { error } from 'console';
 import { Dataset } from '../models/sequelize_model/Dataset'; // Import the Dataset model
 import { Result } from '../models/sequelize_model/Result'; // Import the Result model
 import { Tag } from '../models/sequelize_model/Tag'; // Import the Tag model
@@ -58,14 +59,33 @@ const DatasetDAO = {
      * @param {string} file_path - The file path associated with the dataset.
      * @returns {Promise<Dataset>} The newly created dataset.
      */
-    async create(dataset_name: string, userEmail: string, file_path: string) {
-        return await Dataset.create({
-            dataset_name: dataset_name,
-            email: userEmail,
-            file_path: file_path,
-            is_deleted: false,
-            token_cost: 0
-        });
+    async create(dataset_name: string, userEmail: string) {
+        try {
+            const newDataset:Dataset = await Dataset.create({
+                dataset_name: dataset_name,
+                email: userEmail,
+                file_path: '',  
+                is_deleted: false,
+                token_cost: 0
+            });
+
+            // Retrieves the dataset ID
+            const datasetId:number = newDataset.dataset_id;
+
+            // Constructs the new file path using the dataset ID
+            const updatedFilePath = `/user/uploads/${datasetId}`; 
+
+            // Updates the file_path with the newly created dataset ID
+            await Dataset.update(
+                { file_path: updatedFilePath },
+                { where: { dataset_id: datasetId } }
+            );
+
+            // Return the updated dataset
+            return await Dataset.findByPk(datasetId);
+        } catch (err) {
+            console.error(err);
+        }
     },
 
     /**

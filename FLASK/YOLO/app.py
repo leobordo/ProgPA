@@ -89,8 +89,8 @@ def predict():
     # Convert to json
     results_json = jsonify(results_list)
 
-    load_json_results(validation_response, results_json)
-
+    #load_json_results(validation_response, results_json)):
+    
     return results_json, 200
 
 if __name__ == '__main__':

@@ -23,8 +23,6 @@ const FLASK_PREDICTION_URL = /*process.env.FLASK_PREDICTION_URL ||*/ 'http://fla
 // Definition of the function used by the worker to process jobs
 const processContents: Function = async (job: Job) => {
 
-  console.log("nel worker");
-  console.log("dataset_name: " + job.data.datasetName + "userEmail: " + job.data.userEmail)
   try {
     // Retrieve the dataset informations
     const dataset: Dataset = await DatasetDAO.getDatasetByName(job.data.datasetName, job.data.userEmail);
@@ -57,9 +55,10 @@ const processContents: Function = async (job: Job) => {
         }),
       });
 
-      console.log("response: " + response);
       const responseData = await response.json();
-      console.log("responseData: " + responseData);
+      console.log("responseData: " + JSON.stringify(responseData));
+
+      ResultDAO.updateJobResult(job.id!, JSON.stringify(responseData));
 
       if (!response.ok) {
         throw new Error(responseData.message);
@@ -75,27 +74,32 @@ const processContents: Function = async (job: Job) => {
 const worker = new Worker('inferenceQueue', processContents, { connection: redisConnection });
 
 // Listener for the 'active' event
-worker.on(BullJobStatus.Active, async (jobId: string) => {
-  console.log("job " + jobId + " preso in carico");
+worker.on(BullJobStatus.Active, async (job: any) => {
+  console.log("job " + job.id + " preso in carico");
   //aggiornamento dello stato del job nel db
-  ResultDAO.updateJobStatus(jobId, JobStatus.Running);
+  ResultDAO.updateJobStatus(job.id, JobStatus.Running);
 });
 
 // Listener for the 'completed' event
-worker.on(BullJobStatus.Completed, async (jobId: string) => {
-  console.log("job " + jobId + " completato");
+worker.on(BullJobStatus.Completed, async (job: any) => {
+  console.log("job " + job.id + " completato");
   //aggiornamento dello stato del job nel db
-  ResultDAO.updateJobStatus(jobId, JobStatus.Completed);
+  ResultDAO.updateJobStatus(job.id, JobStatus.Completed);
 });
 
 // Listener for the 'failed' event
-worker.on(BullJobStatus.Failed, async (jobId: string, failedReason: string) => {
-  console.log("job " + jobId + " fallito");
+worker.on(BullJobStatus.Failed, async (job: any, err:any) => {
+  console.log("job " + job.id + " fallito");
   //aggiornamento dello stato del job nel db
-  ResultDAO.updateJobStatus(jobId, JobStatus.Failed);
+  ResultDAO.updateJobStatus(job.id, JobStatus.Failed);
 });
 
-// Listener for the 'completed' event
+// Listener for the 'waiting' event
+worker.on(BullJobStatus.Waiting, async (jobId: string) => {
+  
+});
+
+// Listener for the 'removed' event
 worker.on(BullJobStatus.Removed, async (jobId: string) => {
   console.log("job " + jobId + " rimosso");
   //aggiornamento dello stato del job nel db

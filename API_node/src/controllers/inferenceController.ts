@@ -59,9 +59,10 @@ const checkState = async (req: Request, res: Response): Promise<void> => {
         //Retrieves the job result by its ID
         const result:IResult = await service.getProcessResult(jobId, userEmail);
         res.send({jobState: jobStatus, result: result.jsonResult});
-      }
-      //If the job isn't completed, returns only its status
-      res.send({jobState: jobStatus});
+      } else {
+        //If the job isn't completed, returns only its status
+        res.send({jobState: jobStatus});
+      }   
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'Internal error' });

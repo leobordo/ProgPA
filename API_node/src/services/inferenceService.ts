@@ -30,10 +30,10 @@ const getProcessResult = async (jobId: string, userEmail:string): Promise<IResul
     const uri = `user/uploads/${job.dataset_id}/annotated_files/${job.job_id}`;
     if (job.result) {
         const jsonResult = JSON.parse(job.result);
-        // chiamata ad una funzione del dao per prendere il risultato del job dal db
         return {jsonResult: jsonResult, contentURI: uri};
+    } else {
+        throw Error("The job has no results");
     }
-    throw Error("The job has no results");
 };
 
 export {requestDatasetInference, getProcessStatus, getProcessResult};

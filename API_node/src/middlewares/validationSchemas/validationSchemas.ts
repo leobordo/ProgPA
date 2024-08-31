@@ -61,13 +61,13 @@ export const getJobResultSchema = Joi.object({
 // Validation scheme that allows a user to register
 export const loginSchema = Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required()
+    password: Joi.string().min(VP.MIN_PASSWORD_LENGTH).max(VP.MAX_PASSWORD_LENGTH).pattern(/^[a-zA-Z0-9_!?@]*$/).required()
 });
 
 // Validation schema for the route that allows a user to log in
 export const registrationSchema = Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).pattern(/^[a-zA-Z0-9_!?@]*$/).required(),
+    password: Joi.string().min(VP.MIN_PASSWORD_LENGTH).max(VP.MAX_PASSWORD_LENGTH).pattern(/^[a-zA-Z0-9_!?@]*$/).required(),
     confirmPassword: Joi.string().valid(Joi.ref('password')).required()
 });
 

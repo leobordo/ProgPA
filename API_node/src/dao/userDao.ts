@@ -23,10 +23,14 @@ const UserDAO = {
 
     //Gets the user's informations by his email 
     async getUserByEmail(userEmail: string) {
-        const user = await User.findOne({
-            where: {email: userEmail}
-        });
-        return user;
+        try {
+            const user = await User.findOne({
+                where: {email: userEmail}
+            });
+            return user;
+        } catch (err) {
+            console.error(err);
+        }
     },
 
     //Gets the user's informations by his email and password

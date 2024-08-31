@@ -1,6 +1,7 @@
 from flask import jsonify
 from models import db, Result
 from config import logger
+from sqlalchemy.exc import SQLAlchemyError
 
 def load_json_results(validation_data, results_json):
     """
@@ -11,9 +12,11 @@ def load_json_results(validation_data, results_json):
     dataset_id = validation_data['dataset_id']
     model_version = validation_data['model_version']
 
+    '''
     # Check if a result already exists for the given job_id
     existing_result = Result.query.filter_by(job_id=job_id).first()
 
+    
     if existing_result is not None:
         # If a result for this job_id already exists, return an error
         logger.error('A result for job_id %s already exists.', job_id)
@@ -49,5 +52,27 @@ def load_json_results(validation_data, results_json):
         logger.debug("Result saved for job_id %s: %s", job_id, result_double_check)
     else:
         logger.debug("No result found for job_id %s", job_id)
+        
+    return results_json, 200'''
+    
+    try:
+        # Fetch the record by job_id
+        job = Result.query.filter_by(job_id=job_id).first()
+        
+        # If the record exists, update the result field
+        if job:
+            job.result = str(results_json)
+            db.session.commit()
+            return True
+        else:
+            # Record not found
+            logger.error(f"No result found with job_id: {job_id}")
+            return False
 
-    return results_json, 200
+    except SQLAlchemyError as e:
+        # Rollback in case of an error and log the error
+        db.session.rollback()
+        logger.error(f"An error occurred while updating the result: {e}")
+        return False
+
+    
