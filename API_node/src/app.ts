@@ -62,11 +62,14 @@ sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
+
+
   // Avvia il server WebSocket su una porta separata
   startWebSocketServer();
 }).catch((error: Error) => {
   console.error("Unable to synchronize the database:", error);
 });
+
 
 // Gestione della chiusura del server e della connessione al database
 process.on('SIGTERM', () => {

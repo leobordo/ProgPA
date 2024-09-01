@@ -1,6 +1,5 @@
 import WebSocket from 'ws';
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
 
 // Carica la chiave pubblica dal file
 const publicKey = (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n');

@@ -90,13 +90,14 @@ const getResult = async (req: Request, res: Response): Promise<void> => {
       if (jobStatus === JobStatus.Completed) {
         //Retrieves the job result by its ID
         const result:IResult = await service.getProcessResult(jobId, userEmail);
+        console.log(result)
         res.send({contentURI: result.contentURI, result: result.jsonResult});
       }
       //If the job isn't completed, returns an error
       throw Error("The job is not completed")
     } catch (error) {
-      console.error(error);
-      res.status(500).send({ error: "Internal error" });
+      const err = error as Error
+      res.status(500).send(err.message);
     }
   };
 

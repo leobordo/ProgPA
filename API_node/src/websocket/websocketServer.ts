@@ -1,68 +1,56 @@
 import WebSocket from 'ws';
-import { Client } from 'pg';
-import { authenticateWebSocket } from './websocketAuth'; // Importa il middleware
-import { getJobsByUserEmail } from './websocketJob'; // Importa la funzione dal servizio
+import { authenticateWebSocket } from './websocketAuth';
+import { getJobsByUserEmail } from './websocketJob';
+
+// Mappa per tenere traccia delle connessioni WebSocket per utente
+const userSockets = new Map<string, Set<WebSocket>>();
+
 
 // Funzione per gestire la connessione WebSocket
 const handleWebSocketConnection = async (socket: WebSocket, userEmail: string) => {
     try {
         console.log(`Recupero job per l'utente con email: ${userEmail}`);
-        // Chiamata al service per ottenere i job correlati
         const jobs = await getJobsByUserEmail(userEmail);
-      
-        // Invia i job recuperati al client WebSocket
         socket.send(JSON.stringify({ type: 'job_list', data: jobs }));
+
+        // Aggiungi il socket alla mappa degli utenti
+        if (!userSockets.has(userEmail)) {
+            userSockets.set(userEmail, new Set());
+        }
+        userSockets.get(userEmail)!.add(socket);
+
+        // Rimuovi il socket dalla mappa quando si disconnette
+        socket.on('close', () => {
+            const sockets = userSockets.get(userEmail);
+            if (sockets) {
+                sockets.delete(socket);
+                if (sockets.size === 0) {
+                    userSockets.delete(userEmail);
+                }
+            }
+        });
     } catch (error) {
         console.error('Errore nel recupero dei job:', error);
         socket.send(JSON.stringify({ type: 'error', message: 'Errore nel recupero dei job.' }));
     }
 };
 
+
+// Definizione del server WebSocket
+let wss: WebSocket.Server;  // Dichiarazione del server WebSocket a livello di modulo
+
 const startWebSocketServer = () => {
-    const WEBSOCKET_PORT = 8080; // Specifica una porta separata per il WebSocket
-    const wss = new WebSocket.Server({ port: WEBSOCKET_PORT });
-
-    // Configurazione del client PostgreSQL per ascoltare le notifiche
-    const pgClient = new Client({
-        user: process.env.POSTGRES_USER,
-        host: process.env.POSTGRES_HOST,
-        database: process.env.POSTGRES_DB,
-        password: process.env.POSTGRES_PASSWORD,
-        port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
-    });
-
-    pgClient.connect()
-        .then(() => {
-            console.log('Connected to PostgreSQL for notifications.');
-            pgClient.query('LISTEN job_notifications'); // Ascolta il canale delle notifiche
-        })
-        .catch((err) => {
-            console.error('Failed to connect to PostgreSQL:', err);
-        });
-
-    pgClient.on('notification', (msg) => {
-        const payload = JSON.parse(msg.payload || '{}');
-        console.log('Notifica ricevuta dal database:', payload);
-        // Invia la notifica a tutti i client connessi
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ type: 'job_update', data: payload }));
-            }
-        });
-    });
+    const WEBSOCKET_PORT = 8080;
+    wss = new WebSocket.Server({ port: WEBSOCKET_PORT });
 
     wss.on('connection', (socket, request) => {
         console.log('WebSocket connection attempt');
 
-        // Utilizza il middleware per autenticare la connessione WebSocket
         authenticateWebSocket(socket, request, () => {
             console.log('WebSocket connection established and authenticated');
-
-            // Ottieni l'email dell'utente dal socket autenticato
             const userEmail = (socket as any).user?.email;
 
             if (userEmail) {
-                // Chiama la funzione per gestire la connessione WebSocket
                 handleWebSocketConnection(socket, userEmail);
             } else {
                 socket.send(JSON.stringify({ type: 'error', message: 'Email non trovata nel token JWT.' }));
@@ -70,7 +58,6 @@ const startWebSocketServer = () => {
             }
 
             socket.on('message', (message) => {
-                // Converte il buffer in una stringa
                 const messageString = message.toString();
                 console.log('Received message:', messageString);
             });
@@ -84,6 +71,18 @@ const startWebSocketServer = () => {
     });
 
     console.log(`WebSocket server is running on port ${WEBSOCKET_PORT}`);
+};
+
+// Funzione per inviare un messaggio solo all'utente specifico
+export const sendMessageToUser = (userEmail: string, message: any) => {
+    const sockets = userSockets.get(userEmail);
+    if (sockets) {
+        sockets.forEach(socket => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(message));
+            }
+        });
+    }
 };
 
 export default startWebSocketServer;
