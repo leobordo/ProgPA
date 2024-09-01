@@ -41,7 +41,8 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
         }
          // Create directory for the new dataset
          fs.mkdirSync(newDataset.file_path, { recursive: true });
-         return { message: 'Dataset created successfully', dataset: newDataset, tags: tags };
+         const { dataset_id, file_path, dataset_name } = newDataset;
+         return { message: 'Dataset created successfully', dataset: { dataset_id, file_path, dataset_name, tags }};
     } catch(err) {
         throw err; // Propagate error if dataset creation fails
     }
@@ -55,14 +56,17 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
 const getAllDatasets = async (email: string) => {
     // Retrieve all datasets for a user
     const datasets: Dataset[] = await DatasetDAO.default.getAllByUserEmail(email);
-    const results: { dataset: Dataset; tags: Tag[] }[] = [];
+    const results = [];
 
-    for (const dataset of datasets) {
+    for (const ds of datasets) {
         // Get tags for each dataset
-        const tags = await getAllTags(dataset);
+        const tags = await getAllTags(ds);
+        const dataset_tags : string[] = []
+
+        for (const tg of tags) {dataset_tags.push(tg.tag)}
+        const { dataset_id, file_path, dataset_name, token_cost } = ds;
         results.push({
-            dataset: dataset,
-            tags: tags
+            dataset: { dataset_id, file_path, dataset_name, token_cost, dataset_tags},
         });
     }
 
@@ -277,7 +281,7 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             await updateTokenBalance(email, -totalTokenCost);
             await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, totalTokenCostInference);
         } catch (err) {
-            console.error(err);
+            throw err;
         }
         
 

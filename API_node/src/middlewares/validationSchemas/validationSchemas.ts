@@ -26,8 +26,8 @@ export const deleteDatasetSchema = Joi.object({
 // Validation schema for the route that consents to update an existing dataset 
 export const updateDatasetSchema = Joi.object({
     datasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH).required(),
-    newDatasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH).required(),
-    newTags: Joi.string().min(VP.MIN_TAG_LENGTH).max(VP.MAX_TAG_LENGTH).required()
+    newDatasetName: Joi.string().min(VP.MIN_DATASET_NAME_LENGTH).max(VP.MAX_DATASET_NAME_LENGTH),
+    newTags: Joi.string().min(VP.MIN_TAG_LENGTH).max(VP.MAX_TAG_LENGTH)
 });
 
 // Validation schema for the route that consents to upload a new content 

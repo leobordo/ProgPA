@@ -48,6 +48,14 @@ If you followed these steps correctly, the app is now installed and ready to use
     |------------|---------------------|
     | `email`    | User's email        |
     | `password` | User's password     |
+  
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "Log in completed! User token: <created_auth_token>"
+    }
+    ```
 
 - **POST `/user/registration`**: Enables new users to register by creating an account with their details. Auth token is clearly not necessary.
   - **Request Body**:
@@ -57,10 +65,50 @@ If you followed these steps correctly, the app is now installed and ready to use
     | `email`          | User's email             |
     | `password`       | User's password          |
     | `confirmPassword`| Equal to user's password |
+    
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "User created!"
+    }
+    ```
 
 #### Dataset Management (`/datasets`)
 
-- **GET `/datasets/`**: Retrieves a list of all datasets available to the user.
+- **GET `/datasets/`**: Retrieves a list of all datasets available to the user.    
+  
+  - **Response Example**:
+
+    ```json
+    [
+    {
+        "dataset": {
+            "dataset_id": <integer>,
+            "file_path": <string>,
+            "dataset_name": <string>,
+            "token_cost": <float>,
+            "dataset_tags": [
+                <string>
+            ]
+        }
+    },
+    {
+        "dataset": {
+            "dataset_id": <integer>,
+            "file_path": <string>,
+            "dataset_name": <string>,
+            "token_cost": <float>,
+            "dataset_tags": [
+                <string>
+            ]
+        }
+    },
+    ...
+    ]
+
+    ```
+
 
 - **POST `/datasets/`**: Allows users to create a new dataset by giving name and tags.
   - **Request Body**:
@@ -69,6 +117,21 @@ If you followed these steps correctly, the app is now installed and ready to use
     |--------------|---------------------------------|
     | `datasetName`| Dataset's name                  |
     | `tags`       | List of words separated by commas|
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "Dataset created successfully",
+      "dataset": {
+        "dataset_id": <integer>,
+        "file_path": <string>,
+        "dataset_name": <string>,
+        "tags": [
+            <string>
+        ]
+    }
+    }
+    ```
 
 - **DELETE `/datasets/`**: Deletes an existing dataset as specified by the user.
   - **Request Body**:
@@ -76,6 +139,13 @@ If you followed these steps correctly, the app is now installed and ready to use
     | Key          | Value               |
     |--------------|---------------------|
     | `datasetName`| Dataset's name to delete |
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "Dataset deleted successfully"
+    }
+    ```
 
 - **PATCH `/datasets/`**: Updates the name, tags, or both of an existing dataset.
   - **Request Body**:
@@ -85,6 +155,13 @@ If you followed these steps correctly, the app is now installed and ready to use
     | `datasetName`  | Dataset's name              |
     | `newDatasetName` | New name for the dataset    |
     | `newTags`      | New tags for the dataset    |
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "Name (/Tags/Name and Tags) correctly updated"
+    }
+    ```
 
 #### Token Management (`/token`)
 
@@ -108,6 +185,14 @@ If you followed these steps correctly, the app is now installed and ready to use
     | `datasetName` | Dataset used for the inference  |
     | `modelId`     | ModelId used for the inference  |
     | `modelVersion`| ModelVersion used for the inference |
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "Process added successfully to the queue",
+      "jobId": <integer>
+    }
+    ```
 
 - **GET `/inference/state`**: Checks the current state of a submitted inference task, such as pending, running, or completed.
   - **Request Body**:
@@ -115,6 +200,13 @@ If you followed these steps correctly, the app is now installed and ready to use
     | Key           | Value                           |
     |---------------|---------------------------------|
     | `jobId` | Job's id that you want to state check|
+  - **Response Example**:
+
+    ```json
+    {
+      "jobState": <string>
+    }
+    ```
 
 
 - **GET `/inference/result`**: Retrieves the result of a completed inference task.
@@ -123,7 +215,22 @@ If you followed these steps correctly, the app is now installed and ready to use
     | Key           | Value                           |
     |---------------|---------------------------------|
     | `jobId` | Job'id that you want to retrive result |
+  - **Response Example**:
 
+    ```json
+    {
+    "contentURI": <path>,
+    "result": [
+        {
+            "filename": <string>,
+            "objects": [
+                <string>
+            ],
+            "type": "imagae/video"
+        }
+    ]
+    }
+    ```
 
 #### File Upload (`/upload`)
 
@@ -134,6 +241,14 @@ If you followed these steps correctly, the app is now installed and ready to use
     |---------------|------------------|
     | `file`        | File to be uploaded |
     | `datasetName` | Dataset's name   |
+  - **Response Example**:
+
+    ```json
+    {
+      "message": "Content uploaded successfully"
+    }
+    ```
+  
 #### Web Socket(`ws://localhost:8080`)
 - You can retrive real-time information of your jobs' processiong state
 ---
