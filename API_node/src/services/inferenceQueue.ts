@@ -8,6 +8,7 @@ import { BullJobStatus, JobStatus } from "../models/job";
 import UserDAO from "../dao/userDao";
 import sequelize from '../config/sequelize';
 const { Queue, Worker, QueueEvents } = require('bullmq');
+import { sendMessageToUser } from '../websocket/websocketServer'; // Importa la funzione per inviare messaggi agli utenti specifici
 
 
 // Getting the Redis connection instance 
@@ -78,6 +79,15 @@ worker.on(BullJobStatus.Active, async (job: any) => {
   console.log("job " + job.id + " preso in carico");
   //aggiornamento dello stato del job nel db
   ResultDAO.updateJobStatus(job.id, JobStatus.Running);
+
+  // Invia un messaggio di notifica all'utente che il job è stato preso in carico
+  const userEmail = job.data.userEmail;
+  sendMessageToUser(userEmail, {
+    type: 'job_active',
+    jobId: job.id,
+    message: `Il suo job con ID ${job.id} è stato preso in carico.`
+  });
+ 
 });
 
 // Listener for the 'completed' event
@@ -85,13 +95,30 @@ worker.on(BullJobStatus.Completed, async (job: any) => {
   console.log("job " + job.id + " completato");
   //aggiornamento dello stato del job nel db
   ResultDAO.updateJobStatus(job.id, JobStatus.Completed);
+
+  const userEmail = job.data.userEmail;
+  sendMessageToUser(userEmail, {
+      type: 'job_completed',
+      jobId: job.id,
+      message: `Il suo job con ID ${job.id} è stato completato.`
+  });
 });
+
+
 
 // Listener for the 'failed' event
 worker.on(BullJobStatus.Failed, async (job: any, err:any) => {
   console.log("job " + job.id + " fallito");
   //aggiornamento dello stato del job nel db
   ResultDAO.updateJobStatus(job.id, JobStatus.Failed);
+
+  const userEmail = job.data.userEmail;
+  sendMessageToUser(userEmail, {
+    type: 'job_failed',
+    jobId: job.id,
+    message: `Il suo job con ID ${job.id} è fallito.`
+  });
+
 });
 
 // Listener for the 'waiting' event
