@@ -7,6 +7,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Middleware } from "./middleware";
 import { Role, UserPayload } from '../models/request';
 import * as jwt from 'jsonwebtoken';
+import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 /**
  * Middleware for handling JWT authentication.
@@ -22,36 +23,41 @@ class AuthenticationMiddleware extends Middleware {
     /**
      * Processes an incoming HTTP request to authenticate the user based on a JWT.
      * If the token is valid, it decodes the user's details, attach them to the request object and proceeds to the next middleware.
-     * If the token is invalid or missing, it sends an unauthorized response.
+     * If the token is invalid or missing, it pass the an unathorized error to the next middleware;
+     * the exception must be handled by the ErrorHandlingMiddleware.
      * 
      * @param req - Express's HTTP request object.
      * @param res - Express's HTTP response object.
      * @param next - Callback to the next middleware function.
      */
     handle(req: Request, res: Response, next: NextFunction): void {
-        const authHeader = req.headers.authorization;
-
-        if (authHeader) {
-            const token = authHeader.split(' ')[1];     //Token extraction (Bearer <token>)
-            if (!token) {
-                res.status(401).send({ error: 'Token not found' });
+        try {
+            const authHeader = req.headers.authorization;
+            if (!authHeader) {
+                throw ErrorFactory.createError(ErrorType.Authentication, 'Authorization header is missing');
             }
 
-            // Verifies the token using the RSA public key; if it's valid, attach user's informations to the request object
-            jwt.verify(token, (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n'), { algorithms: ['RS256'] }, (err: any, decoded: any) => {
+            const token = authHeader.split(' ')[1]; // Extract token (Bearer <token>)
+            if (!token) {
+                throw ErrorFactory.createError(ErrorType.Authentication, 'Token not found');
+            }
+
+            // Verifies the token using the RSA public key; if it's valid, attach user's information to the request object
+            jwt.verify(token, (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n'), { algorithms: ['RS256'] }, (err, decoded) => {
                 if (err) {
-                    return res.status(403).send({ error: 'Token is invalid' });
+                    throw ErrorFactory.createError(ErrorType.Authentication, 'Token is invalid');
                 }
+                
                 const decodedPayload = decoded as UserPayload;
                 req.user = {
                     userEmail: decodedPayload.email,
                     userRole: decodedPayload.role as Role
                 };
-                super.handle(req, res, next);
+                super.handle(req, res, next); // Continue to the next middleware if authentication is successful
             });
-        } else {
-
-            res.status(401).send({ error: 'Authorization header is missing' });
+        } catch (error) {
+            // Pass any unexpected error to the next middleware
+            next(error);
         }
     }
 }
@@ -84,7 +90,7 @@ class AuthorizationMiddleware extends Middleware {
         if (this.requiredRoles.includes(req.user!.userRole as Role)) {
             super.handle(req, res, next);
         } else {
-            res.status(401).send({ error: 'Unauthorized' });
+            next(ErrorFactory.createError(ErrorType.Authorization, 'Forbidden'));
         }
     }
 }

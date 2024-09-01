@@ -3,7 +3,7 @@ import fs from 'fs'; // Import file system module
 import unzipper from 'unzipper'; // Import unzipper module for extracting files
 import path from 'path'; // Import path module for handling file paths
 import ffmpeg from 'fluent-ffmpeg'; // Import ffmpeg for processing video files
-import { ErrorType, ErrorFactory } from './errorFactory'; // Import error handling utilities
+import { ErrorType, ErrorFactory } from '../utils/errorFactory'; // Import error handling utilities
 import { checkTokenAvailability, updateTokenBalance } from './tokenManagementService'; // Import token management services
 import { TOKEN_COSTS } from '../config/tokenCosts'; // Import token costs configuration
 import { Dataset } from '../models/sequelize_model/Dataset'; // Import Dataset model

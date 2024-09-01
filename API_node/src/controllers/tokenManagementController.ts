@@ -12,7 +12,7 @@ import * as tokenManagementService from '../services/tokenManagementService';
  *                          The response contains balance of the user that sends the request.                   
  */
 const getBalance = async (req: Request, res: Response): Promise<void> => {
-    const userEmail = req.body.userEmail;
+    const userEmail:string = req.user!.userEmail;
 
     try {
       //Retrieves the user's balance by his email
@@ -31,8 +31,8 @@ const getBalance = async (req: Request, res: Response): Promise<void> => {
  *                          The response contains balance of the user that sends the request.                   
  */
 const updateBalance = async (req: Request, res: Response): Promise<void> => {
-    const topUpUserEmail = req.body.topUpUserEmail; 
-    const topUpAmount = req.body.topUpAmount;
+    const topUpUserEmail:string = req.body.topUpUserEmail; 
+    const topUpAmount:number = req.body.topUpAmount;
 
     try {
       const updatedTokenBalance:number = await tokenManagementService.updateTokenBalance(topUpUserEmail, topUpAmount);

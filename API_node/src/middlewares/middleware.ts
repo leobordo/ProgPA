@@ -11,7 +11,7 @@ import { Request, Response, NextFunction } from 'express';
  */
 class Middleware {
 
-    private next: Middleware | null = null;
+    protected next: Middleware | null = null;
 
     /** 
      * Sets the next middleware and returns the reference to the next middleware (to concatenate setNext methods).

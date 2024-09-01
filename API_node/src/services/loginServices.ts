@@ -1,6 +1,6 @@
 import UserDAO from "../dao/userDao"
 import { Role } from "../models/request"
-import { ErrorFactory, ErrorType } from "./errorFactory"
+import { ErrorFactory, ErrorType } from "../utils/errorFactory"
 const jwt = require('jsonwebtoken');
 
 export const login = async (email: string, password: string) => {

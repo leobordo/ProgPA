@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 import { Middleware } from "./middleware";
 import { userSchema } from './validationSchemas/validationSchemas';
+import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 /**
  * Middleware class for validating both the request body and the user data embedded within the request.
@@ -40,22 +41,27 @@ class ValidationMiddleware extends Middleware {
      * @param {NextFunction} next - The callback function to pass control to the next middleware/controller.
      */
     handle(req: Request, res: Response, next: NextFunction): void {
-        // Validate the request body against the bodySchema
-        const bodyValidationResult = this.bodySchema.validate(req.body);
-        if (bodyValidationResult.error) {
-            res.status(400).send(bodyValidationResult.error.details[0].message);
-            return;
-        }
+        try {
+            // Validates the request body against the bodySchema
+            const bodyValidationResult = this.bodySchema.validate(req.body);
+            if (bodyValidationResult.error) {
+                next(ErrorFactory.createError(ErrorType.Validation, bodyValidationResult.error.details[0].message));
+                return;
+            }
 
-        // Validate the user data against the userSchema
-        const userValidationResult = this.userSchema.validate(req.user);
-        if (userValidationResult.error) {
-            res.status(400).send(userValidationResult.error.details[0].message);
-            return;
-        }
+            // Validates the user data against the userSchema
+            const userValidationResult = this.userSchema.validate(req.user);
+            if (userValidationResult.error) {
+                next(ErrorFactory.createError(ErrorType.Validation, userValidationResult.error.details[0].message));
+                return;
+            }
 
-        // If all validations pass, proceed to the next middleware/controller
-        super.handle(req, res, next);
+            // If all validations pass, proceeds to the next middleware/controller
+            super.handle(req, res, next);
+
+        } catch (err) {
+            next(err);
+        }
     }
 }
 

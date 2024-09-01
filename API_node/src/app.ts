@@ -13,20 +13,19 @@ import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 import { Request, Response, NextFunction } from 'express';
 import { initializeTag } from './models/sequelize_model/Tag';
 import startWebSocketServer from './websocket/websocketServer'; // Importa il server WebSocket
+import { ErrorHandlingMiddleware } from './middlewares/errorHandlingMiddleware';
+import { IAppError } from './utils/errorFactory';
 
-// Carica le variabili di ambiente dal file .env
+// Loading environment variables from .env file
 dotenv.config();
-require('dotenv').config();         // Loading environment variables from .env file
+require('dotenv').config();         
 const express = require('express');
-const bodyParser = require('body-parser');
-
 
 const app = express();
 const server: Server = createServer(app);
 
-// Middleware per l'analisi dei body delle richieste
-//app.use(bodyParser.json());
-//app.use(bodyParser.urlencoded({ extended: true }));
+
+//Global authentication middleware (except for registration and login routes)
 const authenticationMiddleware = new AuthenticationMiddleware();
 app.use((req: Request, res: Response, next: NextFunction) => {
  
@@ -45,8 +44,11 @@ app.use('/token', tokenManagementRouter);
 app.use('/inference', inferenceRouter);
 app.use('/upload', uploadRouter);
 
-
-
+//Global error handling middleware
+const errorHandlingMiddleware = new ErrorHandlingMiddleware();
+app.use((err: IAppError, req: Request, res: Response, next: NextFunction) => {
+  errorHandlingMiddleware.handle(req, res, next, err);
+});
 
 initializeUser(sequelize);
 initializeDataset(sequelize);

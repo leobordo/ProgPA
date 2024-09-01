@@ -26,11 +26,10 @@ adminAuthorization.setNext(updateBalanceValidation);
  */
 router.use((req : Request, res : Response, next : NextFunction) => bodyParser.handle(req, res, next))
 
-
 //GET route to retrieve the user's token balance
-router.get('/balance', (req: Request, res: Response, next: NextFunction) => userAuthorization.handle(req, res, next), controller.getBalance);
+router.get('/', (req: Request, res: Response, next: NextFunction) => userAuthorization.handle(req, res, next), controller.getBalance);
 
 //PATCH route that allows the admin to update a user's token balance
-router.patch('/balance', (req: Request, res: Response, next: NextFunction) => adminAuthorization.handle(req, res, next), controller.updateBalance);
+router.patch('/', (req: Request, res: Response, next: NextFunction) => adminAuthorization.handle(req, res, next), controller.updateBalance);
 
 export default router;

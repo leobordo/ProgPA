@@ -1,6 +1,6 @@
 import { Response, Request } from 'express'; // Import Express types
 import * as dataServices from '../services/dataServices'; // Import the data services
-import { ErrorType, ErrorFactory } from '../services/errorFactory'; // Import error handling utilities
+import { ErrorType, ErrorFactory } from '../utils/errorFactory'; // Import error handling utilities
 import  HTTPStatus from 'http-status-codes'; // Import HTTPStatus module
 
 /**

@@ -14,7 +14,8 @@ enum ErrorType {
     InsufficientTokens,
     UserNotFound,
     PswMatch,
-    DuplicateUser
+    DuplicateUser,
+    RequestParsingError
 }
 
 interface IAppError {
@@ -111,7 +112,12 @@ class UndefinedRequestError extends ApplicationError {
 }
 class InsufficientTokensError extends ApplicationError {
     constructor(message: string = 'Insufficient tokens to complete request') {
-        super('InsufficientTokens', message, 402);
+        super('InsufficientTokensError', message, 402);
+    }
+}
+class RequestParsingError extends ApplicationError {
+    constructor(message: string = 'An error occurred while parsing the request') {
+        super('RequestParsingError', message, 400);
     }
 }
 
@@ -144,6 +150,8 @@ class ErrorFactory {
                 return new DuplicateUserError(message);
             case ErrorType.PswMatch:
                 return new PswMatchError(message);
+            case ErrorType.RequestParsingError:
+                return new RequestParsingError(message);
             default:
                 return new GenericError(message);
         }

@@ -1,12 +1,13 @@
 import { Job } from "bullmq";
-import RedisConnection from './redisConnection';
+import RedisConnection from '../utils/redisConnection';
 import DatasetDAO from "../dao/datasetDao";
 import { Dataset } from "../models/sequelize_model/Dataset";
-import { checkTokenAvailability } from "./tokenManagementService";
+import { checkTokenAvailability, updateTokenBalance } from "./tokenManagementService";
 import ResultDAO from "../dao/resultDao";
 import { BullJobStatus, JobStatus } from "../models/job";
-import UserDAO from "../dao/userDao";
 import sequelize from '../config/sequelize';
+import { ErrorFactory, ErrorType } from "../utils/errorFactory";
+import { error } from "console";
 const { Queue, Worker, QueueEvents } = require('bullmq');
 
 
@@ -18,30 +19,26 @@ const inferenceQueue = new Queue('inferenceQueue', { connection: redisConnection
 // QueueEvent Creation
 const inferenceQueueEvents = new QueueEvents('inferenceQueueEvents', { connection: redisConnection });
 // Route address to perform object detection
-const FLASK_PREDICTION_URL = /*process.env.FLASK_PREDICTION_URL ||*/ 'http://flask:5000/predict'; 
+const FLASK_PREDICTION_URL = process.env.FLASK_PREDICTION_URL || 'http://flask:5000/predict'; 
 
 // Definition of the function used by the worker to process jobs
 const processContents: Function = async (job: Job) => {
 
-  try {
-    // Retrieve the dataset informations
-    const dataset: Dataset = await DatasetDAO.getDatasetByName(job.data.datasetName, job.data.userEmail);
+  // Retrieve the dataset informations
+  const dataset: Dataset = await DatasetDAO.getDatasetByName(job.data.datasetName, job.data.userEmail);
 
-    // Checks if the user has enough tokens to perform the inference on the dataset
-    if (!await checkTokenAvailability(job.data.userEmail, -dataset.token_cost)) {
-      console.log("Token insufficienti");
-      ResultDAO.updateJobStatus(job.id!, JobStatus.Aborted);
-      return;
-    }
+  // Checks if the user has enough tokens to perform the inference on the dataset
+  if (!await checkTokenAvailability(job.data.userEmail, dataset.token_cost)) {
+    throw ErrorFactory.createError(ErrorType.InsufficientTokens, "Unsufficient tokens to process job " + job.id);
+  }
 
-    console.log("Token sufficienti");
+  // Use a managed transaction
+  await sequelize.transaction(async (transaction) => {
+    // Update token balance with the transaction
+    await updateTokenBalance(job.data.userEmail, dataset.token_cost, transaction);
 
-    // Utilizza una managed transaction
-    await sequelize.transaction(async (transaction) => {
-      // Aggiorna il saldo dei token con la transazione
-      await UserDAO.updateTokenBalanceByEmail(job.data.userEmail, dataset.token_cost, transaction);
-
-      // Invia la richiesta di inferenza all'API Flask
+    try {
+      // Send inference request to the Flask API
       const response = await fetch(FLASK_PREDICTION_URL, {
         method: "POST",
         headers: {
@@ -55,19 +52,20 @@ const processContents: Function = async (job: Job) => {
         }),
       });
 
-      const responseData = await response.json();
-      console.log("responseData: " + JSON.stringify(responseData));
+      // Check if the response is not ok ( status 4xx or 5xx)
+      if (!response.ok) {
+        const responseData = await response.json();
+        throw ErrorFactory.createError(ErrorType.Generic, responseData.message || "An error occurred during the inference");
+      }
 
+      // Parse the response data and stores the job result in the db
+      const responseData = await response.json();
       ResultDAO.updateJobResult(job.id!, JSON.stringify(responseData));
 
-      if (!response.ok) {
-        throw new Error(responseData.message);
-      }
-    });
-  } catch (error: any) {
-    console.log(error);
-  }
-
+    } catch (err: any) {
+      throw ErrorFactory.createError(ErrorType.Generic, "Failed to perform inference request to Flask API: " + err.message);
+    }
+  });
 }
 
 // Worker creation to process jobs in the inferenceQueue
@@ -89,9 +87,15 @@ worker.on(BullJobStatus.Completed, async (job: any) => {
 
 // Listener for the 'failed' event
 worker.on(BullJobStatus.Failed, async (job: any, err:any) => {
-  console.log("job " + job.id + " fallito");
-  //aggiornamento dello stato del job nel db
-  ResultDAO.updateJobStatus(job.id, JobStatus.Failed);
+  console.error(err);
+  // Check the error type 
+  if (err.name === 'InsufficientTokensError') {
+    ResultDAO.updateJobStatus(job.id!, JobStatus.Aborted);
+    console.log("job " + job.id + " aborted");
+  } else {
+    ResultDAO.updateJobStatus(job.id, JobStatus.Failed);
+    console.log("job " + job.id + " failed");
+  }
 });
 
 // Listener for the 'waiting' event

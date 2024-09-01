@@ -2,7 +2,7 @@ import { error } from 'console';
 import { Dataset } from '../models/sequelize_model/Dataset'; // Import the Dataset model
 import { Result } from '../models/sequelize_model/Result'; // Import the Result model
 import { Tag } from '../models/sequelize_model/Tag'; // Import the Tag model
-import { ErrorFactory, ErrorType } from '../services/errorFactory'; // Import error handling utilities
+import { ErrorFactory, ErrorType } from '../utils/errorFactory'; // Import error handling utilities
 
 /**
  * Dataset Data Access Object (DAO)

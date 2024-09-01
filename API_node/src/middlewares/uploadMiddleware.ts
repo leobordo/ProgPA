@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import multer, { StorageEngine, FileFilterCallback } from 'multer';
 import path from 'path';
 import { Middleware } from "./middleware"; 
+import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 
 type FileFilter = (req: Request, file: Express.Multer.File, callback: FileFilterCallback) => void;
@@ -25,7 +26,7 @@ class UploadMiddleware extends Middleware {
             if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/') || file.mimetype === 'application/zip') {
                 cb(null, true);
             } else {
-                cb(new Error('Unsupported file type'));
+                cb(ErrorFactory.createError(ErrorType.RequestParsingError, "Unsupported file type"));
             }
         };
 
@@ -33,16 +34,16 @@ class UploadMiddleware extends Middleware {
     }
 
     handle(req: Request, res: Response, next: NextFunction): void {
-        const upload = this.uploader.single('file');  // o .array(), .fields(), etc., a seconda delle tue necessità
+        const upload = this.uploader.single('file');
         upload(req, res, (err) => {
             if (err instanceof multer.MulterError) {
-                // Un errore di Multer quando si carica un file
-                res.status(500).send({ error: err.message });
+                // Multer error during the file uploading
+                next(ErrorFactory.createError(ErrorType.FileUpload, "An error occurred while uploading the file"));
             } else if (err) {
-                // Un errore generico se il fileFilter rifiuta il file
-                res.status(400).send({ error: err.message });
+                // FileFilter refuses the file
+                next(ErrorFactory.createError(ErrorType.RequestParsingError, err.message));
             } else {
-                // Se non ci sono errori, procedi al prossimo middleware nella catena
+                // No errors occurred
                 super.handle(req, res, next);
             }
         });
@@ -54,21 +55,14 @@ class BodyParserMiddleware extends Middleware {
 
     constructor() {
         super();
-        // Configura multer senza salvataggio di file
         this.upload = multer();
     }
 
     handle(req: Request, res: Response, next: NextFunction): void {
-        // Processa solo dati form-data senza file
-
         this.upload.none()(req, res, (err: any) => {
             if (err) {
-                // Gestisci gli errori di Multer
-                return res.status(400).send(`Error processing data: ${err.message}`);
+                next(ErrorFactory.createError(ErrorType.RequestParsingError, "An error occurred while parsing the request"));
             }
-            // Procedi al prossimo middleware se non ci sono errori
-
-
             super.handle(req, res, next);
         });
     }
