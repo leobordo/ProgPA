@@ -1,55 +1,64 @@
 import { error } from "console";
 import { User } from "../models/sequelize_model/User";
 import { Transaction } from "sequelize";
+import { ErrorFactory, ErrorType } from "../utils/errorFactory";
 
 const UserDAO = {
     
     //Updates the token balance of the specified user (by ID) with the value of newTokenBalance
     async updateTokenBalanceByEmail(userEmail: string, newTokenBalance: number, transaction: Transaction | null = null) {
-        const [updateCount, updatedUsers] = await User.update(
-            { tokens: newTokenBalance },
-            { 
-                where: { email: userEmail },
-                returning: true,
-                transaction
-            }
-        );
+        try {
+            const [affectedCount, affectedRows] = await User.update(
+                { tokens: newTokenBalance },
+                { 
+                    where: { email: userEmail },
+                    returning: true,
+                    transaction
+                }
+            );
 
-        if (updateCount > 0) {
-            return updatedUsers[0];
+            if (affectedCount > 0) {            // Check if any rows were updated
+                return affectedRows[0];         // Return the updated row
+            }
+            return null;                        // Return null if no rows were updated
+        } catch (error) {
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
-        throw error("Update failed");
     },
 
     //Gets the user's informations by his email 
     async getUserByEmail(userEmail: string) {
         try {
-            const user = await User.findOne({
+            return await User.findOne({
                 where: {email: userEmail}
             });
-            return user;
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
     //Gets the user's informations by his email and password
     //used when user has not a token 
     async getUserByEmailAndPsw(userEmail: string, psw: string) {
-        const user  = await User.findOne({
-            where: {email: userEmail,
-                password: psw
-            }
-        });
-        return user;
+        try {
+            return await User.findOne({
+                where: {email: userEmail, password: psw}
+            });
+        } catch (error) {
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
+        }
     },
 
     //Create a new user
     async createUser(email: string, psw:string){
-        return await User.create({
-            email: email,
-            password:psw
-        })
+        try {
+            return await User.create({
+                email: email,
+                password:psw
+            })
+        } catch (error) {
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
+        }
     }
 
 

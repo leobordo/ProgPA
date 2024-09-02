@@ -23,7 +23,7 @@ const updateTokenBalance = async (userEmail: string, tokenFlowAmount: number, tr
         throw Error
     }
     const newBalance:number = Number(user.tokens) + Number(tokenFlowAmount);
-    const updatedUser:User = await userDao.updateTokenBalanceByEmail(userEmail, newBalance, transaction);
+    const updatedUser:User | null = await userDao.updateTokenBalanceByEmail(userEmail, newBalance, transaction);
     return updatedUser.tokens;
 };
 
