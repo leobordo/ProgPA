@@ -14,6 +14,8 @@ from processing import (get_annotated_image, get_annotated_video,
 from utils import get_file_category
 from validation import validate_request_params
 
+import json
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -87,7 +89,7 @@ def predict():
                 get_annotated_video(file_path, model, dataset_id, job_id)
 
     # Convert to json
-    results_json = jsonify(results_list)
+    results_json = json.dumps(results_list, indent=4)  # Format JSON with indentation
 
     #load_json_results(validation_response, results_json)):
     

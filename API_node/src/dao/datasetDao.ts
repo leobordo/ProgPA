@@ -255,6 +255,44 @@ const DatasetDAO = {
             throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
+
+
+    /** 
+   * Retrieve jobs associated with a specific user email.
+   * @param {string} userEmail - The email of the user.
+   * @returns 
+   */
+  async getJobsByUserEmail(userEmail: string) {
+    try {
+      
+      const jobs = await Result.findAll({
+        include: [{
+          model: Dataset,
+          required: true, 
+          where: { email: userEmail, is_deleted: false }
+        }],
+        attributes: ['job_id', 'state', 'dataset_id']
+      });
+
+      return jobs;
+      
+    } catch (error) {
+      console.error('Errore nel recupero dei job:', error);
+      throw Error('Error retrieving jobs');
+    }
+  },
+
+
+
+
+
+
+
+
+
+
+
+
 };
 
 /* Export the DatasetDAO object as the default export. */
