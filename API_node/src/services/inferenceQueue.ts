@@ -25,8 +25,10 @@ const FLASK_PREDICTION_URL = process.env.FLASK_PREDICTION_URL || 'http://flask:5
 const processContents: Function = async (job: Job) => {
 
   // Retrieve the dataset informations
-  const dataset: Dataset = await DatasetDAO.getDatasetByName(job.data.datasetName, job.data.userEmail);
-
+  const dataset: Dataset | null = await DatasetDAO.getDatasetByName(job.data.datasetName, job.data.userEmail);
+  if (!dataset) {
+    throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
+}
   // Checks if the user has enough tokens to perform the inference on the dataset
   if (!await checkTokenAvailability(job.data.userEmail, dataset.token_cost)) {
     throw ErrorFactory.createError(ErrorType.InsufficientTokens, "Unsufficient tokens to process job " + job.id);

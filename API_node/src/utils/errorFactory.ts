@@ -1,4 +1,6 @@
 // Link per codici di errore: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+import { StatusCodes } from 'http-status-codes';
+
 
 enum ErrorType {
     Authentication,
@@ -16,7 +18,8 @@ enum ErrorType {
     PswMatch,
     DuplicateUser,
     RequestParsingError,
-    DatabaseError
+    DatabaseError,
+    FrameCount
 }
 
 interface IAppError {
@@ -39,92 +42,104 @@ class ApplicationError extends Error implements IAppError {
 
 class ValidationError extends ApplicationError {
     constructor(message: string = 'Validation error occurred') {
-        super('ValidationError', message, 400);
+        super('ValidationError', message, StatusCodes.BAD_REQUEST);
     }
 }
 
 class UserNotFoundError extends ApplicationError {
-    constructor(message: string = 'User not found, wrong email or password'){
-        super('UserNotFoundError', message, 401)
+    constructor(message: string = 'User not found, wrong email or password') {
+        super('UserNotFoundError', message, StatusCodes.UNAUTHORIZED);
     }
 }
+
 class PswMatchError extends ApplicationError {
-    constructor(message: string = "Passwords don't match"){
-        super('PswMatchError', message, 401)
+    constructor(message: string = "Passwords don't match") {
+        super('PswMatchError', message, StatusCodes.UNAUTHORIZED);
     }
 }
+
 class DuplicateUserError extends ApplicationError {
-    constructor(message: string = 'An user with this email already exists') {
-        super('DuplicateUserError', message, 401);
+    constructor(message: string = 'A user with this email already exists') {
+        super('DuplicateUserError', message, StatusCodes.CONFLICT);
     }
 }
 
 class AuthenticationError extends ApplicationError {
     constructor(message: string = 'Unauthorized') {
-        super('AuthenticationError', message, 401);
+        super('AuthenticationError', message, StatusCodes.UNAUTHORIZED);
     }
 }
 
 class AuthorizationError extends ApplicationError {
     constructor(message: string = 'Forbidden') {
-        super('AuthorizationError', message, 403);
+        super('AuthorizationError', message, StatusCodes.FORBIDDEN);
     }
 }
 
 class DatabaseError extends ApplicationError {
     constructor(message: string = 'Database error') {
-        super('DatabaseError', message, 500);
+        super('DatabaseError', message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 class GenericError extends ApplicationError {
     constructor(message: string = 'Something went wrong') {
-        super('GenericError', message, 500);
+        super('GenericError', message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 class DatasetNotFoundError extends ApplicationError {
     constructor(message: string = 'Dataset not found') {
-        super('DatasetNotFoundError', message, 404);
+        super('DatasetNotFoundError', message, StatusCodes.NOT_FOUND);
     }
 }
 
 class DuplicateDatasetError extends ApplicationError {
     constructor(message: string = 'A dataset with this name already exists') {
-        super('DuplicateDatasetError', message, 409);
+        super('DuplicateDatasetError', message, StatusCodes.CONFLICT);
+    }
+}
+
+class FrameCountError extends ApplicationError {
+    constructor(message: string = 'Error counting video frames') {
+        super('FrameCountError', message, StatusCodes.UNPROCESSABLE_ENTITY);
     }
 }
 
 class FileUploadError extends ApplicationError {
     constructor(message: string = 'File upload error') {
-        super('FileUploadError', message, 400);
+        super('FileUploadError', message, StatusCodes.BAD_REQUEST);
     }
 }
 
 class DirectoryCreationError extends ApplicationError {
     constructor(message: string = 'Failed to create directory') {
-        super('DirectoryCreationError', message, 500);
+        super('DirectoryCreationError', message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
+
 class MissingParametersError extends ApplicationError {
     constructor(missingParams: string[]) {
         const message = `Missing required parameters: ${missingParams.join(', ')}.`;
-        super('MissingParametersError', message, 400);
+        super('MissingParametersError', message, StatusCodes.BAD_REQUEST);
     }
 }
+
 class UndefinedRequestError extends ApplicationError {
     constructor(message: string = 'Undefined request, try again') {
-        super('UndefinedRequestError', message, 501);
+        super('UndefinedRequestError', message, StatusCodes.NOT_IMPLEMENTED);
     }
 }
+
 class InsufficientTokensError extends ApplicationError {
     constructor(message: string = 'Insufficient tokens to complete request') {
-        super('InsufficientTokensError', message, 402);
+        super('InsufficientTokensError', message, StatusCodes.PAYMENT_REQUIRED);
     }
 }
+
 class RequestParsingError extends ApplicationError {
     constructor(message: string = 'An error occurred while parsing the request') {
-        super('RequestParsingError', message, 400);
+        super('RequestParsingError', message, StatusCodes.BAD_REQUEST);
     }
 }
 
@@ -161,10 +176,12 @@ class ErrorFactory {
                 return new RequestParsingError(message);
             case ErrorType.DatabaseError:
                 return new DatabaseError(message);
+            case ErrorType.FrameCount:
+                return new FrameCountError(message);
             default:
                 return new GenericError(message);
         }
     }
 }
 
-export { ErrorType, ErrorFactory, IAppError };
+export { ErrorType, ErrorFactory, IAppError, ApplicationError };
