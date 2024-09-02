@@ -2,7 +2,7 @@ import { error } from 'console';
 import { Dataset } from '../models/sequelize_model/Dataset'; // Import the Dataset model
 import { Result } from '../models/sequelize_model/Result'; // Import the Result model
 import { Tag } from '../models/sequelize_model/Tag'; // Import the Tag model
-import { ErrorFactory, ErrorType } from '../utils/errorFactory'; // Import error handling utilities
+import { ErrorFactory, ErrorType, ApplicationError } from '../utils/errorFactory'; // Import error handling utilities
 
 /**
  * Dataset Data Access Object (DAO)
@@ -14,27 +14,16 @@ const DatasetDAO = {
      * @returns {Promise<number | null>} The maximum dataset ID or null if none found.
      */
     async getMaxDatasetId() {
-        const maxDatasetId = await Dataset.max('dataset_id');
-        return maxDatasetId;
+        try
+        {const maxDatasetId = await Dataset.max('dataset_id');
+        return maxDatasetId;}
+        catch(err)
+        {
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        }
     },
     
     /**
-     * Retrieve a dataset by its name and user email.
-     * @param {string} dataset_name - The name of the dataset.
-     * @param {string} userEmail - The email of the user who owns the dataset.
-     * @param {any} [transaction] - Optional Sequelize transaction object.
-     * @returns {Promise<Dataset | null>} The dataset if found, otherwise null.
-     */
-    async getDsByName(dataset_name: string, userEmail: string, transaction?: any) {
-        return await Dataset.findOne({
-            where: {
-                dataset_name: dataset_name,
-                email: userEmail,
-                is_deleted: false
-            },
-            transaction: transaction
-        });
-    },
 
     /**
      * Retrieve all tags associated with a dataset.
@@ -43,13 +32,17 @@ const DatasetDAO = {
      * @returns {Promise<Tag[]>} A list of tags associated with the dataset.
      */
     async getTags(dataset_id: number, transaction?: any){
-        return await Tag.findAll({
+        try {
+            return await Tag.findAll({
             where: {
                 dataset_id: dataset_id
             },
             attributes: ['tag'],
             transaction: transaction
-        });
+            });
+        }catch(err){
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
+            }
     },
 
     /**
@@ -84,7 +77,7 @@ const DatasetDAO = {
             // Return the updated dataset
             return await Dataset.findByPk(datasetId);
         } catch (err) {
-            console.error(err);
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
         }
     },
 
@@ -96,13 +89,16 @@ const DatasetDAO = {
      * @returns {Promise<Tag>} The newly created tag.
      */
     async createTag(dataset_id: number, tag: string, transaction?: any) {
-        return await Tag.create({
+       try{ return await Tag.create({
             dataset_id: dataset_id,
             tag: tag
         },
         {
             transaction: transaction
         });
+        }catch(err){
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        }
     },
 
     /**
@@ -112,10 +108,13 @@ const DatasetDAO = {
      * @returns {Promise<Dataset[]>} A list of datasets associated with the user.
      */
     async getAllByUserEmail(userEmail: string, transaction?: any) {
-        return await Dataset.findAll({
+        try{return await Dataset.findAll({
             where: { email: userEmail, is_deleted: false },
             transaction: transaction
         });
+        }catch(err){
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        }
     },
 
     /**
@@ -131,7 +130,6 @@ const DatasetDAO = {
     async updateDsByName(
         dataset_name: string, 
         userEmail: string, 
-        dataset_id: number, 
         newName?: string,
         transaction?: any 
     ) {
@@ -147,7 +145,7 @@ const DatasetDAO = {
             );
             return "Dataset name updated successfully";
         } catch (err) {
-            throw ErrorFactory.createError(ErrorType.Generic); // Throw generic error
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
@@ -165,7 +163,7 @@ const DatasetDAO = {
                 transaction: transaction
             });
         } catch (err) {
-            throw ErrorFactory.createError(ErrorType.Generic); // Throw generic error
+            throw ErrorFactory.createError(ErrorType.DatabaseError); // Throw generic error
         }
     },
 
@@ -176,10 +174,13 @@ const DatasetDAO = {
      * @returns {Promise<void>} Resolves when the dataset is marked as deleted.
      */
     async softDeleteByName(dataset_name: string, userEmail: string) {
-        await Dataset.update(
+        try{await Dataset.update(
             { is_deleted: true },
             { where: { dataset_name: dataset_name, email: userEmail } }
-        );
+        );}catch(err)
+        {
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        }
     },
 
     /**
@@ -191,14 +192,14 @@ const DatasetDAO = {
      * @throws {Error} Throws an error if the dataset is not found.
      */
     async getDatasetByName(dataset_name: string, userEmail: string, transaction?: any) {
-        const dataset = await Dataset.findOne({
+        try{const dataset = await Dataset.findOne({
             where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },
             transaction: transaction,
         });
-        if (dataset) {
-            return dataset;
-        } else {
-            throw Error("Dataset not found"); // Throws error if dataset not found
+        return dataset;
+        }catch(err)
+        {
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
         }
     },
 
@@ -210,26 +211,16 @@ const DatasetDAO = {
      * @returns {Promise<void>} Resolves when the token cost is updated.
      * @throws {Error} Throws an error if the dataset is not found.
      */
-    async updateTokenCostByName(dataset_name: string, userEmail: string, additionalCost: number) {
-        const dataset = await Dataset.findOne({
-            attributes: ['token_cost'], 
-            where: {
-                dataset_name: dataset_name,
-                email: userEmail,
-                is_deleted: false
-            }
-        });
-        if (dataset) {
-            console.log(dataset.token_cost)
-            console.log(additionalCost)
-            const newTokenCost = Number(dataset.token_cost) + Number(additionalCost);
-            console.log(newTokenCost)
+    async updateTokenCostByName(dataset_name: string, userEmail: string,token_cost: number, additionalCost: number) {
+        try{
+            const newTokenCost = Number(token_cost) + Number(additionalCost);
             await Dataset.update(
                 { token_cost: newTokenCost },
                 { where: { dataset_name: dataset_name, email: userEmail } }
             );
-        } else {
-            throw Error("Dataset not found"); // Throws error if dataset not found
+        }catch(err)
+        {
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
         }
     },
 
@@ -240,17 +231,18 @@ const DatasetDAO = {
      * @throws {Error} Throws an error if the dataset is not found.
      */
     async getDatasetByJobId(jobId: string) {
-        const dataset = await Dataset.findOne({
+        try{const dataset = await Dataset.findOne({
             include: [{
                 model: Result,
                 required: true, 
                 where: { job_id: jobId }
             }]
         });
-        if (dataset) {
-            return dataset;
+        return dataset
+        }catch(err)
+        {
+            throw ErrorFactory.createError(ErrorType.DatabaseError)
         }
-        throw Error("Dataset not found"); // Throws error if user not found
     },
 };
 

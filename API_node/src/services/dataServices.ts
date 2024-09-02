@@ -21,7 +21,7 @@ ffmpeg.setFfprobePath('/usr/bin/ffprobe'); // Set the path to ffprobe for ffmpeg
  */
 const createDataset = async (datasetName: string, tags: string[], email: string) => {
     // Check if a dataset with the same name already exists
-    const existingDataset = await DatasetDAO.default.getDsByName(datasetName, email);
+    const existingDataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
 
     if (existingDataset) {
         throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if dataset exists
@@ -31,7 +31,7 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
         // Create the new dataset in the database
         const newDataset = await DatasetDAO.default.create(datasetName, email);
         if (!newDataset) {
-            throw Error;
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
         if (tags){
             // Add tags to the new dataset
@@ -55,7 +55,7 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
  */
 const getAllDatasets = async (email: string) => {
     // Retrieve all datasets for a user
-    const datasets: Dataset[] = await DatasetDAO.default.getAllByUserEmail(email);
+    try{const datasets: Dataset[] = await DatasetDAO.default.getAllByUserEmail(email);
     const results = [];
 
     for (const ds of datasets) {
@@ -70,7 +70,10 @@ const getAllDatasets = async (email: string) => {
         });
     }
 
-    return results;
+    return results;}
+    catch(err){
+        throw err
+    }
 };
 
 /**
@@ -84,55 +87,53 @@ const getAllDatasets = async (email: string) => {
 const updateDatasetByName = async (datasetName: string, email: string, newName?: string, tags?: string[]) => {
     return await sequelize.transaction(async (transaction: any) => {
         // Get the dataset by name and email
-        const dataset = await DatasetDAO.default.getDsByName(datasetName, email, transaction);
-        const allDatasets = await DatasetDAO.default.getAllByUserEmail(email, transaction);
-        if (!dataset) {
-            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
-        }
-
-        if (dataset.email !== email) {
-            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if email mismatch
-        }
-
-        for(const ds of allDatasets){
-            if (ds.dataset_name === newName) {
-                throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name already exists
+        try{const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email, transaction);
+            const allDatasets = await DatasetDAO.default.getAllByUserEmail(email, transaction);
+            if (!dataset) {
+                throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
             }
-        }
 
-        if (newName && dataset.dataset_name === newName) {
-            throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name is the same as current
-        }
+            if (dataset.email !== email) {
+                throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if email mismatch
+            }
 
-        if (!newName && !tags) {
-            throw ErrorFactory.createError(ErrorType.UndefinedRequest); // Throw error if neither newName nor tags are provided
-        }
+            for(const ds of allDatasets){
+                if (ds.dataset_name === newName) {
+                    throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name already exists
+                }
+            }
 
-        try {
+            if (newName && dataset.dataset_name === newName) {
+                throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name is the same as current
+            }
+
+            if (!newName && !tags) {
+                throw ErrorFactory.createError(ErrorType.UndefinedRequest); // Throw error if neither newName nor tags are provided
+            }
             // Update dataset name if newName is provided
             if (!tags) {
-                await DatasetDAO.default.updateDsByName(datasetName, email, dataset.dataset_id, newName, transaction);
-                return "Name correctly updated";
-            }
-
-            // Update tags if provided
-            if (!newName) {
-                await DatasetDAO.default.deleteTagsbyId(dataset.dataset_id, transaction);
-                for(const tag of tags) {
-                    await DatasetDAO.default.createTag(dataset.dataset_id, tag, transaction);
+                    await DatasetDAO.default.updateDsByName(datasetName, email, newName, transaction);
+                    return "Name correctly updated";
                 }
-                return "Tags correctly updated";
-            }
 
-            // Update both dataset name and tags
-            await DatasetDAO.default.updateDsByName(datasetName, email, dataset.dataset_id, newName, transaction);
+                // Update tags if provided
+            if (!newName) {
+                    await DatasetDAO.default.deleteTagsbyId(dataset.dataset_id, transaction);
+                    for(const tag of tags) {
+                        await DatasetDAO.default.createTag(dataset.dataset_id, tag, transaction);
+                    }
+                    return "Tags correctly updated";
+                }
+
+                // Update both dataset name and tags
+            await DatasetDAO.default.updateDsByName(datasetName, email, newName, transaction);
             await DatasetDAO.default.deleteTagsbyId(dataset.dataset_id, transaction);
             for(const tag of tags) {
                 await DatasetDAO.default.createTag(dataset.dataset_id, tag, transaction);
-            }
+                }
             return "Name and Tags correctly updated";
         } catch(err) {
-            throw err; // Propagate error if update fails
+        throw err; // Propagate error if update fails
         }
     });
 };
@@ -143,8 +144,8 @@ const updateDatasetByName = async (datasetName: string, email: string, newName?:
  * @param email - User's email
  */
 const deleteDatasetByName = async (datasetName: string, email: string) => {
-    // Get the dataset by name and email
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
+   try{ // Get the dataset by name and email
+    const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
 
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
@@ -156,6 +157,9 @@ const deleteDatasetByName = async (datasetName: string, email: string) => {
 
     // Soft delete the dataset by marking it as deleted
     return await DatasetDAO.default.softDeleteByName(datasetName, email);
+    }catch(err){
+        throw err
+    }
 };
 
 /**
@@ -166,9 +170,8 @@ const deleteDatasetByName = async (datasetName: string, email: string) => {
  * @returns Success message
  */
 const insertContents = async (datasetName: string, file: Express.Multer.File, email: string) => {
-    // Get the dataset by name and email
-    const dataset = await DatasetDAO.default.getDsByName(datasetName, email);
-
+    try{// Get the dataset by name and email
+    const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
     if (!dataset) {
         throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
     }
@@ -241,14 +244,14 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             await updateTokenBalance(email, -totalTokenCost);
             // Update token cost on dataset
             
-            await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, totalTokenCostInference);
+            await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, dataset.token_cost, totalTokenCostInference);
 
             // Clean up extracted files and uploaded zip
             fs.rmSync(extractedPath, { recursive: true, force: true });
             fs.rmSync(file.path, { recursive: true, force: true });
         } catch (err: any) {
             if (err.status === 402){
-                throw err; // Propagate insufficient tokens error
+                throw err; 
             }
             throw ErrorFactory.createError(ErrorType.FileUpload); // Throw error if file upload fails
         }
@@ -279,7 +282,7 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             
             // Deduct tokens
             await updateTokenBalance(email, -totalTokenCost);
-            await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, totalTokenCostInference);
+            await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, dataset.token_cost, totalTokenCostInference);
         } catch (err) {
             throw err;
         }
@@ -291,6 +294,8 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
         const finalFilePath = path.join(originalFilesPath, file.filename);
         fs.renameSync(file.path, finalFilePath);
         return 'Content uploaded successfully';
+    }}catch(err){
+        throw err
     }
 };
 
@@ -303,8 +308,7 @@ const getVideoFrameCount = (videoPath: string): Promise<number> => {
     return new Promise((resolve, reject) => {
         ffmpeg.ffprobe(videoPath, (err: Error | null, metadata: ffmpeg.FfprobeData) => {
             if (err) {
-                console.error('ffprobe error:', err);
-                return reject(err); // Reject promise if error occurs
+                return reject(ErrorFactory.createError(ErrorType.FrameCount)); // Reject promise if error occurs
             }
             
             const stream = metadata.streams.find((stream: ffmpeg.FfprobeStream) => stream.codec_type === 'video');
@@ -319,7 +323,7 @@ const getVideoFrameCount = (videoPath: string): Promise<number> => {
                     const duration = parseFloat(stream.duration);
                     resolve(Math.round(frameRate * duration));
                 } else {
-                    reject(new Error('Unable to determine frame count')); // Reject promise if unable to determine frame count
+                    reject(ErrorFactory.createError(ErrorType.FrameCount)); 
                 }
             }
         });
@@ -332,7 +336,10 @@ const getVideoFrameCount = (videoPath: string): Promise<number> => {
  * @returns An array of tags associated with the dataset
  */
 const getAllTags = async (dataset: Dataset) => {
-    return await DatasetDAO.default.getTags(dataset.dataset_id); // Retrieve tags for the dataset
+    try{return await DatasetDAO.default.getTags(dataset.dataset_id);} // Retrieve tags for the dataset
+    catch(err){
+        throw err;
+    }
 };
 
 // Export functions for use in other modules
