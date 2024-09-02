@@ -1,44 +1,32 @@
-import { Request, Response } from 'express';
-import * as service from '../services/inferenceService';
-import { IResult, JobStatus } from '../models/job';
-import * as userServices from '../services/loginServices'
-import  HTTPStatus from 'http-status-codes'; // Import HTTPStatus module
+import { NextFunction, Request, Response } from 'express';
+import * as loginService from '../services/loginServices'
+import HTTPStatus from 'http-status-codes'; 
 
-const login = async (req: Request, res: Response): Promise<void> => {
-    try {const email = req.body.email
-    const password = req.body.password
+const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { email, password } = req.body;
 
-    const result = await userServices.login(email!, password!);
-    
-    // Respond with logged user
-    res.status(HTTPStatus.CREATED).json(result);}
-    catch (error) {
-        const err = error as Error;
-        
-        // Respond with internal server error if an error occurs
-        res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: err.message });
-      }
+        const access_token:string = await loginService.login(email!, password!);
 
-}
-
-const registration = async (req: Request, res: Response): Promise<void> => {
-
-    try {const email = req.body.email
-    const password = req.body.password
-    const confirmPassword = req.body.confirmPassword
-
-    const result = await userServices.registration(email, password, confirmPassword)
-
-    // Respond with registrated user
-    res.status(HTTPStatus.CREATED).json(result);} catch(err){
-        const error = err as Error
-        // Respond with internal server error if an error occurs
-        res.status(HTTPStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
+        const response: Object = {message: "Logged in", jwt_token: access_token};
+        res.status(HTTPStatus.OK).send(response);
     }
+    catch (error) {
+        next(error);
+    }
+}
 
+const registration = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
-
+    try {
+        const { email, password } = req.body;
+        const createdUser = await loginService.registration(email, password);
+        const response = {message: "Registration completed", email: createdUser.email, token_balance: createdUser.tokens};
+        res.status(HTTPStatus.CREATED).json(response);
+    } catch (error) {
+        next(error);
+    }
 }
 
 
-export { login, registration};
+export { login, registration };

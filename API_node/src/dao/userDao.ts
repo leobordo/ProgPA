@@ -1,4 +1,3 @@
-import { error } from "console";
 import { User } from "../models/sequelize_model/User";
 import { Transaction } from "sequelize";
 import { ErrorFactory, ErrorType } from "../utils/errorFactory";

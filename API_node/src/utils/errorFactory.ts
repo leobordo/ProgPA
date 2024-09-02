@@ -1,6 +1,4 @@
-// Link per codici di errore: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 import { StatusCodes } from 'http-status-codes';
-
 
 enum ErrorType {
     Authentication,
@@ -19,7 +17,10 @@ enum ErrorType {
     DuplicateUser,
     RequestParsingError,
     DatabaseError,
-    FrameCount
+    FrameCount,
+    JobNotCompletedError,
+    JobNotFoundError,
+    InferenceError
 }
 
 interface IAppError {
@@ -76,7 +77,7 @@ class AuthorizationError extends ApplicationError {
     }
 }
 
-class DatabaseError extends ApplicationError {
+export class DatabaseError extends ApplicationError {
     constructor(message: string = 'Database error') {
         super('DatabaseError', message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
@@ -91,6 +92,18 @@ class GenericError extends ApplicationError {
 class DatasetNotFoundError extends ApplicationError {
     constructor(message: string = 'Dataset not found') {
         super('DatasetNotFoundError', message, StatusCodes.NOT_FOUND);
+    }
+}
+
+class JobNotFoundError extends ApplicationError {
+    constructor(message: string = 'Job not found') {
+        super('JobNotFoundError', message, StatusCodes.NOT_FOUND);
+    }
+}
+
+class InferenceError extends ApplicationError {
+    constructor(message: string = 'An error occurred during the inference') {
+        super('InferenceError', message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -131,7 +144,7 @@ class UndefinedRequestError extends ApplicationError {
     }
 }
 
-class InsufficientTokensError extends ApplicationError {
+export class InsufficientTokensError extends ApplicationError {
     constructor(message: string = 'Insufficient tokens to complete request') {
         super('InsufficientTokensError', message, StatusCodes.PAYMENT_REQUIRED);
     }
@@ -139,6 +152,12 @@ class InsufficientTokensError extends ApplicationError {
 
 class RequestParsingError extends ApplicationError {
     constructor(message: string = 'An error occurred while parsing the request') {
+        super('RequestParsingError', message, StatusCodes.BAD_REQUEST);
+    }
+}
+
+class JobNotCompletedError extends ApplicationError {
+    constructor(message: string = 'the job has not been completed yet') {
         super('RequestParsingError', message, StatusCodes.BAD_REQUEST);
     }
 }
@@ -178,6 +197,12 @@ class ErrorFactory {
                 return new DatabaseError(message);
             case ErrorType.FrameCount:
                 return new FrameCountError(message);
+            case ErrorType.JobNotCompletedError:
+                return new JobNotCompletedError(message);
+            case ErrorType.JobNotFoundError:
+                return new JobNotFoundError(message);
+            case ErrorType.InferenceError:
+                return new InferenceError(message);
             default:
                 return new GenericError(message);
         }
