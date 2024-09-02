@@ -7,7 +7,6 @@ import ResultDAO from "../dao/resultDao";
 import { BullJobStatus, JobStatus } from "../models/job";
 import sequelize from '../config/sequelize';
 import { ErrorFactory, ErrorType } from "../utils/errorFactory";
-import { error } from "console";
 const { Queue, Worker, QueueEvents } = require('bullmq');
 import { sendMessageToUser } from '../websocket/websocketServer'; // Importa la funzione per inviare messaggi agli utenti specifici
 
@@ -102,8 +101,6 @@ worker.on(BullJobStatus.Completed, async (job: any) => {
   });
 });
 
-
-
 // Listener for the 'failed' event
 worker.on(BullJobStatus.Failed, async (job: any, err: any) => {
   console.error(err);
@@ -115,14 +112,14 @@ worker.on(BullJobStatus.Failed, async (job: any, err: any) => {
     sendMessageToUser(userEmail, {
       type: 'job_aborted',
       jobId: job.id,
-      message: `Il suo job con ID ${job.id} è stato abortito percheè i token non sono sufficienti.`
+      message: `Il suo job con ID ${job.id} è stato abortito perchè i token non sono sufficienti.`
     });
   } else {
     ResultDAO.updateJobStatus(job.id, JobStatus.Failed);
     console.log("job " + job.id + " failed");
     const userEmail = job.data.userEmail;
     sendMessageToUser(userEmail, {
-      type: 'job_aborted',
+      type: 'job_failed',
       jobId: job.id,
       message: `Il suo job con ID ${job.id} è fallito.`
     });

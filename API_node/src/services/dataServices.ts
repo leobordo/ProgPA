@@ -186,8 +186,8 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
     }
 
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv']; 
-    let totalTokenCost = 0;
-    let totalTokenCostInference = 0;
+    let totalTokenCost: number = 0;
+    let totalTokenCostInference: number = 0;
 
     if (file.mimetype === 'application/zip') {
         const extractedPath = path.join(originalFilesPath, `${Date.now()}/`);
@@ -216,11 +216,11 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
                     // Calculate token cost based on file type
                     if (['.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'].includes(fileExtension)) {
                         const frameCount = await getVideoFrameCount(finalFilePath); // Function to calculate frame count
-                        totalTokenCost += frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
-                        totalTokenCostInference += frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
+                        totalTokenCost += Number(frameCount) * Number(TOKEN_COSTS.FRAME_VIDEO_UPLOADING);
+                        totalTokenCostInference += Number(frameCount) * Number(TOKEN_COSTS.FRAME_VIDEO_UPLOADING);
                     } else {
-                        totalTokenCost += TOKEN_COSTS.IMAGE_UPLOADING;
-                        totalTokenCostInference += TOKEN_COSTS.IMAGE_UPLOADING;
+                        totalTokenCost += Number(TOKEN_COSTS.IMAGE_UPLOADING);
+                        totalTokenCostInference += Number(TOKEN_COSTS.IMAGE_UPLOADING);
                     }
                 } else {
                     blockedFiles.push(fileName); // Add blocked file to list

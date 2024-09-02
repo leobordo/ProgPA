@@ -15,7 +15,8 @@ enum ErrorType {
     UserNotFound,
     PswMatch,
     DuplicateUser,
-    RequestParsingError
+    RequestParsingError,
+    DatabaseError
 }
 
 interface IAppError {
@@ -67,6 +68,12 @@ class AuthenticationError extends ApplicationError {
 class AuthorizationError extends ApplicationError {
     constructor(message: string = 'Forbidden') {
         super('AuthorizationError', message, 403);
+    }
+}
+
+class DatabaseError extends ApplicationError {
+    constructor(message: string = 'Database error') {
+        super('DatabaseError', message, 500);
     }
 }
 
@@ -152,6 +159,8 @@ class ErrorFactory {
                 return new PswMatchError(message);
             case ErrorType.RequestParsingError:
                 return new RequestParsingError(message);
+            case ErrorType.DatabaseError:
+                return new DatabaseError(message);
             default:
                 return new GenericError(message);
         }

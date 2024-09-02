@@ -53,7 +53,7 @@ app.use((err: IAppError, req: Request, res: Response, next: NextFunction) => {
 initializeUser(sequelize);
 initializeDataset(sequelize);
 initializeResult(sequelize);
-initializeTag(sequelize)
+initializeTag(sequelize);
 createAssociation()
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
@@ -62,7 +62,6 @@ sequelize.sync({ force: false }).then(() => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-
 
   // Avvia il server WebSocket su una porta separata
   startWebSocketServer();
