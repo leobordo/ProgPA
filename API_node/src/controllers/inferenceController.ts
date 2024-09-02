@@ -2,10 +2,12 @@
  * @fileOverview This file contains the controllers associated to the routes of the inference Router
  */
 import { NextFunction, Request, Response } from 'express';
-import * as service from '../services/inferenceService';
+import InferenceService from '../services/inferenceService';
 import { IResult, JobStatus } from '../models/job';
 import HTTPStatus from 'http-status-codes';
 import { ErrorFactory, ErrorType } from '../utils/errorFactory';
+
+const inferenceService = InferenceService.getInstance();
 
 /** 
  * Adds a new inference job to the queue with the specified dataset and model version.
@@ -26,7 +28,7 @@ const makeInference = async (req: Request, res: Response, next: NextFunction): P
     const userEmail = req.user!.userEmail;
 
     //Adds the job to the queue and receives the Id 
-    const jobId = await service.requestDatasetInference(datasetName, userEmail, modelId, modelVersion);
+    const jobId = await inferenceService.requestDatasetInference(datasetName, userEmail, modelId, modelVersion);
     res.status(HTTPStatus.OK).send({ message: "Process added succesfully to the queue", jobId: jobId });
   } catch (error) {
     next(error);
@@ -49,7 +51,7 @@ const checkState = async (req: Request, res: Response, next: NextFunction): Prom
   const userEmail = req.user!.userEmail;
 
   try {
-    const jobData = await service.getJobStateWithResult(jobId, userEmail);
+    const jobData = await inferenceService.getJobStateWithResult(jobId, userEmail);
     res.status(HTTPStatus.OK).send(jobData);
   } catch (error) {
     next(error);
@@ -72,7 +74,7 @@ const getResult = async (req: Request, res: Response, next: NextFunction): Promi
   const userEmail = req.user!.userEmail;
 
   try {
-    const jobData = await service.getJobResult(jobId, userEmail);
+    const jobData = await inferenceService.getJobResult(jobId, userEmail);
     res.status(HTTPStatus.OK).send(jobData);
   } catch (error) {
     next(error);

@@ -43,7 +43,11 @@ class AuthenticationMiddleware extends Middleware {
             }
 
             // Verifies the token using the RSA public key; if it's valid, attach user's information to the request object
-            jwt.verify(token, (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n'), { algorithms: ['RS256'] }, (err, decoded) => {
+            jwt.verify(token, (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n'), { 
+                algorithms: ['RS256'],
+                audience: process.env.TOKEN_AUD,
+                issuer: process.env.TOKEN_DURATION 
+            }, (err, decoded) => {
                 if (err) {
                     throw ErrorFactory.createError(ErrorType.Authentication, 'Token is invalid');
                 }

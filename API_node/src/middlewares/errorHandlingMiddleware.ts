@@ -22,7 +22,7 @@ class ErrorHandlingMiddleware extends Middleware {
                 name: err.name || 'InternalServerError',
                 message: err.message || 'An unexpected error occurred.',
                 status: err.status || 500,
-                ...((process.env.NODE_ENV || 'production') === 'development' && { stack: err.stack }),
+                ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
             };
 
             // Send the error response

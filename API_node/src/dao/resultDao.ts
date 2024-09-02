@@ -17,6 +17,7 @@ const ResultDAO = {
                 model_version: modelVersion
             });
         } catch (error) {
+            console.error(error);
             throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },

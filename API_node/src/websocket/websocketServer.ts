@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import { authenticateWebSocket } from './websocketAuth';
-import { getJobsByUserEmail } from './websocketJob';
+import DatasetDAO from '../dao/datasetDao';
 
 // Mappa per tenere traccia delle connessioni WebSocket per utente
 const userSockets = new Map<string, Set<WebSocket>>();
@@ -10,7 +10,7 @@ const userSockets = new Map<string, Set<WebSocket>>();
 const handleWebSocketConnection = async (socket: WebSocket, userEmail: string) => {
     try {
         console.log(`Recupero job per l'utente con email: ${userEmail}`);
-        const jobs = await getJobsByUserEmail(userEmail);
+        const jobs = await DatasetDAO.getJobsByUserEmail(userEmail);
         socket.send(JSON.stringify({ type: 'job_list', data: jobs }));
 
         // Aggiungi il socket alla mappa degli utenti
