@@ -220,7 +220,10 @@ const DatasetDAO = {
             }
         });
         if (dataset) {
-            const newTokenCost = dataset.token_cost + additionalCost;
+            console.log(dataset.token_cost)
+            console.log(additionalCost)
+            const newTokenCost = Number(dataset.token_cost) + Number(additionalCost);
+            console.log(newTokenCost)
             await Dataset.update(
                 { token_cost: newTokenCost },
                 { where: { dataset_name: dataset_name, email: userEmail } }

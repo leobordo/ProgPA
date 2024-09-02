@@ -8,7 +8,7 @@ import { checkTokenAvailability, updateTokenBalance } from './tokenManagementSer
 import { TOKEN_COSTS } from '../config/tokenCosts'; // Import token costs configuration
 import { Dataset } from '../models/sequelize_model/Dataset'; // Import Dataset model
 import { Tag } from '../models/sequelize_model/Tag'; // Import Tag model
-import sequelize from '../config/sequelize'; // Import sequelize instance
+import {sequelize} from '../config/sequelize'; // Import sequelize instance
 
 ffmpeg.setFfprobePath('/usr/bin/ffprobe'); // Set the path to ffprobe for ffmpeg
 
@@ -217,10 +217,10 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
                     if (['.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'].includes(fileExtension)) {
                         const frameCount = await getVideoFrameCount(finalFilePath); // Function to calculate frame count
                         totalTokenCost += frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
-                        totalTokenCostInference += frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
+                        totalTokenCostInference += frameCount * TOKEN_COSTS.FRAME_VIDEO_INFERENCE;
                     } else {
                         totalTokenCost += TOKEN_COSTS.IMAGE_UPLOADING;
-                        totalTokenCostInference += TOKEN_COSTS.IMAGE_UPLOADING;
+                        totalTokenCostInference += TOKEN_COSTS.IMAGE_INFERENCE;
                     }
                 } else {
                     blockedFiles.push(fileName); // Add blocked file to list
@@ -265,8 +265,8 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
             totalTokenCost = frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
             totalTokenCostInference = frameCount * TOKEN_COSTS.FRAME_VIDEO_INFERENCE;
         } else if (file.mimetype.startsWith('image/')) {
-            totalTokenCost = TOKEN_COSTS.IMAGE_INFERENCE;
-            totalTokenCostInference = TOKEN_COSTS.IMAGE_UPLOADING;
+            totalTokenCost = TOKEN_COSTS.IMAGE_UPLOADING;
+            totalTokenCostInference = TOKEN_COSTS.IMAGE_INFERENCE;
         }
 
         try {

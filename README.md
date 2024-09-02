@@ -166,6 +166,13 @@ If you followed these steps correctly, the app is now installed and ready to use
 #### Token Management (`/token`)
 
 - **GET `/token`**: Retrieves the current token balance for the authenticated user.
+  - **Response Example**:
+
+    ```json
+    {
+      "tokenBalance": <float> 
+    }
+    ```
 
 - **PATCH `/token`**: Updates the token balance based on usage or other criteria. This route *can be used only by an admin user*.
   - **Request Body**:
@@ -174,7 +181,13 @@ If you followed these steps correctly, the app is now installed and ready to use
     |----------------|-----------------------------|
     | `topUpUserEmail` | User selected for balance update |
     | `topUpAmount`  | New amount token for the specified user |
+  - **Response Example**:
 
+    ```json
+    {
+      "updatedTokenBalance": <float> 
+    }
+    ```
 #### Inference Management (`/inference`)
 
 - **POST `/inference/`**: Initiates a new inference task using a specified model and dataset. In this version, the `modelId` can only be "YOLO8" and the `modelVersion` can only be "YOLO8s_FSR" or "YOLO8m_FSR".

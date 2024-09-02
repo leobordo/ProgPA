@@ -17,8 +17,8 @@ class UploadMiddleware extends Middleware {
                 cb(null, path.resolve('../uploads/')); 
             },
             filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-                const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+                //const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                cb(null, file.originalname);
             }
         });
 
