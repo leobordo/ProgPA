@@ -5,7 +5,7 @@ import { Dataset } from "../models/sequelize_model/Dataset";
 import { checkTokenAvailability, updateTokenBalance } from "./tokenManagementService";
 import ResultDAO from "../dao/resultDao";
 import { BullJobStatus, JobStatus } from "../models/job";
-import sequelize from '../config/sequelize';
+import {sequelize} from '../config/sequelize';
 import { ErrorFactory, ErrorType } from "../utils/errorFactory";
 const { Queue, Worker, QueueEvents } = require('bullmq');
 import { sendMessageToUser } from '../websocket/websocketServer'; // Importa la funzione per inviare messaggi agli utenti specifici

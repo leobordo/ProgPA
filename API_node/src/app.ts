@@ -3,20 +3,17 @@ import tokenManagementRouter from './routers/tokenManagementRouter';
 import inferenceRouter from './routers/inferenceRouter';
 import uploadRouter from './routers/uploadRouter';
 import loginRouter from './routers/loginRouter';
-import sequelize from './config/sequelize'; // Importa l'istanza di Sequelize configurata
+import {sequelize,  initializeModels } from './config/sequelize'; // Importa l'istanza di Sequelize configurata
 import dotenv from 'dotenv';
-import { initializeUser as initializeUser } from './models/sequelize_model/User';
-import { initializeDataset as initializeDataset } from './models/sequelize_model/Dataset';
-import { createAssociation, initializeResult } from './models/sequelize_model/Result';
 import { createServer, Server } from 'http';
 import {AuthenticationMiddleware} from './middlewares/authMiddleware';
 import { Request, Response, NextFunction } from 'express';
-import { initializeTag } from './models/sequelize_model/Tag';
 import startWebSocketServer from './websocket/websocketServer'; // Importa il server WebSocket
 import { ErrorHandlingMiddleware } from './middlewares/errorHandlingMiddleware';
 import { IAppError } from './utils/errorFactory';
 
 // Loading environment variables from .env file
+
 dotenv.config();
 require('dotenv').config();         
 const express = require('express');
@@ -50,11 +47,9 @@ app.use((err: IAppError, req: Request, res: Response, next: NextFunction) => {
   errorHandlingMiddleware.handle(req, res, next, err);
 });
 
-initializeUser(sequelize);
-initializeDataset(sequelize);
-initializeResult(sequelize);
-initializeTag(sequelize);
-createAssociation()
+//Inizializza i modelli sequelize
+initializeModels(sequelize)
+
 // Sincronizza il database e avvia il server
 sequelize.sync({ force: false }).then(() => {
   console.log("Database synchronized");
