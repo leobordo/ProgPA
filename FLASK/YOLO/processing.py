@@ -5,6 +5,7 @@ from flask import jsonify
 import cv2
 from ultralytics.engine.results import Results
 from config import logger
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ def get_image_text_result(file_path, model):
         model (object): Model used for predictions.
 
     Returns:
-        list: A list of dictionaries containing results for the image.
+        str: A JSON formatted string containing results for the image.
     """
     
     results_list = []
@@ -39,8 +40,8 @@ def get_image_text_result(file_path, model):
                 'objects': ["none"]
             })
         else:
-            # Convert results to JSON format
-            res = [r.tojson() for r in results]
+            # Convert results to Python objects from JSON strings
+            res = [json.loads(r.tojson()) for r in results]
             results_list.append({'type': 'image', 'filename': file_path.split('/')[-1], 'objects': res})
     except Exception as e:
         results_list.append({'type': 'image', 'filename': file_path.split('/')[-1], 'error': f'Failed to process image: {str(e)}'})
@@ -95,7 +96,7 @@ def get_video_text_result(file_path, model):
                 })
             else:
                 # Convert results to JSON format
-                res = [r.tojson() for r in results]
+                res = [json.loads(r.tojson()) for r in results]
                 results_list.append({
                     'type': 'video_frame', 
                     'filename': file_path, 
@@ -127,7 +128,7 @@ def get_annotated_video(file_path, model, dataset_id, job_id):
     Returns:
         None
     """
-    try:
+    try:  
         # # Define desired output directory for annotated video
         annotated_video_dir = os.path.join('/user/uploads', str(dataset_id), 'annotated_files', str(job_id))
         logger.debug("Desired output directory for annotated video: %s", annotated_video_dir)

@@ -9,7 +9,7 @@ import { sequelize } from '../config/sequelize';
 import { ApplicationError, ErrorFactory, ErrorType, InsufficientTokensError} from "../utils/errorFactory";
 const { Queue, Worker, QueueEvents } = require('bullmq');
 import { sendMessageToUser } from '../websocket/websocketServer'; // Importa la funzione per inviare messaggi agli utenti specifici
-
+import { sendUserMessage, MessageType } from '../websocket/websocketMessages'
 
 // Getting the Redis connection instance 
 const redisConnection = RedisConnection.getInstance();
@@ -75,7 +75,7 @@ const processContents: Function = async (job: Job) => {
 
 // Worker creation to process jobs in the inferenceQueue
 const worker = new Worker('inferenceQueue', processContents, { connection: redisConnection });
-
+  
 // Listener for the 'active' event
 worker.on(BullJobStatus.Active, async (job: any) => {
   //aggiornamento dello stato del job nel db
@@ -83,25 +83,15 @@ worker.on(BullJobStatus.Active, async (job: any) => {
 
   // Invia un messaggio di notifica all'utente che il job è stato preso in carico
   const userEmail = job.data.userEmail;
-  sendMessageToUser(userEmail, {
-    type: 'job_active',
-    jobId: job.id,
-    message: `Il suo job con ID ${job.id} è stato preso in carico.`
+  sendUserMessage(userEmail, MessageType.JobActive, { userEmail, jobId: job.id });
   });
-
-});
+ 
 
 // Listener for the 'completed' event
 worker.on(BullJobStatus.Completed, async (job: any) => {
-  //aggiornamento dello stato del job nel db
   ResultDAO.updateJobStatus(job.id, JobStatus.Completed);
-
-  const userEmail = job.data.userEmail;
-  sendMessageToUser(userEmail, {
-    type: 'job_completed',
-    jobId: job.id,
-    message: `Il suo job con ID ${job.id} è stato completato.`
-  });
+  const userEmail = job.data.userEmail; 
+  sendUserMessage(userEmail, MessageType.JobCompleted, { userEmail, jobId: job.id });
 });
 
 // Listener for the 'failed' event
@@ -110,19 +100,12 @@ worker.on(BullJobStatus.Failed, async (job: any, error: any) => {
   if (error instanceof InsufficientTokensError) {
     ResultDAO.updateJobStatus(job.id!, JobStatus.Aborted);
     const userEmail = job.data.userEmail;
-    sendMessageToUser(userEmail, {
-      type: 'job_aborted',
-      jobId: job.id,
-      message: `Il suo job con ID ${job.id} è stato abortito perchè i token non sono sufficienti.`
-    });
+    sendUserMessage(userEmail, MessageType.JobAborted, { userEmail, jobId: job.id });
+   
   } else {
     ResultDAO.updateJobStatus(job.id, JobStatus.Failed);
     const userEmail = job.data.userEmail;
-    sendMessageToUser(userEmail, {
-      type: 'job_failed',
-      jobId: job.id,
-      message: `Il suo job con ID ${job.id} è fallito.`
-    });
+    sendUserMessage(userEmail, MessageType.JobFailed, { userEmail, jobId: job.id });
   }
 });
 

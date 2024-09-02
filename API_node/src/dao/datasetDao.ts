@@ -1,87 +1,87 @@
-import { error } from 'console';
-import { Dataset } from '../models/sequelize_model/Dataset'; // Import the Dataset model
-import { Result } from '../models/sequelize_model/Result'; // Import the Result model
-import { Tag } from '../models/sequelize_model/Tag'; // Import the Tag model
-import { ErrorFactory, ErrorType, ApplicationError } from '../utils/errorFactory'; // Import error handling utilities
+/* Import necessary modules and models for the application. */
+import { Dataset } from '../models/sequelize_model/Dataset';  // Import the Dataset model from sequelize_model
+import { Result } from '../models/sequelize_model/Result';  // Import the Result model from sequelize_model
+import { Tag } from '../models/sequelize_model/Tag';  // Import the Tag model from sequelize_model
+import { ErrorFactory, ErrorType, ApplicationError } from '../utils/errorFactory';  // Import custom error handling utilities
 
-/**
+/* 
  * Dataset Data Access Object (DAO)
  * Provides methods to interact with Dataset and Tag models in the database.
  */
 const DatasetDAO = {
-    /**
+    /*
      * Get the maximum dataset ID from the Dataset table.
      * @returns {Promise<number | null>} The maximum dataset ID or null if none found.
      */
     async getMaxDatasetId() {
-        try
-        {const maxDatasetId = await Dataset.max('dataset_id');
-        return maxDatasetId;}
-        catch(err)
-        {
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        try {
+            /* Get the maximum value of dataset_id from the Dataset table. */
+            const maxDatasetId = await Dataset.max('dataset_id');
+            return maxDatasetId;  // Return the maximum dataset_id
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
     
-    /**
-
-    /**
+    /*
      * Retrieve all tags associated with a dataset.
      * @param {number} dataset_id - The ID of the dataset.
      * @param {any} [transaction] - Optional Sequelize transaction object.
      * @returns {Promise<Tag[]>} A list of tags associated with the dataset.
      */
-    async getTags(dataset_id: number, transaction?: any){
+    async getTags(dataset_id: number, transaction?: any) {
         try {
+            /* Find all tags where the dataset_id matches the provided ID. */
             return await Tag.findAll({
-            where: {
-                dataset_id: dataset_id
-            },
-            attributes: ['tag'],
-            transaction: transaction
+                where: { dataset_id: dataset_id },  
+                attributes: ['tag'],  // Only retrieve the 'tag' attribute
+                transaction: transaction  // Use the provided transaction if any
             });
-        }catch(err){
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
-            }
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
+        }
     },
 
-    /**
+    /*
      * Create a new dataset.
      * @param {string} dataset_name - The name of the dataset.
      * @param {string} userEmail - The email of the user who owns the dataset.
-     * @param {string} file_path - The file path associated with the dataset.
      * @returns {Promise<Dataset>} The newly created dataset.
      */
     async create(dataset_name: string, userEmail: string) {
         try {
-            const newDataset:Dataset = await Dataset.create({
-                dataset_name: dataset_name,
-                email: userEmail,
-                file_path: '',  
-                is_deleted: false,
-                token_cost: 0
+            /* Create a new dataset with the provided name and user email. */
+            const newDataset: Dataset = await Dataset.create({
+                dataset_name: dataset_name,  // Set dataset_name
+                email: userEmail,  // Set email
+                file_path: '',  // Initial file path is empty
+                is_deleted: false,  // Dataset is not deleted
+                token_cost: 0  // Initial token cost is zero
             });
 
-            // Retrieves the dataset ID
-            const datasetId:number = newDataset.dataset_id;
+            /* Retrieves the dataset ID */
+            const datasetId: number = newDataset.dataset_id;
 
-            // Constructs the new file path using the dataset ID
+            /* Constructs the new file path using the dataset ID */
             const updatedFilePath = `/user/uploads/${datasetId}`; 
 
-            // Updates the file_path with the newly created dataset ID
+            /* Updates the file_path with the newly created dataset ID */
             await Dataset.update(
-                { file_path: updatedFilePath },
-                { where: { dataset_id: datasetId } }
+                { file_path: updatedFilePath },  // New file path
+                { where: { dataset_id: datasetId } }  
             );
 
-            // Return the updated dataset
+            /* Return the updated dataset */
             return await Dataset.findByPk(datasetId);
         } catch (err) {
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Create a new tag for a dataset.
      * @param {number} dataset_id - The ID of the dataset.
      * @param {string} tag - The tag to be created.
@@ -89,67 +89,68 @@ const DatasetDAO = {
      * @returns {Promise<Tag>} The newly created tag.
      */
     async createTag(dataset_id: number, tag: string, transaction?: any) {
-       try{ return await Tag.create({
-            dataset_id: dataset_id,
-            tag: tag
-        },
-        {
-            transaction: transaction
-        });
-        }catch(err){
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        try {
+            /* Create a new tag for the specified dataset. */
+            return await Tag.create({
+                dataset_id: dataset_id,  // Set dataset_id
+                tag: tag  // Set tag
+            },
+            {
+                transaction: transaction  
+            });
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Retrieve all datasets associated with a specific user email.
      * @param {string} userEmail - The email of the user.
      * @param {any} [transaction] - Optional Sequelize transaction object.
      * @returns {Promise<Dataset[]>} A list of datasets associated with the user.
      */
     async getAllByUserEmail(userEmail: string, transaction?: any) {
-        try{return await Dataset.findAll({
-            where: { email: userEmail, is_deleted: false },
-            transaction: transaction
-        });
-        }catch(err){
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        try {
+            /* Find all datasets where the email matches and the dataset is not deleted. */
+            return await Dataset.findAll({
+                where: { email: userEmail, is_deleted: false },  
+                transaction: transaction  
+            });
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Update the name of a dataset.
      * @param {string} dataset_name - The current name of the dataset.
      * @param {string} userEmail - The email of the user who owns the dataset.
-     * @param {number} dataset_id - The ID of the dataset.
      * @param {string} [newName] - The new name for the dataset.
      * @param {any} [transaction] - Optional Sequelize transaction object.
      * @returns {Promise<string>} Success message upon successful update.
      * @throws {Error} Throws an error if the update fails.
      */
-    async updateDsByName(
-        dataset_name: string, 
-        userEmail: string, 
-        newName?: string,
-        transaction?: any 
-    ) {
+    async updateDsByName(dataset_name: string, userEmail: string, newName?: string, transaction?: any) {
         try {
-            // Update only the dataset name
+            /* Update only the dataset name */
             const [affectedRows, updatedDatasets] = await Dataset.update(
-                { dataset_name: newName }, 
+                { dataset_name: newName },  // New dataset name
                 {
-                    where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },
-                    returning: true,
-                    transaction: transaction
+                    where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },  
+                    returning: true,  // Return the updated dataset
+                    transaction: transaction  
                 }
             );
-            return "Dataset name updated successfully";
+            return "Dataset name updated successfully";  // Return success message
         } catch (err) {
+            /* Throw a database error if the operation fails. */
             throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Delete tags by dataset ID.
      * @param {number} dataset_id - The ID of the dataset whose tags are to be deleted.
      * @param {any} [transaction] - Optional Sequelize transaction object.
@@ -158,32 +159,37 @@ const DatasetDAO = {
      */
     async deleteTagsbyId(dataset_id: number, transaction?: any) {
         try {
+            /* Delete all tags where the dataset_id matches the provided ID. */
             return await Tag.destroy({
-                where: {dataset_id: dataset_id},
-                transaction: transaction
+                where: { dataset_id: dataset_id },  
+                transaction: transaction  // Use the provided transaction if any
             });
         } catch (err) {
-            throw ErrorFactory.createError(ErrorType.DatabaseError); // Throw generic error
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError); 
         }
     },
 
-    /**
+    /*
      * Soft delete a dataset by marking it as deleted.
      * @param {string} dataset_name - The name of the dataset to be deleted.
      * @param {string} userEmail - The email of the user who owns the dataset.
      * @returns {Promise<void>} Resolves when the dataset is marked as deleted.
      */
     async softDeleteByName(dataset_name: string, userEmail: string) {
-        try{await Dataset.update(
-            { is_deleted: true },
-            { where: { dataset_name: dataset_name, email: userEmail } }
-        );}catch(err)
-        {
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        try {
+            /* Mark the dataset as deleted by setting is_deleted to true. */
+            await Dataset.update(
+                { is_deleted: true },  // Set is_deleted to true
+                { where: { dataset_name: dataset_name, email: userEmail } }  
+            );
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Retrieve a dataset by its name and user email.
      * @param {string} dataset_name - The name of the dataset.
      * @param {string} userEmail - The email of the user who owns the dataset.
@@ -192,18 +198,20 @@ const DatasetDAO = {
      * @throws {Error} Throws an error if the dataset is not found.
      */
     async getDatasetByName(dataset_name: string, userEmail: string, transaction?: any) {
-        try{const dataset = await Dataset.findOne({
-            where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },
-            transaction: transaction,
-        });
-        return dataset;
-        }catch(err)
-        {
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        try {
+            /* Find one dataset where the name matches the provided dataset name and email. */
+            const dataset = await Dataset.findOne({
+                where: { dataset_name: dataset_name, email: userEmail, is_deleted: false },  
+                transaction: transaction  // Use the provided transaction if any
+            });
+            return dataset;  
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Update the token cost for a dataset by its name.
      * @param {string} dataset_name - The name of the dataset.
      * @param {string} userEmail - The email of the user who owns the dataset.
@@ -211,39 +219,81 @@ const DatasetDAO = {
      * @returns {Promise<void>} Resolves when the token cost is updated.
      * @throws {Error} Throws an error if the dataset is not found.
      */
-    async updateTokenCostByName(dataset_name: string, userEmail: string,token_cost: number, additionalCost: number) {
-        try{
+    async updateTokenCostByName(dataset_name: string, userEmail: string, token_cost: number, additionalCost: number) {
+        try {
+            /* Calculate the new token cost by adding the additional cost to the current token cost. */
             const newTokenCost = Number(token_cost) + Number(additionalCost);
             await Dataset.update(
-                { token_cost: newTokenCost },
-                { where: { dataset_name: dataset_name, email: userEmail } }
+                { token_cost: newTokenCost },  // Set the new token cost
+                { where: { dataset_name: dataset_name, email: userEmail } }  // Condition to match dataset_name and email
             );
-        }catch(err)
-        {
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
 
-    /**
+    /*
      * Retrieve a dataset by job ID.
      * @param {string} jobId - The job ID associated with the dataset.
      * @returns {Promise<Dataset>} The dataset if found.
      * @throws {Error} Throws an error if the dataset is not found.
      */
     async getDatasetByJobId(jobId: string) {
-        try{const dataset = await Dataset.findOne({
-            include: [{
-                model: Result,
-                required: true, 
-                where: { job_id: jobId }
-            }]
-        });
-        return dataset
-        }catch(err)
-        {
-            throw ErrorFactory.createError(ErrorType.DatabaseError)
+        try {
+            /* Find one dataset where the job_id matches the provided job ID. */
+            const dataset = await Dataset.findOne({
+                include: [{
+                    model: Result,  // Include the Result model
+                    required: true,  // Make the inclusion required
+                    where: { job_id: jobId }  // Condition to match the job_id
+                }]
+            });
+            return dataset;  // Return the found dataset
+        } catch (err) {
+            /* Throw a database error if the operation fails. */
+            throw ErrorFactory.createError(ErrorType.DatabaseError);
         }
     },
+
+
+    /** 
+   * Retrieve jobs associated with a specific user email.
+   * @param {string} userEmail - The email of the user.
+   * @returns 
+   */
+  async getJobsByUserEmail(userEmail: string) {
+    try {
+      
+      const jobs = await Result.findAll({
+        include: [{
+          model: Dataset,
+          required: true, 
+          where: { email: userEmail, is_deleted: false }
+        }],
+        attributes: ['job_id', 'state', 'dataset_id']
+      });
+
+      return jobs;
+      
+    } catch (error) {
+      console.error('Errore nel recupero dei job:', error);
+      throw Error('Error retrieving jobs');
+    }
+  },
+
+
+
+
+
+
+
+
+
+
+
+
 };
 
+/* Export the DatasetDAO object as the default export. */
 export default DatasetDAO;
