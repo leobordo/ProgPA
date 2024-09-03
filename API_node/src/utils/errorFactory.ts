@@ -20,7 +20,9 @@ enum ErrorType {
     FrameCount,
     JobNotCompletedError,
     JobNotFoundError,
-    InferenceError
+    InferenceError,
+    UnzipError,
+    DirectoryRmError
 }
 
 interface IAppError {
@@ -86,6 +88,18 @@ export class DatabaseError extends ApplicationError {
 class GenericError extends ApplicationError {
     constructor(message: string = 'Something went wrong') {
         super('GenericError', message, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+class UnzipError extends ApplicationError {
+    constructor(message: string = 'Something went wrong while unzipping') {
+        super('UnzipError', message, StatusCodes.UNPROCESSABLE_ENTITY);
+    }
+}
+
+class DirectoryRmError extends ApplicationError {
+    constructor(message: string = 'Something went wrong while removing a directory') {
+        super('DirectoryRmError', message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -203,6 +217,10 @@ class ErrorFactory {
                 return new JobNotFoundError(message);
             case ErrorType.InferenceError:
                 return new InferenceError(message);
+            case ErrorType.UnzipError:
+                return new UnzipError(message);
+            case ErrorType.DirectoryRmError:
+                return new DirectoryRmError(message);
             default:
                 return new GenericError(message);
         }

@@ -1,5 +1,5 @@
 # Dockerfile.express
-FROM node:18-bullseye
+FROM node:18-bullseye-slim
 
 # Imposta la directory di lavoro nel container
 WORKDIR /user/app
