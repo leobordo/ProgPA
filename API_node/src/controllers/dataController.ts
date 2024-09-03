@@ -1,3 +1,12 @@
+/**
+ * @fileOverview Dataset controller module.
+ *
+ * This module contains controller functions for managing datasets in the application.
+ * It provides functionality to create, retrieve, update, and delete datasets, as well as 
+ * insert contents into existing datasets. Each function interacts with the data services 
+ * to perform the necessary operations and responds to the client with appropriate HTTP status codes.
+ */
+
 import { Response, Request, NextFunction } from 'express'; // Import Express types
 import * as dataServices from '../services/dataServices'; // Import the data services
 import HTTPStatus from 'http-status-codes'; // Import HTTPStatus module

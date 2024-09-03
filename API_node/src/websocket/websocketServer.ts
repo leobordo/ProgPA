@@ -1,5 +1,5 @@
 /**
- * WebSocket Server and Connection Management Module
+ * @fileoverview WebSocket Server and Connection Management Module
  *
  * This module manages WebSocket connections for real-time communication with users.
  * It includes:
