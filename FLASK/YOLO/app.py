@@ -2,7 +2,6 @@
 Flask application module to handle prediction requests and save results.
 """
 import os
-import json
 
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
@@ -14,7 +13,6 @@ from processing import (get_annotated_image, get_annotated_video,
                         get_image_text_result, get_video_text_result)
 from utils import get_file_category
 from validation import validate_request_params
-
 
 
 # Load environment variables from .env file
@@ -29,19 +27,20 @@ app.config.from_object(Config)
 # Initialize the database with the Flask app
 db.init_app(app)
 
+
 @app.route('/predict', methods=['POST'])
 def predict():
     """
     Handles the POST request for predictions. Validates parameters, 
     generates, save and load results.
     """
-    logger.debug("Received POST request at /predict")
+    logger.debug("Received POST request at /predict.")
 
     # Use the validation function to verify the request parameters
     validation_response = validate_request_params(request)
 
     if validation_response['error']:
-        return validation_response['error'], validation_response['status_code']
+        return jsonify({'error': validation_response['error']}), validation_response['status_code']
 
     tracker = EmissionsTracker()
     tracker.start()
