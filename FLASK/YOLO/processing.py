@@ -36,11 +36,18 @@ def get_image_text_result(file_path, model):
             results_list.append({
                 'type': 'image',
                 'filename': file_path.split('/')[-1],
-                'objects': ["none"]
+                'objects': []
             })
         else:
-            # Convert results to Python objects from JSON strings
-            res = [json.loads(r.tojson()) for r in results]
+            res = []
+            for r in results:
+                try:
+                    objects = json.loads(r.tojson())
+                    res.extend(objects if isinstance(objects, list) else [objects])
+                except json.JSONDecodeError as json_error:
+                    logger.error(f"JSON decoding failed for {file_path}: {str(json_error)}")
+                    continue
+
             results_list.append({'type': 'image', 'filename': file_path.split('/')[-1], 'objects': res})
     except Exception as e:
         results_list.append({'type': 'image', 'filename': file_path.split('/')[-1], 'error': f'Failed to process image: {str(e)}'})
@@ -100,27 +107,30 @@ def get_video_text_result(file_path, model):
                 frame_data = {
                     'frame_number': frame_number,
                     'time': time_in_seconds,
-                    'objects': []  # Empty if prediction fails
+                    'objects': []  
                 }
                 video_results['frames'].append(frame_data)
                 frame_number += 1
                 continue  # Skip to the next frame if prediction fails
 
             # Check if any objects were detected in the frame
-            if results[0].boxes is None or len(results[0].boxes) == 0:
-                frame_data = {
-                    'frame_number': frame_number,
-                    'time': time_in_seconds,
-                    'objects': []
-                }
-            else:
-                # Convert results to JSON format
-                objects = [json.loads(r.tojson()) for r in results]
-                frame_data = {
-                    'frame_number': frame_number,
-                    'time': time_in_seconds,
-                    'objects': objects
-                }
+            frame_objects = []
+            for r in results:
+                try:
+                    objects = json.loads(r.tojson())
+                    if isinstance(objects, list):
+                        frame_objects.extend(objects)
+                    else:
+                        frame_objects.append(objects)
+                except json.JSONDecodeError as json_error:
+                    logger.error(f"JSON decoding failed for frame {frame_number} of video {file_path}: {str(json_error)}")
+                    continue
+
+            frame_data = {
+                'frame_number': frame_number,
+                'time': time_in_seconds,
+                'objects': frame_objects
+            }
 
             video_results['frames'].append(frame_data)
             frame_number += 1

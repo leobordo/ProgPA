@@ -102,11 +102,11 @@ def predict():
 
     results_with_emissions = {
         
-        'Inference information': {
-            'Dataset ID': dataset_id,
-            'CO2 emissions [kg]': emissions_data.emissions,  
-            'consumed energy [kWh]': emissions_data.energy_consumed, 
-            'inference time [s]': emissions_data.duration,  
+        'inference_information': {
+            'dataset_id': dataset_id,
+            'CO2_emissions_kg': emissions_data.emissions,  
+            'consumed_energy_kWh': emissions_data.energy_consumed, 
+            'inference_time_s': emissions_data.duration,  
         },
         'inference_results': results_list
     }
