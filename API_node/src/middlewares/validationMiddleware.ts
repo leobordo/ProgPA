@@ -7,7 +7,7 @@ import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
 import { Middleware } from "./middleware";
-import { userSchema } from './validationSchemas/validationSchemas';
+import { userSchema } from './validationSchemas/requestSchemas';
 import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 /**

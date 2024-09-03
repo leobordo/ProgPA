@@ -5,11 +5,11 @@
 import { Router } from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/tokenManagementController';
-import { AuthenticationMiddleware, AuthorizationMiddleware } from '../middlewares/authMiddleware';
+import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/validationMiddleware';
 import { Role } from '../models/request';
-import * as schema from '../middlewares/validationSchemas/validationSchemas';
+import * as schema from '../middlewares/validationSchemas/requestSchemas';
 
 const router = Router();
 

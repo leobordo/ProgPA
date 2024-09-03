@@ -12,3 +12,8 @@ export const VALIDATION_PARAMS = {
     MIN_PASSWORD_LENGTH: 6,       // Minimum length of the user password
     MAX_PASSWORD_LENGTH: 25,      // Maximum length of the user password
 };
+
+export enum ContentType {
+    Image = "image",
+    Video = "video"
+}

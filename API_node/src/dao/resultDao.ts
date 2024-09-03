@@ -1,6 +1,6 @@
 // Importing necessary enums and models for handling AI model IDs, job statuses, and errors.
 import { ModelId } from "../models/aiModels";
-import { JobStatus } from "../models/job";
+import { JobStatus } from "../models/jobStatus";
 import { Dataset } from "../models/sequelize_model/Dataset";
 import { Result } from "../models/sequelize_model/Result";
 import { ErrorFactory, ErrorType } from "../utils/errorFactory";

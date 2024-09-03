@@ -25,13 +25,10 @@ const server: Server = createServer(app);
 //Global authentication middleware (except for registration and login routes)
 const authenticationMiddleware = new AuthenticationMiddleware();
 app.use((req: Request, res: Response, next: NextFunction) => {
- 
   if (req.path.startsWith('/user')) {
       return next();
   }
-
   authenticationMiddleware.handle(req, res, next);
-
 });
 
 // Definizione delle rotte

@@ -2,7 +2,7 @@ CREATE TABLE users (
     email VARCHAR(255) PRIMARY KEY,
     password TEXT NOT NULL,
     role INTEGER DEFAULT 1,
-    tokens FLOAT DEFAULT 1000
+    tokens FLOAT
 );
 
 CREATE TABLE datasets (

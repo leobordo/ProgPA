@@ -3,7 +3,7 @@
  */
 import { NextFunction, Request, Response } from 'express';
 import InferenceService from '../services/inferenceService';
-import { IResult, JobStatus } from '../models/job';
+import { IResult, JobStatus } from '../models/jobStatus';
 import HTTPStatus from 'http-status-codes';
 
 const inferenceService = InferenceService.getInstance();
@@ -73,7 +73,7 @@ const getResult = async (req: Request, res: Response, next: NextFunction): Promi
   const userEmail = req.user!.userEmail;
 
   try {
-    const jobData = await inferenceService.getJobResult(jobId, userEmail);
+    const jobData:IResult = await inferenceService.getJobResult(jobId, userEmail);
     res.status(HTTPStatus.OK).send(jobData);
   } catch (error) {
     next(error);

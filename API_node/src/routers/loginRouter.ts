@@ -8,7 +8,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as controller from '../controllers/loginController';
 import { BodyParserMiddleware} from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/validationMiddleware';
-import * as schema from '../middlewares/validationSchemas/validationSchemas';
+import * as schema from '../middlewares/validationSchemas/requestSchemas';
 
 const router = Router();
 

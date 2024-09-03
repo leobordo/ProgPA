@@ -6,7 +6,7 @@
  * including DatasetDAO, ResultDAO, and InferenceQueueService.
  */
 import { Job } from "bullmq";                           // Importing Job from bullmq for job management in a queue.
-import { IResult, JobStatus } from "../models/job";     // Importing types related to job statuses and result interfaces.
+import { IResult, JobStatus } from "../models/jobStatus";     // Importing types related to job statuses and result interfaces.
 import DatasetDAO from "../dao/datasetDao";             // Data access object for datasets.
 import { Dataset } from "../models/sequelize_model/Dataset";    // Sequelize model for datasets.
 import ResultDAO from "../dao/resultDao";               // Data access object for job results.

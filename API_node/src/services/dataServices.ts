@@ -5,7 +5,7 @@ import path from 'path'; // Import path module for handling file paths
 import ffmpeg from 'fluent-ffmpeg'; // Import ffmpeg for processing video files
 import { ErrorType, ErrorFactory, InsufficientTokensError } from '../utils/errorFactory'; // Import error handling utilities
 import { checkTokenAvailability, updateTokenBalance } from './tokenManagementService'; // Import token management services
-import { TOKEN_COSTS } from '../config/tokenCosts'; // Import token costs configuration
+import { TOKEN_COSTS } from '../config/tokenConst'; // Import token costs configuration
 import { Dataset } from '../models/sequelize_model/Dataset'; // Import Dataset model
 import { sequelize } from '../config/sequelize'; // Import sequelize instance
 
@@ -26,26 +26,27 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
         throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if dataset exists
     }
 
-    
-        // Create the new dataset in the database
-        const newDataset = await DatasetDAO.default.create(datasetName, email);
-        if (!newDataset) {
-            throw ErrorFactory.createError(ErrorType.DatabaseError);
-        }
-        if (tags) {
-            // Add tags to the new dataset
-            tags.forEach(async (tag) => {
-                await DatasetDAO.default.createTag(newDataset.dataset_id, tag);
-            });
-        }
-        try{
+
+    // Create the new dataset in the database
+    const newDataset = await DatasetDAO.default.create(datasetName, email);
+    if (!newDataset) {
+        throw ErrorFactory.createError(ErrorType.DatabaseError);
+    }
+    if (tags) {
+        // Add tags to the new dataset
+        tags.forEach(async (tag) => {
+            await DatasetDAO.default.createTag(newDataset.dataset_id, tag);
+        });
+    }
+    try {
         // Create directory for the new dataset
-        fs.mkdirSync(newDataset.file_path, { recursive: true });}
-        catch(err){
-            throw ErrorFactory.createError(ErrorType.DirectoryCreation)
-        }
-        return { message: 'Dataset created successfully', newDataset};
-    
+        fs.mkdirSync(newDataset.file_path, { recursive: true });
+    }
+    catch (err) {
+        throw ErrorFactory.createError(ErrorType.DirectoryCreation)
+    }
+    return { message: 'Dataset created successfully', newDataset };
+
 };
 
 /**
@@ -55,24 +56,24 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
  */
 const getAllDatasets = async (email: string) => {
     // Retrieve all datasets for a user
-    
-        const datasets: Dataset[] = await DatasetDAO.default.getAllByUserEmail(email);
-        const results = [];
 
-        for (const ds of datasets) {
-            // Get tags for each dataset
-            const tags = await getAllTags(ds);
-            const dataset_tags: string[] = []
+    const datasets: Dataset[] = await DatasetDAO.default.getAllByUserEmail(email);
+    const results = [];
 
-            for (const tg of tags) { dataset_tags.push(tg.tag) }
-            const { dataset_id, file_path, dataset_name, token_cost } = ds;
-            results.push({
-                dataset: { dataset_id, file_path, dataset_name, token_cost, dataset_tags },
-            });
-        }
+    for (const ds of datasets) {
+        // Get tags for each dataset
+        const tags = await getAllTags(ds);
+        const dataset_tags: string[] = []
 
-        return results;
-    };
+        for (const tg of tags) { dataset_tags.push(tg.tag) }
+        const { dataset_id, file_path, dataset_name, token_cost } = ds;
+        results.push({
+            dataset: { dataset_id, file_path, dataset_name, token_cost, dataset_tags },
+        });
+    }
+
+    return results;
+};
 
 /**
  * Update dataset by name
@@ -85,51 +86,51 @@ const getAllDatasets = async (email: string) => {
 const updateDatasetByName = async (datasetName: string, email: string, newName?: string, tags?: string[]) => {
     return await sequelize.transaction(async (transaction: any) => {
         // Get the dataset by name and email
-            const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email, transaction);
-            const allDatasets = await DatasetDAO.default.getAllByUserEmail(email, transaction);
-            if (!dataset) {
-                throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
-            }
+        const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email, transaction);
+        const allDatasets = await DatasetDAO.default.getAllByUserEmail(email, transaction);
+        if (!dataset) {
+            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
+        }
 
-            if (dataset.email !== email) {
-                throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if email mismatch
-            }
+        if (dataset.email !== email) {
+            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if email mismatch
+        }
 
-            for (const ds of allDatasets) {
-                if (ds.dataset_name === newName) {
-                    throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name already exists
-                }
+        for (const ds of allDatasets) {
+            if (ds.dataset_name === newName) {
+                throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name already exists
             }
+        }
 
-            if (newName && dataset.dataset_name === newName) {
-                throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name is the same as current
-            }
+        if (newName && dataset.dataset_name === newName) {
+            throw ErrorFactory.createError(ErrorType.DuplicateDataset); // Throw error if new name is the same as current
+        }
 
-            if (!newName && !tags) {
-                throw ErrorFactory.createError(ErrorType.UndefinedRequest); // Throw error if neither newName nor tags are provided
-            }
-            // Update dataset name if newName is provided
-            if (!tags) {
-                await DatasetDAO.default.updateDsByName(datasetName, email, newName, transaction);
-                return "Name correctly updated";
-            }
-
-            // Update tags if provided
-            if (!newName) {
-                await DatasetDAO.default.deleteTagsbyId(dataset.dataset_id, transaction);
-                for (const tag of tags) {
-                    await DatasetDAO.default.createTag(dataset.dataset_id, tag, transaction);
-                }
-                return "Tags correctly updated";
-            }
-
-            // Update both dataset name and tags
+        if (!newName && !tags) {
+            throw ErrorFactory.createError(ErrorType.UndefinedRequest); // Throw error if neither newName nor tags are provided
+        }
+        // Update dataset name if newName is provided
+        if (!tags) {
             await DatasetDAO.default.updateDsByName(datasetName, email, newName, transaction);
+            return "Name correctly updated";
+        }
+
+        // Update tags if provided
+        if (!newName) {
             await DatasetDAO.default.deleteTagsbyId(dataset.dataset_id, transaction);
             for (const tag of tags) {
                 await DatasetDAO.default.createTag(dataset.dataset_id, tag, transaction);
             }
-            return "Name and Tags correctly updated";
+            return "Tags correctly updated";
+        }
+
+        // Update both dataset name and tags
+        await DatasetDAO.default.updateDsByName(datasetName, email, newName, transaction);
+        await DatasetDAO.default.deleteTagsbyId(dataset.dataset_id, transaction);
+        for (const tag of tags) {
+            await DatasetDAO.default.createTag(dataset.dataset_id, tag, transaction);
+        }
+        return "Name and Tags correctly updated";
     });
 };
 
@@ -139,20 +140,19 @@ const updateDatasetByName = async (datasetName: string, email: string, newName?:
  * @param email - User's email
  */
 const deleteDatasetByName = async (datasetName: string, email: string) => {
-        // Get the dataset by name and email
-        const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
+    // Get the dataset by name and email
+    const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
 
-        if (!dataset) {
-            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
-        }
+    if (!dataset) {
+        throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
+    }
 
-        if (dataset.email !== email) {
-            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if email mismatch
-        }
+    if (dataset.email !== email) {
+        throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if email mismatch
+    }
 
-        // Soft delete the dataset by marking it as deleted
-        await DatasetDAO.default.softDeleteByName(datasetName, email);
-        return 'Dataset deleted successfully'
+    // Soft delete the dataset by marking it as deleted
+    await DatasetDAO.default.softDeleteByName(datasetName, email);
 };
 
 /**
@@ -164,148 +164,155 @@ const deleteDatasetByName = async (datasetName: string, email: string) => {
  */
 const insertContents = async (datasetName: string, file: Express.Multer.File, email: string) => {
     // Get the dataset by name and email
-        const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
-        if (!dataset) {
-            throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
+    const dataset = await DatasetDAO.default.getDatasetByName(datasetName, email);
+    if (!dataset) {
+        throw ErrorFactory.createError(ErrorType.DatasetNotFound); // Throw error if dataset not found
+    }
+
+    const datasetFilePath = dataset.file_path;
+    const originalFilesPath = path.join(datasetFilePath, 'original_files');
+
+    // Check if original files directory exists, create if not
+    if (!fs.existsSync(originalFilesPath)) {
+        try {
+            fs.mkdirSync(originalFilesPath, { recursive: true });
+        } catch (err) {
+            throw ErrorFactory.createError(ErrorType.DirectoryCreation); // Throw error if directory creation fails
+        }
+    }
+
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'];
+    let totalTokenCost: number = 0;
+    let totalTokenCostInference: number = 0;
+
+    if (file.mimetype === 'application/zip') {
+        const extractedPath = path.join(originalFilesPath, `${Date.now()}/`);
+        try { fs.mkdirSync(extractedPath, { recursive: true }); }
+        catch (err) {
+            ErrorFactory.createError(ErrorType.DirectoryCreation)
         }
 
-        const datasetFilePath = dataset.file_path;
-        const originalFilesPath = path.join(datasetFilePath, 'original_files');
+        let blockedFiles: string[] = [];
 
-        // Check if original files directory exists, create if not
-        if (!fs.existsSync(originalFilesPath)) {
-            try {
-                fs.mkdirSync(originalFilesPath, { recursive: true });
-            } catch (err) {
-                throw ErrorFactory.createError(ErrorType.DirectoryCreation); // Throw error if directory creation fails
-            }
-        }
+        try {
+            // Extract files from the uploaded zip
+            await new Promise<void>((resolve, reject) => {
+                try {
+                    fs.createReadStream(file.path)
+                    .pipe(unzipper.Extract({ path: extractedPath }))
+                    .on('close', resolve)
+                    .on('error', reject);
+                }
+                catch (err) {
+                    ErrorFactory.createError(ErrorType.UnzipError)
+                }
+            });
 
-        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'];
-        let totalTokenCost: number = 0;
-        let totalTokenCostInference: number = 0;
+            const files = fs.readdirSync(extractedPath);
+            for (const fileName of files) {
+                const extractedFilePath = path.join(extractedPath, fileName);
+                const fileExtension = path.extname(fileName).toLowerCase();
 
-        if (file.mimetype === 'application/zip') {
-            const extractedPath = path.join(originalFilesPath, `${Date.now()}/`);
-            try{fs.mkdirSync(extractedPath, { recursive: true });}
-            catch(err){
-                ErrorFactory.createError(ErrorType.DirectoryCreation)
-            }
-
-            let blockedFiles: string[] = [];
-
-            try {
-                // Extract files from the uploaded zip
-                await new Promise<void>((resolve, reject) => {
-                    try{fs.createReadStream(file.path)
-                        .pipe(unzipper.Extract({ path: extractedPath }))
-                        .on('close', resolve)
-                        .on('error', reject);}
-                        catch(err){
-                            ErrorFactory.createError(ErrorType.UnzipError)
-                        }
-                });
-
-                const files = fs.readdirSync(extractedPath);
-                for (const fileName of files) {
-                    const extractedFilePath = path.join(extractedPath, fileName);
-                    const fileExtension = path.extname(fileName).toLowerCase();
-
-                    if (allowedExtensions.includes(fileExtension)) {
-                        const finalFilePath = path.join(originalFilesPath, fileName);
-                        try{
+                if (allowedExtensions.includes(fileExtension)) {
+                    const finalFilePath = path.join(originalFilesPath, fileName);
+                    try {
                         fs.renameSync(extractedFilePath, finalFilePath);
-                        }catch(err){
-                            throw ErrorFactory.createError(ErrorType.DirectoryCreation)
-                        }
-                        // Calculate token cost based on file type
-                        if (['.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'].includes(fileExtension)) {
-                            const frameCount = await getVideoFrameCount(finalFilePath); // Function to calculate frame count
-                            totalTokenCost += frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
-                            totalTokenCostInference += frameCount * TOKEN_COSTS.FRAME_VIDEO_INFERENCE;
-                        } else {
-                            totalTokenCost += TOKEN_COSTS.IMAGE_UPLOADING;
-                            totalTokenCostInference += TOKEN_COSTS.IMAGE_INFERENCE;
-                        }
+                    } catch (err) {
+                        throw ErrorFactory.createError(ErrorType.DirectoryCreation)
+                    }
+                    // Calculate token cost based on file type
+                    if (['.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv'].includes(fileExtension)) {
+                        const frameCount = await getVideoFrameCount(finalFilePath); // Function to calculate frame count
+                        totalTokenCost += frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
+                        totalTokenCostInference += frameCount * TOKEN_COSTS.FRAME_VIDEO_INFERENCE;
                     } else {
-                        blockedFiles.push(fileName); // Add blocked file to list
+                        totalTokenCost += TOKEN_COSTS.IMAGE_UPLOADING;
+                        totalTokenCostInference += TOKEN_COSTS.IMAGE_INFERENCE;
                     }
+                } else {
+                    blockedFiles.push(fileName); // Add blocked file to list
                 }
+            }
 
-                // Check if user has enough tokens
-                const hasEnoughTokens = await checkTokenAvailability(email, totalTokenCost);
+            // Check if user has enough tokens
+            const hasEnoughTokens = await checkTokenAvailability(email, totalTokenCost);
 
-                if (!hasEnoughTokens) {
-                    // Clean up if not enough tokens
-                    try{fs.rmSync(extractedPath, { recursive: true, force: true });
-                    fs.rmSync(file.path, { recursive: true, force: true });}catch(err){
-                        ErrorFactory.createError(ErrorType.DirectoryRmError)
-                    }
-                    throw ErrorFactory.createError(ErrorType.InsufficientTokens);
-                }
-
-                // Deduct tokens
-                await updateTokenBalance(email, -totalTokenCost);
-                // Update token cost on dataset
-
-                await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, dataset.token_cost, totalTokenCostInference);
-
-                // Clean up extracted files and uploaded zip
-                try{fs.rmSync(extractedPath, { recursive: true, force: true });
-                fs.rmSync(file.path, { recursive: true, force: true });}catch(err){
+            if (!hasEnoughTokens) {
+                // Clean up if not enough tokens
+                try {
+                    fs.rmSync(extractedPath, { recursive: true, force: true });
+                    fs.rmSync(file.path, { recursive: true, force: true });
+                } catch (err) {
                     ErrorFactory.createError(ErrorType.DirectoryRmError)
                 }
-            } catch (err: any) {
-                if (err instanceof InsufficientTokensError) {
-                    throw err;
-                }
-                throw ErrorFactory.createError(ErrorType.FileUpload); // Throw error if file upload fails
+                throw ErrorFactory.createError(ErrorType.InsufficientTokens);
             }
 
-            if (blockedFiles.length > 0) {
-                return `Contents from zip added successfully. Blocked files: ${blockedFiles.length} (${blockedFiles.join(', ')})`;
-            } else {
-                return 'Contents from zip added successfully and extraction directory removed';
+            // Deduct tokens
+            await updateTokenBalance(email, -totalTokenCost);
+            // Update token cost on dataset
+
+            await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, dataset.token_cost, totalTokenCostInference);
+
+            // Clean up extracted files and uploaded zip
+            try {
+                fs.rmSync(extractedPath, { recursive: true, force: true });
+                fs.rmSync(file.path, { recursive: true, force: true });
+            } catch (err) {
+                ErrorFactory.createError(ErrorType.DirectoryRmError)
             }
-        } else {
-            // Calculate token cost for single file
-            if (file.mimetype.startsWith('video/')) {
-                const frameCount = await getVideoFrameCount(file.path); // Function to calculate frame count
-                totalTokenCost = frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
-                totalTokenCostInference = frameCount * TOKEN_COSTS.FRAME_VIDEO_INFERENCE;
-            } else if (file.mimetype.startsWith('image/')) {
-                totalTokenCost = TOKEN_COSTS.IMAGE_UPLOADING;
-                totalTokenCostInference = TOKEN_COSTS.IMAGE_INFERENCE;
+        } catch (err: any) {
+            if (err instanceof InsufficientTokensError) {
+                throw err;
             }
-
-            
-                // Check if user has enough tokens
-                const hasEnoughTokens = await checkTokenAvailability(email, totalTokenCost);
-                if (!hasEnoughTokens) {
-                    try{
-                    fs.rmSync(file.path, { recursive: true, force: true });
-                    }catch(err){
-                        throw ErrorFactory.createError(ErrorType.DirectoryRmError)
-                    }
-                    throw ErrorFactory.createError(ErrorType.InsufficientTokens);
-                }
-
-                // Deduct tokens
-                await updateTokenBalance(email, -totalTokenCost);
-                await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, dataset.token_cost, totalTokenCostInference);
-
-
-
-
-            // Move file to final destination
-            const finalFilePath = path.join(originalFilesPath, file.filename);
-            try{
-            fs.renameSync(file.path, finalFilePath);}
-            catch(err){
-                throw ErrorFactory.createError(ErrorType.DirectoryCreation)
-            }
-            return 'Content uploaded successfully';
+            throw ErrorFactory.createError(ErrorType.FileUpload); // Throw error if file upload fails
         }
+
+        if (blockedFiles.length > 0) {
+            return `Contents from zip added successfully. Blocked files: ${blockedFiles.length} (${blockedFiles.join(', ')})`;
+        } else {
+            return 'Contents from zip added successfully and extraction directory removed';
+        }
+    } else {
+        // Calculate token cost for single file
+        if (file.mimetype.startsWith('video/')) {
+            const frameCount = await getVideoFrameCount(file.path); // Function to calculate frame count
+            totalTokenCost = frameCount * TOKEN_COSTS.FRAME_VIDEO_UPLOADING;
+            totalTokenCostInference = frameCount * TOKEN_COSTS.FRAME_VIDEO_INFERENCE;
+        } else if (file.mimetype.startsWith('image/')) {
+            totalTokenCost = TOKEN_COSTS.IMAGE_UPLOADING;
+            totalTokenCostInference = TOKEN_COSTS.IMAGE_INFERENCE;
+        }
+
+
+        // Check if user has enough tokens
+        const hasEnoughTokens = await checkTokenAvailability(email, totalTokenCost);
+        if (!hasEnoughTokens) {
+            try {
+                fs.rmSync(file.path, { recursive: true, force: true });
+            } catch (err) {
+                throw ErrorFactory.createError(ErrorType.DirectoryRmError)
+            }
+            throw ErrorFactory.createError(ErrorType.InsufficientTokens);
+        }
+
+        // Deduct tokens
+        await updateTokenBalance(email, -totalTokenCost);
+        await DatasetDAO.default.updateTokenCostByName(dataset.dataset_name, dataset.email, dataset.token_cost, totalTokenCostInference);
+
+
+
+
+        // Move file to final destination
+        const finalFilePath = path.join(originalFilesPath, file.filename);
+        try {
+            fs.renameSync(file.path, finalFilePath);
+        }
+        catch (err) {
+            throw ErrorFactory.createError(ErrorType.DirectoryCreation)
+        }
+        return 'Content uploaded successfully';
+    }
 };
 
 /**
@@ -315,29 +322,31 @@ const insertContents = async (datasetName: string, file: Express.Multer.File, em
  */
 const getVideoFrameCount = (videoPath: string): Promise<number> => {
     return new Promise((resolve, reject) => {
-        try{ffmpeg.ffprobe(videoPath, (err: Error | null, metadata: ffmpeg.FfprobeData) => {
-            if (err) {
-                return reject(ErrorFactory.createError(ErrorType.FrameCount)); // Reject promise if error occurs
-            }
-
-            const stream = metadata.streams.find((stream: ffmpeg.FfprobeStream) => stream.codec_type === 'video');
-
-            if (stream && stream.nb_frames) {
-                resolve(parseInt(stream.nb_frames, 10)); // Resolve promise with frame count if available
-            } else {
-                // Estimate frame count using duration and frame rate if nb_frames is not available
-                if (stream && stream.duration && stream.r_frame_rate) {
-                    const [numerator, denominator] = stream.r_frame_rate.split('/').map(Number);
-                    const frameRate = numerator / denominator;
-                    const duration = parseFloat(stream.duration);
-                    resolve(Math.round(frameRate * duration));
-                } else {
-                    reject(ErrorFactory.createError(ErrorType.FrameCount));
+        try {
+            ffmpeg.ffprobe(videoPath, (err: Error | null, metadata: ffmpeg.FfprobeData) => {
+                if (err) {
+                    return reject(ErrorFactory.createError(ErrorType.FrameCount)); // Reject promise if error occurs
                 }
-            }
-        });}catch(err){
+
+                const stream = metadata.streams.find((stream: ffmpeg.FfprobeStream) => stream.codec_type === 'video');
+
+                if (stream && stream.nb_frames) {
+                    resolve(parseInt(stream.nb_frames, 10)); // Resolve promise with frame count if available
+                } else {
+                    // Estimate frame count using duration and frame rate if nb_frames is not available
+                    if (stream && stream.duration && stream.r_frame_rate) {
+                        const [numerator, denominator] = stream.r_frame_rate.split('/').map(Number);
+                        const frameRate = numerator / denominator;
+                        const duration = parseFloat(stream.duration);
+                        resolve(Math.round(frameRate * duration));
+                    } else {
+                        reject(ErrorFactory.createError(ErrorType.FrameCount));
+                    }
+                }
+            });
+        } catch (err) {
             throw ErrorFactory.createError(ErrorType.Generic)
-            
+
         }
     });
 };
@@ -348,7 +357,7 @@ const getVideoFrameCount = (videoPath: string): Promise<number> => {
  * @returns An array of tags associated with the dataset
  */
 const getAllTags = async (dataset: Dataset) => {
-        return await DatasetDAO.default.getTags(dataset.dataset_id); // Retrieve tags for the dataset
+    return await DatasetDAO.default.getTags(dataset.dataset_id); // Retrieve tags for the dataset
 };
 
 // Export functions for use in other modules

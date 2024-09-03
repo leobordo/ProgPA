@@ -2,6 +2,7 @@
  * @fileoverview This module contains functions for user authentication, including login and registration functionalities.
  * It interacts with the UserDAO to access and modify user data, and utilizes JWT for generating authentication tokens.
  */
+import { INITIAL_TOKENS } from "../config/tokenConst";
 import UserDAO from "../dao/userDao"; // Import User Data Access Object for interacting with the user data.
 import { Role } from "../models/request"; // Import the Role type, used to manage user roles within the system.
 import { User } from "../models/sequelize_model/User"; // Import the User model to represent user data.
@@ -44,7 +45,7 @@ export const registration = async (email: string, password: string) => {
     }
 
     // Create a new user in the database.
-    const createdUser: User = await UserDAO.createUser(email, password);
+    const createdUser: User = await UserDAO.createUser(email, password, INITIAL_TOKENS);
     return createdUser;
 }
 

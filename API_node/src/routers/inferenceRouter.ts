@@ -11,7 +11,7 @@ import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
 import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { Role } from '../models/request';
 import { ValidationMiddleware } from '../middlewares/validationMiddleware';
-import * as schema from '../middlewares/validationSchemas/validationSchemas';
+import * as schema from '../middlewares/validationSchemas/requestSchemas';
 
 const router = Router();
 
@@ -26,8 +26,8 @@ const getResultValidation = new ValidationMiddleware(schema.getJobResultSchema);
  * Default middlewares for all routes in this router. Each request first goes through the
  * BodyParserMiddleware and then the AuthorizationMiddleware if the body parsing succeeds.
  */
-bodyParser.setNext(userAuthorization);
-router.use((req : Request, res : Response, next : NextFunction) => bodyParser.handle(req, res, next))
+userAuthorization.setNext(bodyParser);
+router.use((req : Request, res : Response, next : NextFunction) => userAuthorization.handle(req, res, next))
 
 //POST route to make inference on a dataset 
 router.post('/', (req : Request, res : Response, next : NextFunction) => inferenceValidation.handle(req, res, next), controller.makeInference);

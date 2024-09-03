@@ -10,7 +10,7 @@ import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { BodyParserMiddleware } from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/validationMiddleware';
 import { Role } from '../models/request';
-import * as schema from '../middlewares/validationSchemas/validationSchemas';
+import * as schema from '../middlewares/validationSchemas/requestSchemas';
 
 const router = Router();
 
@@ -21,12 +21,13 @@ const createDatasetValidation = new ValidationMiddleware(schema.createDatasetSch
 const deleteDatasetValidation = new ValidationMiddleware(schema.deleteDatasetSchema);
 const updateDatasetValidation = new ValidationMiddleware(schema.updateDatasetSchema);
 
-bodyParser.setNext(userAuthorization);
+//bodyParser.setNext(userAuthorization);
+userAuthorization.setNext(bodyParser);
 
 /**
  * All the routes in this router use BodyParserMiddleware and userAuthorization with the same configuration
 */
-router.use((req : Request, res : Response, next : NextFunction) => bodyParser.handle(req, res, next))
+router.use((req : Request, res : Response, next : NextFunction) => userAuthorization.handle(req, res, next))
 
 //GET route that retrieves the list of the dataset associated to the user 
 router.get('/', controller.getAllDatasets);

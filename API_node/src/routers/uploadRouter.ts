@@ -10,7 +10,7 @@ import { AuthorizationMiddleware } from '../middlewares/authMiddleware';
 import { UploadMiddleware } from '../middlewares/uploadMiddleware';
 import { ValidationMiddleware } from '../middlewares/validationMiddleware';
 import { Role } from '../models/request';
-import * as schema from '../middlewares/validationSchemas/validationSchemas';
+import * as schema from '../middlewares/validationSchemas/requestSchemas';
 
 const router = Router();
 
@@ -18,9 +18,9 @@ const router = Router();
 const uploadMiddleware = new UploadMiddleware();
 const userAuthorization = new AuthorizationMiddleware([Role.Admin, Role.User]);
 const validation = new ValidationMiddleware(schema.uploadContentsSchema);
-uploadMiddleware.setNext(userAuthorization).setNext(validation);
+userAuthorization.setNext(uploadMiddleware).setNext(validation);
 
 //POST route to insert a new content (image, video or zip) in a specified dataset (by dataset id)
-router.post('/', (req : Request, res : Response, next : NextFunction) => uploadMiddleware.handle(req, res, next), controller.insertContents);
+router.post('/', (req : Request, res : Response, next : NextFunction) => userAuthorization.handle(req, res, next), controller.insertContents);
 
 export default router;

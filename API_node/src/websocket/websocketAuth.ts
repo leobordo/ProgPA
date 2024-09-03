@@ -23,7 +23,11 @@ export const authenticateWebSocket = (socket: WebSocket, request: any, next: () 
         return;
     }
 
-    jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
+    jwt.verify(token, publicKey, { 
+        algorithms: ['RS256'],
+        audience: process.env.TOKEN_AUD,
+        issuer: process.env.TOKEN_ISSUER  
+    }, (err, decoded) => {
         if (err) {
             console.log('Token invalid:', err);
             socket.close(1008, 'Invalid token');

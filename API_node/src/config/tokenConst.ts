@@ -4,3 +4,5 @@ export const TOKEN_COSTS = {
     IMAGE_INFERENCE: 1.5,           //Cost to make inference on an image
     FRAME_VIDEO_INFERENCE: 1.0,     //Cost to make inference on an video
 };
+
+export const INITIAL_TOKENS: number = 100;  //Amount of token of a new user

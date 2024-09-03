@@ -84,11 +84,12 @@ const deleteDatasetByName = async (req: Request, res: Response, next: NextFuncti
     const datasetName = req.body.datasetName;
     const email = req.user?.userEmail;
 
-    // Delete dataset using the data service
+    // Deletes dataset using the data service
     await dataServices.deleteDatasetByName(datasetName!, email!);
 
-    // Respond with success message
-    res.status(HTTPStatus.OK).json({ message: 'Dataset deleted successfully' });
+    // Responds with success message
+    const message: string = 'Dataset ' + datasetName + ' deleted successfully';
+    res.status(HTTPStatus.OK).json({ message: message});
   } catch (error) {
     next(error)
   }

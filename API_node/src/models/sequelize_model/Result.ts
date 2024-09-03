@@ -1,5 +1,5 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
-import { JobStatus } from '../job';
+import { JobStatus } from '../jobStatus';
 import { ModelId } from '../aiModels';
 import { Dataset } from './Dataset';
 import { User } from './User';

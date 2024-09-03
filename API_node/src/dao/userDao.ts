@@ -82,12 +82,13 @@ const UserDAO = {
      * @param psw The password for the new user.
      * @returns A Promise resolving to the newly created User object.
      */
-    async createUser(email: string, psw: string){
+    async createUser(email: string, psw: string, token_amount: number){
         try {
             // Create a new user record.
             return await User.create({
                 email: email,
-                password: psw
+                password: psw,
+                tokens: token_amount
             })
         } catch (error) {
             // Handle errors by throwing a database error.
