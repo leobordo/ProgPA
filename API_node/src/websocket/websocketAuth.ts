@@ -1,5 +1,5 @@
 /**
- * WebSocket Authentication Middleware Module
+ * @fileoverview WebSocket Authentication Middleware Module
  *
  * This module provides middleware to authenticate WebSocket connections using JWT (JSON Web Tokens).
  * It ensures that only clients with a valid token can establish a WebSocket connection.

@@ -1,5 +1,5 @@
 /**
- * WebSocket Message Handling Module
+ * @fileoverview WebSocket Message Handling Module
  * 
  * This module is responsible for defining and managing WebSocket messages for the application.
  * It includes:
