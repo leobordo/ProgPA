@@ -100,11 +100,8 @@ class InferenceQueueService {
                 // Checks if the json structure is as expected
                 const { error } = ResultSchema.validate(responseData);
                 if (error) {
-                    console.error('Validation failed:', error.details);
                     throw Error
                 }
-                console.error('Validation succesfull');
-
                 ResultDAO.updateJobResult(job.id!, JSON.stringify(responseData));
 
             } catch (error) {

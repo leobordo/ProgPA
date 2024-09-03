@@ -51,8 +51,10 @@ The container containing the Deep Learning model, redesigned to fit the Flask fr
 
 The Express container is based on a sort of Model-View-Controller (MVC) pattern, although in this version of the application, an actual view has not been defined. Essentially, it is a layered backend where, at the highest level, we have routers that route API calls to the appropriate controllers. However, before this operation, the calls pass through a layer of middleware customized according to the requested route.
 
-Once in the controller, the necessary parameters for the operation are extracted from the body of the request. Control is then passed to the service layer, which handles the business logic and error management. This layer interfaces with a lower-level layer, the DAOs (Data Access Objects), which are responsible for managing and executing the queries necessary for the services to function. The DAOs interact with the database using Sequelize models, which allow the implementation of the ORM (Object-Relational Mapping) pattern, thereby simplifying the verbosity of database operations. Once the response is obtained in the service, or potentially an error, it is passed back to the controller through a specific middleware responsible for error handling, which then returns the result of the operations to the user.
+Once in the controller, the necessary parameters for the operation are extracted from the body of the request. Control is then passed to the service layer, which handles the business logic and error management. This layer interfaces with a lower-level layer, the DAOs (Data Access Objects), which are responsible for managing and executing the queries necessary for the services to function. The DAOs interact with the database using Sequelize models, which allow the implementation of the ORM (Object-Relational Mapping) pattern, thereby simplifying the verbosity of database operations. Once the response data is obtained in the service, it is passed back to the controller, which takes care of preparing and sending the response to the user. In case of error, the controller does not directly send the response; this task is delegated to the error handling middleware.
 
+![alt text](Documentation/Use_case_diagram.png)
+![alt text](Documentation/Architecture.png)
 
 ---
 

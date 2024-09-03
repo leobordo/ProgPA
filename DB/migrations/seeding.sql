@@ -1,3 +1,3 @@
 INSERT INTO users (email, password, role)
 VALUES
-('prova@gmail.com', 'ciaociao', 0);
+('admin@gmail.com', 'admin123', 0);
