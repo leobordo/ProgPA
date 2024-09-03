@@ -8,7 +8,6 @@ from flask import Flask, request, jsonify
 
 from config import Config, logger
 from models import db
-from loader import load_json_results
 from processing import (get_annotated_image, get_annotated_video, 
                         get_image_text_result, get_video_text_result)
 from utils import get_file_category

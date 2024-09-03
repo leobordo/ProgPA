@@ -1,9 +1,17 @@
+/**
+ * @fileOverview This file contains the definition of the ErrorHandlingMiddleware class that is used
+ *               for handling errors in the middleware chain. It extends
+ *               the base Middleware class and provides a specialized method for error handling.
+ */
 import { Request, Response, NextFunction } from 'express';
 import { Middleware } from './middleware';
 import { IAppError } from '../utils/errorFactory';
 
 /**
- * Specialized middleware class for handling errors in the middleware chain.
+ * @class Specialized middleware class for handling errors in the middleware chain.
+ * This class extends the base Middleware class and overrides its handle method to include
+ * error handling functionality. It captures errors passed through the middleware chain
+ * and responds with a standardized error response.
  */
 class ErrorHandlingMiddleware extends Middleware {
 

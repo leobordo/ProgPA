@@ -1,11 +1,11 @@
 /**
- * @file This file defines the RedisConnection class which implements the singleton pattern
+ * @fileoverview This file defines the RedisConnection class which implements the singleton pattern
  * to maintain a single Redis connection instance throughout the application.
  */
 import Redis from 'ioredis';
 
 /**
- * RedisConnection class using the singleton pattern to manage a single Redis connection.
+ * @class RedisConnection class using the singleton pattern to manage a single Redis connection.
  * This class ensures that only one connection to the Redis server is maintained across the entire
  * application, preventing connection overhead.
  */

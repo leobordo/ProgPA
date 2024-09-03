@@ -1,6 +1,6 @@
 import { Response, Request, NextFunction } from 'express'; // Import Express types
 import * as dataServices from '../services/dataServices'; // Import the data services
-import  HTTPStatus from 'http-status-codes'; // Import HTTPStatus module
+import HTTPStatus from 'http-status-codes'; // Import HTTPStatus module
 
 /**
  * Create a new dataset
@@ -13,13 +13,13 @@ const createDataset = async (req: Request, res: Response, next: NextFunction): P
     const datasetName = req.body.datasetName;
     const tags = req.body.tags;
     const email = req.user?.userEmail;
-    
+
     // Split tags into an array and trim whitespace
     const arrayTag = tags.split(',').map((element: string) => element.trim());
-    
+
     // Create dataset using the data service
     const result = await dataServices.createDataset(datasetName!, arrayTag, email!);
-    
+
     // Respond with created dataset
     res.status(HTTPStatus.CREATED).json(result);
   } catch (error) {
@@ -38,12 +38,12 @@ const getAllDatasets = async (req: Request, res: Response, next: NextFunction): 
 
     // Get all datasets associated with the user's email
     const results = await dataServices.getAllDatasets(email!);
-  
+
     // Respond with the datasets
     res.status(HTTPStatus.OK).json(results);
   } catch (error) {
     next(error)
-};
+  };
 }
 
 /**
@@ -67,11 +67,11 @@ const updateDatasetByName = async (req: Request, res: Response, next: NextFuncti
 
     // Update dataset using the data service
     const updatedMessage = await dataServices.updateDatasetByName(datasetName!, email!, newName, tags);
-    
+
     // Respond with updated message
     res.status(HTTPStatus.OK).json(updatedMessage);
   } catch (error) {
-  next(error)
+    next(error)
   }
 };
 
@@ -87,10 +87,10 @@ const deleteDatasetByName = async (req: Request, res: Response, next: NextFuncti
 
     // Delete dataset using the data service
     await dataServices.deleteDatasetByName(datasetName!, email!);
-    
+
     // Respond with success message
     res.status(HTTPStatus.OK).json({ message: 'Dataset deleted successfully' });
-} catch (error) {
+  } catch (error) {
     next(error)
   }
 };
@@ -108,10 +108,10 @@ const insertContents = async (req: Request, res: Response, next: NextFunction): 
 
     // Insert contents into dataset using the data service
     const message = await dataServices.insertContents(datasetName!, file!, email!);
-    
+
     // Respond with success message
     res.status(HTTPStatus.CREATED).json({ message });
-} catch (error) {
+  } catch (error) {
     next(error)
   }
 };

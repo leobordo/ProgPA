@@ -1,5 +1,5 @@
 /**
- * @fileOverview This file contains the definition of theValidationMiddleware class that is used 
+ * @fileOverview This file contains the definition of the ValidationMiddleware class that is used 
  *               for validating the request body and the user data originally contained
  *               in the jwt token and attached to the response object by the authentication middleware.
  */
@@ -11,7 +11,7 @@ import { userSchema } from './validationSchemas/validationSchemas';
 import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 /**
- * Middleware class for validating both the request body and the user data embedded within the request.
+ *  @class Middleware class for validating both the request body and the user data embedded within the request.
  * Utilizes Joi schemas to ensure that both sets of data adhere to defined constraints before allowing
  * processing to continue to subsequent middleware or controller.
  */

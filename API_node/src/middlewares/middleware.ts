@@ -5,7 +5,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 /**
- * Base class for creating middleware that can be linked in a chain. 
+ * @class Base class for creating middleware that can be linked in a chain. 
  * This implementation follows the Chain of Responsibility pattern, allowing each middleware to pass the request 
  * to the next in the chain, or to terminate the chain if there are no more middleware.
  */

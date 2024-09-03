@@ -5,7 +5,6 @@ import { NextFunction, Request, Response } from 'express';
 import InferenceService from '../services/inferenceService';
 import { IResult, JobStatus } from '../models/job';
 import HTTPStatus from 'http-status-codes';
-import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 const inferenceService = InferenceService.getInstance();
 

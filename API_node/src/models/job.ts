@@ -24,6 +24,14 @@ enum IContentType {
 }*/
 
 interface IJsonResult {
+    
+}
+
+interface IInferenceInformation {
+
+}
+
+interface IInferenceResult {
     type: string,
     filename: string,
     objects?: Array<IObject>,

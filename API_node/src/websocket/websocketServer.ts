@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import { authenticateWebSocket } from './websocketAuth';
-import DatasetDAO from '../dao/datasetDao'
+import DatasetDAO from '../dao/resultDao'
 import { Result } from '../models/sequelize_model/Result';
 import { sendUserMessage, MessageType, messageTemplates } from '../websocket/websocketMessages'; // Importa le funzioni di messaggi centralizzati
 

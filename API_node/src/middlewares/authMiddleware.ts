@@ -10,7 +10,7 @@ import * as jwt from 'jsonwebtoken';
 import { ErrorFactory, ErrorType } from '../utils/errorFactory';
 
 /**
- * Middleware for handling JWT authentication.
+ * @class Middleware for handling JWT authentication.
  * This class extends the Middleware base class and is responsible for extracting the JWT from
  * the authorization header, verifying it, and attaching the user's payload to the request object.
  */
@@ -46,7 +46,7 @@ class AuthenticationMiddleware extends Middleware {
             jwt.verify(token, (process.env.PUBLIC_KEY)!.replace(/\\n/g, '\n'), { 
                 algorithms: ['RS256'],
                 audience: process.env.TOKEN_AUD,
-                issuer: process.env.TOKEN_DURATION 
+                issuer: process.env.TOKEN_ISSUER 
             }, (err, decoded) => {
                 if (err) {
                     throw ErrorFactory.createError(ErrorType.Authentication, 'Token is invalid');
