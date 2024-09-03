@@ -141,3 +141,4 @@ API_node/tokenGeneration/private_key.pem
 API_node/tokenGeneration/keyGenerator.js
 
 uploads
+FLASK/emissions.csv

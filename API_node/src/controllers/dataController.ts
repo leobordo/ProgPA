@@ -19,9 +19,8 @@ const createDataset = async (req: Request, res: Response, next: NextFunction): P
 
     // Create dataset using the data service
     const result = await dataServices.createDataset(datasetName!, arrayTag, email!);
-
     // Respond with created dataset
-    res.status(HTTPStatus.CREATED).json(result);
+    res.status(HTTPStatus.CREATED).json({message: result.message, dataset: result.newDataset});
   } catch (error) {
     next(error)
   }

@@ -2,9 +2,11 @@
 Flask application module to handle prediction requests and save results.
 """
 import os
+import json
 
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
+from codecarbon import EmissionsTracker
 
 from config import Config, logger
 from models import db
@@ -13,7 +15,7 @@ from processing import (get_annotated_image, get_annotated_video,
 from utils import get_file_category
 from validation import validate_request_params
 
-import json
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -40,6 +42,9 @@ def predict():
 
     if validation_response['error']:
         return validation_response['error'], validation_response['status_code']
+
+    tracker = EmissionsTracker()
+    tracker.start()
 
     # Extract validation values
     job_id = validation_response['job_id']
@@ -84,13 +89,30 @@ def predict():
                 get_annotated_image(file_path, model, dataset_id, job_id)
 
             elif category == 'video':
-                results_list.extend(get_video_text_result(file_path, model))
+                video_result = get_video_text_result(file_path, model)
+                if video_result and isinstance(video_result, list):
+                    results_list.extend(video_result)  
+                else:
+                    logger.error(f"Failed to process video: {file_path}")
                 get_annotated_video(file_path, model, dataset_id, job_id)
+   
+    tracker.stop()
 
-    # Convert to json
-    results_json = json.dumps(results_list, indent=4)  # Format JSON with indentation
+    emissions_data = tracker.final_emissions_data
 
-    #load_json_results(validation_response, results_json)):
+    results_with_emissions = {
+        
+        'Inference information': {
+            'Dataset ID': dataset_id,
+            'CO2 emissions [kg]': emissions_data.emissions,  
+            'consumed energy [kWh]': emissions_data.energy_consumed, 
+            'inference time [s]': emissions_data.duration,  
+        },
+        'inference_results': results_list
+    }
+
+    
+    results_json = jsonify(results_with_emissions)
     
     return results_json, 200
 

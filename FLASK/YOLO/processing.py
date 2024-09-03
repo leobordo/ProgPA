@@ -1,7 +1,6 @@
 import os
 import logging
 from PIL import Image
-from flask import jsonify
 import cv2
 from ultralytics.engine.results import Results
 from config import logger
@@ -51,28 +50,38 @@ def get_image_text_result(file_path, model):
 
 def get_video_text_result(file_path, model):
     """
-    Processes a video file and returns a list of results with detected objects for each frame.
+    Processes a video file and returns a dictionary with video results,
+    where each video is an object containing all frames and detected objects.
 
     Args:
         file_path (str): Path to the video file.
         model (object): Model used for predictions.
 
     Returns:
-        list: A list of dictionaries containing results for each frame of the video.
+        dict: A dictionary containing results for the video with all frames included.
     """
-    results_list = []
+    video_results = {
+        'type': 'video',
+        'filename': file_path.split('/')[-1],  
+        'frames': []
+    }
 
     try:
         # Open the video file
         video = cv2.VideoCapture(file_path)
 
         if not video.isOpened():
-            return jsonify({'error': f'Failed to open video file {file_path}'}), 500
+            logger.error(f"Failed to open video file {file_path}")
+            return [{'error': f'Failed to open video file {file_path}'}]  
 
         logger.debug("Video opened successfully: %s", file_path)
 
         # Get the frames per second of the video
         fps = video.get(cv2.CAP_PROP_FPS)
+        if fps <= 0:
+            logger.error(f"Invalid FPS value: {fps} for video file {file_path}")
+            return [{'error': f'Invalid FPS value for video file {file_path}'}]  
+
         frame_number = 0
 
         while True:
@@ -80,38 +89,51 @@ def get_video_text_result(file_path, model):
             if not ret:
                 break
 
-            time_in_seconds = frame_number / fps
+            time_in_seconds = round(frame_number / fps, 2) if fps > 0 else 0
 
             # Perform the frame prediction using the model
-            results: Results = model.predict(frame)
-
-            # Check if any objects were detected in the frame, if not write "none"
-            if results[0].boxes is None or len(results[0].boxes) == 0:
-                results_list.append({
-                    'type': 'video_frame', 
-                    'filename': file_path, 
-                    'frame': frame_number,
+            try:
+                results: Results = model.predict(frame)
+                logger.debug("Frame %d prediction results: %s", frame_number, results)
+            except Exception as predict_error:
+                logger.error(f"Prediction failed for frame {frame_number} of video {file_path}: {str(predict_error)}")
+                frame_data = {
+                    'frame_number': frame_number,
                     'time': time_in_seconds,
-                    'results': ["none"]
-                })
+                    'objects': []  # Empty if prediction fails
+                }
+                video_results['frames'].append(frame_data)
+                frame_number += 1
+                continue  # Skip to the next frame if prediction fails
+
+            # Check if any objects were detected in the frame
+            if results[0].boxes is None or len(results[0].boxes) == 0:
+                frame_data = {
+                    'frame_number': frame_number,
+                    'time': time_in_seconds,
+                    'objects': []
+                }
             else:
                 # Convert results to JSON format
-                res = [json.loads(r.tojson()) for r in results]
-                results_list.append({
-                    'type': 'video_frame', 
-                    'filename': file_path, 
-                    'frame': frame_number, 
-                    'results': res
-                })
+                objects = [json.loads(r.tojson()) for r in results]
+                frame_data = {
+                    'frame_number': frame_number,
+                    'time': time_in_seconds,
+                    'objects': objects
+                }
+
+            video_results['frames'].append(frame_data)
             frame_number += 1
 
     except Exception as e:
-        return jsonify({'error': f'Failed to process video {file_path}: {str(e)}'}), 500    
+        logger.error(f"Failed to process video {file_path}: {str(e)}")
+        return [{'error': f'Failed to process video {file_path}: {str(e)}'}]  
 
     finally:
         video.release()
 
-    return results_list
+    return [video_results]  
+
 
 
 
