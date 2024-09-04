@@ -1,4 +1,19 @@
-// Importing necessary enums and models for handling AI model IDs, job statuses, and errors.
+/**
+ * @fileOverview Result Data Access Object (DAO) Module
+ * 
+ * This module defines the `ResultDAO` object, which provides methods for interacting with `Result` entities
+ * in the database. The `Result` entity typically represents jobs and their states in an AI model inference 
+ * system. The module includes methods for creating new jobs, updating job statuses and results, and retrieving 
+ * jobs based on various criteria. It uses Sequelize ORM to perform database operations and ensures error handling 
+ * through a custom `ErrorFactory`.
+ * 
+ * Key functionalities:
+ * - Create new jobs in the database with initial status and metadata.
+ * - Update the status or result of existing jobs.
+ * - Retrieve jobs by their unique ID or associated user email.
+ * - Ensure all operations are executed with proper error handling to manage database errors effectively.
+ */
+
 import { ModelId } from "../models/aiModels";
 import { JobStatus } from "../models/jobStatus";
 import { Dataset } from "../models/sequelize_model/Dataset";

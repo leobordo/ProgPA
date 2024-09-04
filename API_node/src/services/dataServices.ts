@@ -1,3 +1,19 @@
+/**
+ * @fileOverview Dataset Service Module
+ * 
+ * This module provides services for managing datasets, including creating, updating, deleting,
+ * and retrieving datasets and their contents. It also handles the insertion of files into datasets
+ * and the associated token costs for operations such as uploading images and videos.
+ * 
+ * Key functionalities:
+ * - Create a new dataset and manage its tags.
+ * - Retrieve all datasets associated with a user's email.
+ * - Update dataset information, including renaming and updating tags.
+ * - Soft delete datasets to mark them as deleted.
+ * - Insert contents into a dataset and manage file uploads, including handling zip files.
+ * - Calculate token costs for different types of file uploads and manage user tokens.
+ */
+
 import * as DatasetDAO from '../dao/datasetDao'; // Import all methods from DatasetDAO
 import fs from 'fs'; // Import file system module
 import unzipper from 'unzipper'; // Import unzipper module for extracting files
@@ -45,9 +61,8 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
     catch (err) {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation)
     }
-    return { message: 'Dataset created successfully', newDataset };
+    return { message: 'Dataset created successfully', newDataset, tags }};
 
-};
 
 /**
  * Get all datasets by user email

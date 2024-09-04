@@ -2,7 +2,7 @@ CREATE TABLE users (
     email VARCHAR(255) PRIMARY KEY,
     password TEXT NOT NULL,
     role INTEGER DEFAULT 1,
-    tokens FLOAT DEFAULT 1000
+    tokens FLOAT
 );
 
 CREATE TABLE datasets (
@@ -35,9 +35,5 @@ CREATE TABLE results (
     model_version TEXT NOT NULL,
     FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
 );
-
-INSERT INTO users (email, password, role)
-VALUES
-('prova@gmail.com', 'ciaociao', 0);
 
 

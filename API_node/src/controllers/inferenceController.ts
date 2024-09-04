@@ -28,7 +28,7 @@ const makeInference = async (req: Request, res: Response, next: NextFunction): P
 
     //Adds the job to the queue and receives the Id 
     const jobId = await inferenceService.requestDatasetInference(datasetName, userEmail, modelId, modelVersion);
-    res.status(HTTPStatus.OK).send({ message: "Process added succesfully to the queue", jobId: jobId });
+    res.status(HTTPStatus.OK).send({ message: "Process added successfully to the queue", jobId: jobId });
   } catch (error) {
     next(error);
   }
@@ -57,7 +57,6 @@ const checkState = async (req: Request, res: Response, next: NextFunction): Prom
   }
 };
 
-
 /** 
  * Gets the result of the specified job (by ID) if it's completed.
  * @param {Request} req - The Express request object containing:
@@ -79,6 +78,5 @@ const getResult = async (req: Request, res: Response, next: NextFunction): Promi
     next(error);
   }
 };
-
 
 export { makeInference, checkState, getResult };

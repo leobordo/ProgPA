@@ -1,9 +1,17 @@
-/* Import necessary modules and models for the application. */
+/**
+ * @fileOverview Dataset Data Access Object (DAO) Module.
+ *
+ * This module provides a set of methods to interact with the `Dataset`, `Tag`, and `Result` models in the database.
+ * It includes functionality for creating, retrieving, updating, and deleting datasets and tags, as well as handling
+ * transactions and error management. This DAO abstracts the database operations, making it easier to manage datasets
+ * within the application.
+ */
+
 import { Dataset } from '../models/sequelize_model/Dataset';        // Import the Dataset model from sequelize_model
 import { Result } from '../models/sequelize_model/Result';          // Import the Result model from sequelize_model
 import { Tag } from '../models/sequelize_model/Tag';                // Import the Tag model from sequelize_model
 import { ErrorFactory, ErrorType} from '../utils/errorFactory';     // Import custom error handling utilities
-import { sequelize } from '../config/sequelize';
+import { sequelize } from '../config/sequelize';                    // Import Sequelize instance for transactions
 
 /** 
  * Dataset Data Access Object (DAO)
@@ -22,8 +30,8 @@ const DatasetDAO = {
             /* Find all tags where the dataset_id matches the provided ID. */
             return await Tag.findAll({
                 where: { dataset_id: dataset_id },  
-                attributes: ['tag'],        // Only retrieve the 'tag' attribute
-                transaction: transaction    // Use the provided transaction if any
+                attributes: ['tag'],        
+                transaction: transaction    
             });
         } catch (err) {
             /* Throw a database error if the operation fails. */

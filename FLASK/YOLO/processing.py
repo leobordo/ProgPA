@@ -1,3 +1,23 @@
+"""
+This module provides functions for processing and annotating images and videos using an object 
+detection model. It includes functionalities for handling both image and video files, predicting 
+objects, and generating annotated versions of these media files.
+
+Functions:
+    - get_image_text_result: Processes an image file to detect objects and returns a JSON-formatted 
+      string with the results.
+    - get_video_text_result: Processes a video file frame by frame to detect objects and returns a 
+      dictionary containing results for each frame.
+    - get_annotated_video: Generates an annotated video using the provided model and saves it to a 
+      specified directory.
+    - get_annotated_image: Generates an annotated image using the provided model and saves it to a 
+      specified directory.
+
+Usage:
+    Import the functions from this module and provide an appropriate object detection model and 
+    media files to process and annotate images or videos as needed.
+"""
+
 import os
 import logging
 from PIL import Image
@@ -7,6 +27,8 @@ from config import logger
 import json
 
 logger = logging.getLogger(__name__)
+
+
 
 def get_image_text_result(file_path, model):
     """
@@ -53,6 +75,7 @@ def get_image_text_result(file_path, model):
         results_list.append({'type': 'image', 'filename': file_path.split('/')[-1], 'error': f'Failed to process image: {str(e)}'})
 
     return results_list
+
 
 
 def get_video_text_result(file_path, model):
@@ -111,7 +134,8 @@ def get_video_text_result(file_path, model):
                 }
                 video_results['frames'].append(frame_data)
                 frame_number += 1
-                continue  # Skip to the next frame if prediction fails
+                # Skip to the next frame if prediction fails
+                continue  
 
             # Check if any objects were detected in the frame
             frame_objects = []
@@ -143,7 +167,6 @@ def get_video_text_result(file_path, model):
         video.release()
 
     return [video_results]  
-
 
 
 
@@ -187,6 +210,8 @@ def get_annotated_video(file_path, model, dataset_id, job_id):
         logger.error("Failed to process video %s: %s", file_path, str(e))
         return None
 
+
+
 def get_annotated_image(file_path, model, dataset_id, job_id):  
     """
     Generates an annotated image using the provided model and saves it to the specified directory.
@@ -208,8 +233,6 @@ def get_annotated_image(file_path, model, dataset_id, job_id):
         # Creates the directory if it doesn't exist
         os.makedirs(annotated_image_dir, exist_ok=True)
         logger.debug("Desired output directory for annotated image: %s", annotated_image_dir)
-
-        
 
         # Create output filename and path for the annotated image 
         annotated_filename = f"annotated_{os.path.basename(file_path)}"
