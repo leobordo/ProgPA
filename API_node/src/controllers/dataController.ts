@@ -12,9 +12,14 @@ import * as dataServices from '../services/dataServices'; // Import the data ser
 import HTTPStatus from 'http-status-codes'; // Import HTTPStatus module
 
 /**
- * Create a new dataset
- * @param req - Express request object
- * @param res - Express response object
+ * Create a new dataset.
+ *
+ * This function validates the request input, splits tags into an array, and creates a new dataset
+ * using the data service. It then responds with the created dataset details.
+ *
+ * @param {Request} req - Express request object containing dataset details.
+ * @param {Response} res - Express response object for sending the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
  */
 const createDataset = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -36,9 +41,14 @@ const createDataset = async (req: Request, res: Response, next: NextFunction): P
 };
 
 /**
- * Get all datasets
- * @param req - Express request object
- * @param res - Express response object
+ * Retrieve all datasets.
+ *
+ * This function retrieves all datasets associated with the user's email from the data service 
+ * and responds with the datasets.
+ *
+ * @param {Request} req - Express request object containing user email.
+ * @param {Response} res - Express response object for sending the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
  */
 const getAllDatasets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -55,9 +65,14 @@ const getAllDatasets = async (req: Request, res: Response, next: NextFunction): 
 }
 
 /**
- * Update a dataset by name
- * @param req - Express request object
- * @param res - Express response object
+ * Update a dataset by name.
+ *
+ * This function updates an existing dataset based on the provided name and new details. 
+ * It can update the dataset name and tags and responds with a success message.
+ *
+ * @param {Request} req - Express request object containing dataset update details.
+ * @param {Response} res - Express response object for sending the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
  */
 const updateDatasetByName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -84,9 +99,14 @@ const updateDatasetByName = async (req: Request, res: Response, next: NextFuncti
 };
 
 /**
- * Delete a dataset by name
- * @param req - Express request object
- * @param res - Express response object
+ * Delete a dataset by name.
+ *
+ * This function deletes a dataset based on the provided name and user email. 
+ * It responds with a success message upon successful deletion.
+ *
+ * @param {Request} req - Express request object containing dataset name to delete.
+ * @param {Response} res - Express response object for sending the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
  */
 const deleteDatasetByName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -105,9 +125,14 @@ const deleteDatasetByName = async (req: Request, res: Response, next: NextFuncti
 };
 
 /**
- * Insert contents into a dataset
- * @param req - Express request object
- * @param res - Express response object
+ * Insert contents into a dataset.
+ *
+ * This function inserts contents into an existing dataset based on the provided dataset name 
+ * and file. It responds with a success message upon successful insertion.
+ *
+ * @param {Request} req - Express request object containing dataset name and file to insert.
+ * @param {Response} res - Express response object for sending the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
  */
 const insertContents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

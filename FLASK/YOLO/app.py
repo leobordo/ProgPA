@@ -1,5 +1,23 @@
 """
-Flask application module to handle prediction requests and save results.
+This module sets up a Flask web application that provides an endpoint for processing prediction 
+requests using machine learning models. It is designed to handle both image and video files, 
+applying object detection models to analyze the media and generate annotated outputs. The module 
+also tracks and logs the environmental impact of the prediction process, including CO2 emissions 
+and energy consumption.
+
+Key Components:
+- **Environment Configuration**: Loads environment variables required for the application's configuration 
+  from a `.env` file using the `dotenv` package.
+- **Flask Initialization**: Sets up the Flask application and integrates it with a SQLAlchemy database 
+  instance for handling persistent data.
+- **Prediction Endpoint**: Defines a `/predict` route that handles POST requests to perform predictions on 
+  media files. This endpoint:
+  - Validates incoming request parameters to ensure all necessary information is provided and correct.
+  - Tracks emissions and energy consumption using the `codecarbon` package during the prediction process.
+  - Processes each file in a specified dataset directory, determining whether the file is an image or video, 
+    and applying the appropriate model to generate predictions and annotations.
+  - Saves annotated media and returns a comprehensive response that includes prediction results, as well as 
+    environmental impact metrics.
 """
 import os
 
@@ -42,6 +60,7 @@ def predict():
     if validation_response['error']:
         return jsonify({'error': validation_response['error']}), validation_response['status_code']
 
+    # Start tracking emissions and energy consumption for the prediction process
     tracker = EmissionsTracker()
     tracker.start()
 
@@ -55,20 +74,23 @@ def predict():
     logger.debug("Job ID: %s, Model ID: %s, Model Version: %s, Dataset ID: %s"
                  , job_id, model_id, model_version, dataset_id)
 
-    # Build the path to the original images directory
+    # Define the path to the original images directory for the specified dataset
     directory_path = os.path.join('/user/uploads', str(dataset_id), 'original_files')
     logger.debug("Original images to directory path : %s", directory_path)
 
-    # Check if the original images directory exists
+    # Check if the directory with original images exists
     if not os.path.exists(directory_path):
         #return jsonify({'error': f'Directory not found: {directory_path}'}), 404
         logger.debug("os.path.exists(directory_path) exist")
 
+    # List to store results
     results_list = []
 
+    # Define the path to save annotated images and videos
     annotated_images_dir = os.path.join('/user/uploads', str(dataset_id), 
                                         'annotated_files', str(job_id))
-    # Create the original images directory if it does not exist
+    
+    # Create the annotated images directory if it does not exist
     os.makedirs(annotated_images_dir, exist_ok=True)
 
     # Process each file in the original images directory
@@ -76,6 +98,7 @@ def predict():
         file_path = os.path.join(directory_path, file)
         logger.debug("Processing file: %s", file_path)
 
+        # Check if the current path is a file
         if os.path.isfile(file_path):
             logger.debug("File found: %s", file_path)
 
@@ -99,6 +122,7 @@ def predict():
 
     emissions_data = tracker.final_emissions_data
 
+    # Compile the results and emissions data into a single response
     results_with_emissions = {
         
         'inference_information': {
@@ -110,7 +134,6 @@ def predict():
         'inference_results': results_list
     }
 
-    
     results_json = jsonify(results_with_emissions)
     
     return results_json, 200
