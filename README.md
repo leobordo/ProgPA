@@ -1,7 +1,7 @@
 # Advanced Programming Project
 *Backend Development for a Small Object Detection Model*
 
-## Introduction
+### Introduction
 
 The objective of this project is to develop a backend for a Small Object Detection model written in Python. We utilized the _Express_ framework to abstract the backend calls to the model, which is built using the _Flask_ framework. This setup allows us to define various functionalities related to user management, inference processing using tokens, and the creation of customized datasets.
 
@@ -11,7 +11,7 @@ All components mentioned above, indicated in italics, have been encapsulated in 
 
 ---
 
-## Installation
+### Installation
 
 First of all you need to clone our GitHub repository:
 
@@ -35,7 +35,9 @@ After Docker is running, navigate to the directory where you cloned the reposito
 docker compose up
    ```
 
-If you followed these steps correctly, the app is now installed and ready to use.
+If you followed these steps correctly, the app is now configured and ready to use.
+
+NOTE: when running for the first time, seeding is automatic. Other database operations are not necessary.
 
 ---
 
@@ -51,7 +53,13 @@ The container containing the Deep Learning model, redesigned to fit the Flask fr
 
 Once in the controller, the necessary parameters for the operation are extracted from the body of the request. Control is then passed to the service layer, which handles the business logic and error management. This layer interfaces with a lower-level layer, the DAOs (Data Access Objects), which are responsible for managing and executing the queries necessary for the services to function. The DAOs interact with the database using Sequelize models, which allow the implementation of the ORM (Object-Relational Mapping) pattern, thereby simplifying the verbosity of database operations. Once the response is obtained in the service, or potentially an error, it is passed back to the controller through a specific middleware responsible for error handling, which then returns the result of the operations to the user.
 
+![Alt text](Documentation/Architecture.png)
 
+---
+
+### Use Case Diagram
+
+![Alt text](Documentation/Use_case_diagram.png)
 
 ---
 
@@ -359,6 +367,58 @@ For the WebSocket implementation, the ws library was used. This library is light
       "message": "user@example.com, your job with ID example_idhas been completed."
     }
     ```
+
+---
+
+### Sequence Diagrams
+
+##### Register
+
+![Alt text](Documentation/RegistrationSequenceDiagram.png)
+
+##### Log in
+
+![Alt text](Documentation/LoginSequenceDiagram.png)
+
+##### Create New Dataset
+
+![Alt text](Documentation/CreateDatasetSequenceDiagram.png)
+
+#### Get Dataset List
+
+![Alt text](Documentation/GetDatasetsSequenceDiagram.png)
+
+##### Delete Dataset
+
+![Alt text](Documentation/DeleteDatasetSequenceDiagram.png)
+
+##### Update Dataset
+
+![Alt text](Documentation/UpdateDatasetSequenceDiagram.png)
+
+##### Upload Content
+
+![Alt text](Documentation/UploadContentsSequenceDiagram.png)
+
+##### Make Inference
+
+![Alt text](Documentation/MakeInferenceSequenceDiagram.png)
+
+##### Check Process Status
+
+![Alt text](Documentation/GetJobStateDiagram.png)
+
+##### Get Process Result
+
+![Alt text](Documentation/GetJobResultDiagram.png)
+
+##### Check Token Balance
+
+![Alt text](Documentation/GetTokenBalanceSequenceDiagram.png)
+
+##### Update Token Balance
+
+![Alt text](Documentation/updateTokenBalanceSequenceDiagram.png)
 
 ---
 

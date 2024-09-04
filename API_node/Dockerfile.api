@@ -12,5 +12,4 @@ COPY package.json ./
 RUN npm install
 
 # Esegue l'applicazione con Nodemon per abilitare l'hot reloading
-#CMD ["nodemon", "--watch", "/user/app", "dist/app.js"]
 CMD ["npm", "run", "start:watch"]
