@@ -1,3 +1,21 @@
+"""
+This module defines the SQLAlchemy models for the database, representing the core entities 
+of the system: User, Dataset, and Result. Each class corresponds to a database table and includes 
+attributes that map to the table's columns, along with relationships to other tables.
+
+Classes:
+    User: Represents a user in the system, storing email and token information, and linking 
+          to datasets owned by the user.
+    Dataset: Represents a dataset, including metadata such as the file path, token cost, and 
+             associated user. Datasets can also have multiple results linked to them.
+    Result: Represents the result of a job processed in the system, storing details about the 
+            job's state, model used, and associated dataset.
+
+Usage:
+    Import the db object from this module to initialize the database and use the defined models 
+    to interact with the data in a structured way.
+"""
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()

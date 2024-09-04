@@ -57,7 +57,6 @@ const checkState = async (req: Request, res: Response, next: NextFunction): Prom
   }
 };
 
-
 /** 
  * Gets the result of the specified job (by ID) if it's completed.
  * @param {Request} req - The Express request object containing:
@@ -79,6 +78,5 @@ const getResult = async (req: Request, res: Response, next: NextFunction): Promi
     next(error);
   }
 };
-
 
 export { makeInference, checkState, getResult };

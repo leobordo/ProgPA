@@ -8,6 +8,7 @@ Constants:
 Functions:
     get_file_category(file_path): Determines the category of a file based on its MIME type.
 """
+
 import mimetypes
 from ultralytics.models.yolo.model import YOLO
 

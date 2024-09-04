@@ -1,4 +1,16 @@
-from flask import jsonify
+"""
+This module validates the parameters of incoming requests for model predictions. 
+
+It ensures that all required parameters are provided and checks if they have valid values.
+The module interacts with the database to verify the existence of datasets and utilizes 
+a model dictionary to validate model identifiers and versions. It also handles errors that 
+may arise during the validation process, logging them appropriately and returning meaningful 
+error messages and status codes.
+
+Functions:
+    - validate_request_params(request): Validates the request parameters for model prediction.
+"""
+
 from models import Dataset
 from utils import model_dict
 from config import logger
