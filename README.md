@@ -49,12 +49,11 @@ The container containing the Deep Learning model, redesigned to fit the Flask fr
 
 ### Express Container Architecture
 
-The Express container is based on a sort of Model-View-Controller (MVC) pattern, although in this version of the application, an actual view has not been defined. Essentially, it is a layered backend where, at the highest level, we have routers that route API calls to the appropriate controllers. However, before this operation, the calls pass through a layer of middleware customized according to the requested route.
+Once in the controller, the necessary parameters for the operation are extracted from the body of the request. Control is then passed to the service layer, which handles the business logic and error management. This layer interfaces with a lower-level layer, the DAOs (Data Access Objects), which are responsible for managing and executing the queries necessary for the services to function. The DAOs interact with the database using Sequelize models, which allow the implementation of the ORM (Object-Relational Mapping) pattern, thereby simplifying the verbosity of database operations. Once the response is obtained in the service, or potentially an error, it is passed back to the controller through a specific middleware responsible for error handling, which then returns the result of the operations to the user.
 
-Once in the controller, the necessary parameters for the operation are extracted from the body of the request. Control is then passed to the service layer, which handles the business logic and error management. This layer interfaces with a lower-level layer, the DAOs (Data Access Objects), which are responsible for managing and executing the queries necessary for the services to function. The DAOs interact with the database using Sequelize models, which allow the implementation of the ORM (Object-Relational Mapping) pattern, thereby simplifying the verbosity of database operations. Once the response data is obtained in the service, it is passed back to the controller, which takes care of preparing and sending the response to the user. In case of error, the controller does not directly send the response; this task is delegated to the error handling middleware.
+![Use_case_diagram](Documentation/Use_case_diagram.png)
+![Architecture](Documentation/Architecture.png)
 
-![alt text](Documentation/Use_case_diagram.png)
-![alt text](Documentation/Architecture.png)
 
 ---
 
@@ -147,9 +146,7 @@ Once in the controller, the necessary parameters for the operation are extracted
         "dataset_id": <integer>,
         "file_path": <string>,
         "dataset_name": <string>,
-        "tags": [
-            <string>
-        ]
+        "tags": <string>
     }
     }
     ```
@@ -164,7 +161,7 @@ Once in the controller, the necessary parameters for the operation are extracted
 
     ```json
     {
-      "message": "Dataset deleted successfully"
+      "message": "Dataset <datasetName> deleted successfully"
     }
     ```
 
@@ -238,7 +235,8 @@ Once in the controller, the necessary parameters for the operation are extracted
 
     ```json
     {
-      "jobState": <string>
+      "jobState": <string>,
+      "result": [...] //it is there only if the jobState is "completed" and the structure is like the next response result
     }
     ```
 
@@ -253,16 +251,61 @@ Once in the controller, the necessary parameters for the operation are extracted
 
     ```json
     {
-    "contentURI": <path>,
-    "result": [
-        {
-            "filename": <string>,
-            "objects": [
-                <string>
+      "jsonResult": {
+        "inference_information": {
+          "CO2_emissions_kg": <float>,          
+          "consumed_energy_kWh": <float>,      
+          "dataset_id": <integer>,             
+          "inference_time_s": <float>          
+        },
+        "inference_results": [
+          {
+            "filename": <string>,                     
+            "objects": [               
+              {
+                "box": {
+                  "x1": <float>,           
+                  "x2": <float>,       
+                  "y1": <float>,       
+                  "y2": <float>      
+                },
+                "class": <integer>,          
+                "confidence": <float>,       
+                "name": <string>            
+              }
+              // Additional objects can be listed here
             ],
-            "type": "imagae/video"
-        }
-    ]
+            "type": "image", 
+          },
+          {
+            "filename": <string>,                      
+            "frames": [        
+              {
+                "frame_number": <integer>,   
+                "time": <float>,                
+                "objects": [                    
+                  {
+                    "box": {
+                      "x1": <float>,        
+                      "x2": <float>,           
+                      "y1": <float>,         
+                      "y2": <float>             
+                    },
+                    "class": <integer>,         
+                    "confidence": <float>, 
+                    "name": <string>   
+                  }
+                  //Additional objects can be listed here
+                ]
+              }
+              //Additional frames can be listed here
+            ],
+            "type": "video",  
+          }
+          //Additional inference results can be listed here
+        ]
+      },
+      "contentURI": <string>
     }
     ```
 
@@ -284,8 +327,137 @@ Once in the controller, the necessary parameters for the operation are extracted
     ```
   
 #### Web Socket(`ws://localhost:8080`)
-- You can retrive real-time information of your jobs' processiong state
+WebSocket is a communication protocol that provides full-duplex, bidirectional communication channels over a single, long-lived TCP connection. Unlike traditional HTTP requests that follow a request-response model, WebSocket allows both the server and the client to send and receive messages independently of each other once the connection is established. This makes WebSocket an ideal choice for real-time applications where data needs to be pushed from the server to the client without the client having to request it repeatedly.
+
+In this context, a user can connect via WebSocket by providing their JWT token. Upon connecting, the user receives a welcome message and a list of jobs associated with their account. When a new job is added to the queue or the status of an existing job changes, the user receives a real time update. Each user only receives information related to their own jobs.
+
+For the WebSocket implementation, the ws library was used. This library is lightweight, fast, and allows for easy and efficient creation and management of WebSocket connections in a Node.js environment.
+
+- **Welcome Message Example**: 
+     ```json
+    {
+      "message": "Hello, user@example.com! Welcome to the Job Monitoring System. You can monitor your job statuses in real-time."
+    }
+    ```
+  **Job List Message Example**
+    ```json
+    {
+      "message": "Here is a list of the jobs associated with your account (user@example.com)."
+      
+    }
+    ```
+
+
+- **New Job Message Example**
+    ```json
+    {
+      "message": "user@example.com, your job with ID example_id has been taken in charge."
+    }
+    ```
+
+- **Status change Message Example**
+  ```json
+    {
+      "message": "user@example.com, your job with ID example_idhas been completed."
+    }
+    ```
+
 ---
+
+### Design Pattern Description
+
+#### Chain of Responsability
+
+The Chain of Responsibility pattern is a behavioral design pattern used to pass a request along a chain of potential handlers until one of them handles the request. Each handler in the chain has the opportunity to either process the request or pass it to the next handler in the chain. It helps in decoupling the sender of a request from its receivers, allowing more flexible assignment of responsibilities.
+The pattern was used to define chains of middleware, both global and for individual sets of routes, in this case it was also usful . To use it, middleware was modeled as classes rather than simple functions, with each class containing two methods: _setNext_, which is used to pass control to the next middleware in the chain, and _handle_, which is used to process the request. All classes inherit from the Middleware class and override the before mentioned methods.
+
+Using this pattern, the code gains several useful advantages, such as:
+
+- **Separation of Concerns**: Each middleware is responsible for a single concern (e.g., authorization, request body parsing, validation). This makes the code more modular and easier to maintain. If it becomes necessary to change the authorization logic or add a new layer of validation, this can be done without affecting other parts of the chain.
+
+- **Scalability**: It's easy adding new middleware without modifying the entire flow.
+
+- **Flexibility in Execution Order**: Middleware can be easily reordered based on the needs. For instance, if it is decided that the request body parsing should occur before authorization, the chain can be reorganized without rewriting the middleware themselves.
+
+- **Distributed Responsibility**: Instead of having a single large function that handles everything (authentication, validation, parsing, etc.), this pattern allows these responsibilities to be distributed across different handlers, each with its own specific task.
+
+The referenced files can be found in the _"API_node/src/middlewares"_ directory.
+
+
+
+- **Usage Example**
+
+![Chain of responsability pattern example](Documentation/Cor.png)
+
+
+### Factory
+
+The Factory Pattern is a creational design pattern in object-oriented programming that provides an interface for creating objects in a superclass but allows subclasses to alter the type of objects that will be created. It promotes loose coupling by preventing code from being dependent on concrete classes.
+
+In simple terms, it defines a method, called a "factory method," that is used to create objects. Instead of calling a constructor directly, you call a factory method, which then creates and returns an object. This pattern is useful when the exact type of object to be created is not known until runtime or when is provided specific logic for object creation.
+
+In this case, the pattern was used to handle error creation. First, an enum was created to define the types of errors. Then, the factory method _createError_ was constructed, allowing the creation of new "Error" objects by specifying the type at the time of the method call.
+
+These are the reasons for using this pattern:
+
+
+- **Reduction of direct dependencies**: By using the factory, the direct dependencies between calling classes and specific error classes are reduced. The factory acts as an intermediary, which improves the modularity of the code.
+
+- **Flexibility**: The factory allows for easy changes in the object creation logic without having to modify the code that uses these objects.
+
+- **Better error management**: By centralizing error creation, the factory enables more consistent error handling throughout the application. Additionally, it is easier to add logging, monitoring, or other cross-cutting concerns to error creation.
+
+- **Cleaner and more readable code**: By separating the creation logic from the application logic, the code becomes cleaner and easier to read. The calling classes are not burdened with details related to error creation.
+
+The referenced files can be found in the _"API_node/utils"_ directory.
+
+- **Usage Example**
+
+![Factory_example](Documentation/Factory.png)
+
+### Singleton
+
+The Singleton pattern is a design pattern that ensures a class has only one instance and provides a global point of access to that instance. This is useful when exactly one object is needed to coordinate actions across a system. The pattern typically involves:
+
+- <u>Private Constructor</u>: Prevents other classes from instantiating the Singleton.
+- <u>Static Method or Property</u>: Returns the single instance of the class.
+- <u>Static Variable</u>: Holds the instance of the Singleton.
+
+By restricting instantiation and providing controlled access, the Singleton pattern ensures that only one instance of the class is ever created.
+
+In this backend, the Singleton pattern has been used on several occasions. Among the main applications, the first one to note is for defining the connection to _Redis_ to ensure that it is unique. Additionally, it has been defined for the class _InferenceQueueService_; in this case, the pattern was used to ensure that the API maintains a single job queue. For each, the structure defined is exactly as described in the paragraph above.
+
+These are the benefits of applying this pattern:
+
+- **Control of access to shared resources**: It is ensured that critical resources are centralized and controlled through a single point of access. This prevents conflicts, data races, and synchronization issues that could occur if there were multiple independent instances managing the same resource.
+
+- **Reduction in resource consumption**: In the case of RedisConnection, maintaining a single active connection avoids the costs associated with repeatedly opening and closing connections. Although, this is especially useful in high-frequency access applications and could me more appreciated in future develops.
+
+- **Consistency of data and shared state**: With InferenceQueueService, having a single instance ensures that all inference requests are handled uniformly, maintaining a consistent, synchronized and shared state.
+
+- **Ease of maintenance and debugging**: Having a single instance simplifies code maintenance and debugging. If there is an issue with the Redis connection or inference management, it is clear where to look and make changes. There is no need to track multiple instances or figure out which instance is causing the problem.
+
+- **Prevention of multiple object creation**: With a Singleton, accidental creation of multiple instances of the same class is avoided. This is important in contexts, like this one, where the creation of multiple objects could lead to logical errors, such as multiple queue handlers, which could overload the system and introduce undesired behaviors.
+
+The referenced files can be found in the _"API_node/utils"_ and _"API_node/services"_ directories.
+- **Usage Example**
+
+![Singleton_first_example](Documentation/Singleton1.png)
+![Singleton_second_example](Documentation/Singleton2.png)
+
+---
+
+### Postman Collection
+
+All routes have been tried using Postman, here it is the link to get the collections and the enviroment to try the application:
+
+- Workspace: https://www.postman.com/programmazione-avanzata-esame/workspace/progetto-program-avanz 
+
+In the Postman script section, we have defined tests for each individual route. These tests are customized and configured for each call; generally, they test the HTTP status code and the structure of the response. However, in certain cases, other types of tests can be defined, such as checks on the response time.
+
+
+
+
 
 
 

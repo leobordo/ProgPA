@@ -28,7 +28,7 @@ const makeInference = async (req: Request, res: Response, next: NextFunction): P
 
     //Adds the job to the queue and receives the Id 
     const jobId = await inferenceService.requestDatasetInference(datasetName, userEmail, modelId, modelVersion);
-    res.status(HTTPStatus.OK).send({ message: "Process added succesfully to the queue", jobId: jobId });
+    res.status(HTTPStatus.OK).send({ message: "Process added successfully to the queue", jobId: jobId });
   } catch (error) {
     next(error);
   }

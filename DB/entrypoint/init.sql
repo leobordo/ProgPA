@@ -36,8 +36,8 @@ CREATE TABLE results (
     FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
 );
 
-INSERT INTO users (email, password, role)
+INSERT INTO users (email, password, role, tokens)
 VALUES
-('admin@gmail.com', 'admin123', 0);
+('admin@gmail.com', 'admin123', 0, 10000);
 
 

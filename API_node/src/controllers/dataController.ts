@@ -28,8 +28,13 @@ const createDataset = async (req: Request, res: Response, next: NextFunction): P
 
     // Create dataset using the data service
     const result = await dataServices.createDataset(datasetName!, arrayTag, email!);
+    const dataset_id = result.newDataset.dataset_id
+    const file_path = result.newDataset.file_path
+    const token_cost = result.newDataset.token_cost
+    const dataset_name = result.newDataset.dataset_name
+
     // Respond with created dataset
-    res.status(HTTPStatus.CREATED).json({message: result.message, dataset: result.newDataset});
+    res.status(HTTPStatus.CREATED).json({message: result.message, dataset: {dataset_name, dataset_id, file_path, token_cost, tags}});
   } catch (error) {
     next(error)
   }
@@ -77,7 +82,7 @@ const updateDatasetByName = async (req: Request, res: Response, next: NextFuncti
     const updatedMessage = await dataServices.updateDatasetByName(datasetName!, email!, newName, tags);
 
     // Respond with updated message
-    res.status(HTTPStatus.OK).json(updatedMessage);
+    res.status(HTTPStatus.OK).json({message: updatedMessage});
   } catch (error) {
     next(error)
   }

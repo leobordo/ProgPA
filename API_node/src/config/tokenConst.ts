@@ -24,6 +24,7 @@ export const TOKEN_COSTS = {
 };
 
 /**
+ * 
  * The initial number of tokens assigned to a new user.
  *
  * @constant {number} INITIAL_TOKENS

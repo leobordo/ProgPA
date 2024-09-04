@@ -45,9 +45,8 @@ const createDataset = async (datasetName: string, tags: string[], email: string)
     catch (err) {
         throw ErrorFactory.createError(ErrorType.DirectoryCreation)
     }
-    return { message: 'Dataset created successfully', newDataset };
+    return { message: 'Dataset created successfully', newDataset, tags }};
 
-};
 
 /**
  * Get all datasets by user email
